@@ -1,0 +1,32 @@
+language: java
+
+jobs:
+  include:
+    - stage: "Frontend"
+      name: "Lint"
+      before_install:
+        - nvm install 8.9
+      install:
+        - cd frontend/sentiment-dashboard
+        - npm install -g @angular/cli
+        - npm install
+      script:
+        - ng lint
+    - name: "Build"
+      before_install:
+        - nvm install 8.9
+      install:
+        - cd frontend/sentiment-dashboard
+        - npm install -g @angular/cli
+        - npm install
+      script:
+        - ng build --prod
+    - name: "Test"
+      before_install:
+        - nvm install 8.9
+      install:
+        - cd frontend/sentiment-dashboard
+        - npm install -g @angular/cli
+        - npm install
+      script:
+        - ng test
