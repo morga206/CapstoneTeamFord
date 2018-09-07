@@ -29,4 +29,4 @@ jobs:
         - npm install -g @angular/cli
         - npm install
       script:
-        - ng test
+        - ng test --browsers ChromeHeadlessNoSandbox --watch=false
