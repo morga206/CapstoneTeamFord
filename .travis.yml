@@ -31,12 +31,9 @@ jobs:
       script:
         - ng test --browsers ChromeHeadlessNoSandbox --watch=false
     - stage: "Backend"
-      name: "Java + Spring Test"
-      install:
-        - cd backend/main
-      script:
-        - mvn test
-    - name: "Java + Spring Build"
+      name: "Java/Spring Build & Test"
+      env:
+        - FUNCTION_NAME=hello
       install:
         - cd backend/main
       script:
