@@ -1,0 +1,29 @@
+service: sentiment-dashboard
+provider:
+  name: aws
+  stage: ${opt:stage}
+  region: us-east-2
+
+package:
+  individually: true
+
+functions:
+  nlp:
+    runtime: python3.6
+    handler: nlp/handler.hello
+    events:
+      - http:
+          method: get
+          path: nlp
+  main:
+    runtime: java8
+    timeout: 10
+    handler: sentiment.Handler
+    package:
+      artifact: main/target/sentiment-ALPHA-aws.jar
+    events:
+      - http:
+          method: any
+          path: main
+    environment:
+      FUNCTION_NAME: hello

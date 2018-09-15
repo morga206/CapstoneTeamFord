@@ -30,3 +30,12 @@ jobs:
         - npm install
       script:
         - ng test --browsers ChromeHeadlessNoSandbox --watch=false
+    - stage: "Backend"
+      name: "Java/Spring Build & Test"
+      env:
+        - FUNCTION_NAME=hello
+      install:
+        - cd backend/main
+      script:
+        - mvn clean
+        - mvn package
