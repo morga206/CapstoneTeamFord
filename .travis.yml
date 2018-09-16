@@ -35,7 +35,7 @@ jobs:
       install:
         - cd backend/main
       script:
-        - mvn checkstyle_check
+        - mvn checkstyle:check
     - name: "Java/Spring Build & Test"
       env:
         - FUNCTION_NAME=hello
