@@ -31,7 +31,12 @@ jobs:
       script:
         - ng test --browsers ChromeHeadlessNoSandbox --watch=false
     - stage: "Backend"
-      name: "Java/Spring Build & Test"
+      name: "Java/Spring Lint"
+      install:
+        - cd backend/main
+      script:
+        - mvn checkstyle:check
+    - name: "Java/Spring Build & Test"
       env:
         - FUNCTION_NAME=hello
       install:

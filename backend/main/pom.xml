@@ -102,14 +102,17 @@
 					<shadedClassifierName>aws</shadedClassifierName>
 				</configuration>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <configLocation>google_checks.xml</configLocation>
-                </configuration>
-            </plugin>
+			<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>3.0.0</version>
+					<configuration>
+							<configLocation>google_checks.xml</configLocation>
+							<violationSeverity>warning</violationSeverity>
+							<consoleOutput>true</consoleOutput>
+        			<encoding>UTF-8</encoding>
+					</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

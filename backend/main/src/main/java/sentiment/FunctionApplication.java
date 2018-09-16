@@ -12,21 +12,21 @@ import java.util.function.Function;
 @SpringBootApplication
 public class FunctionApplication {
 
-    public static void main(final String[] args) {
-        SpringApplication.run(FunctionApplication.class, args);
-    }
+  public static void main(final String[] args) {
+    SpringApplication.run(FunctionApplication.class, args);
+  }
 
-    /**
-     * Hello, World lambda function.
-     * @return HelloResponse to pass to API Gateway handler
-     */
-	@Bean
-	public Function<HelloRequest, HelloResponse> hello() {
-		return request -> {
-			HelloResponse response = new HelloResponse();
-			response.setMessage("Hello, " + request.getName());
-		    return response;
-        };
-	}
+  /**
+   * Hello, World lambda function.
+   * @return HelloResponse to pass to API Gateway handler
+   */
+  @Bean
+  public Function<HelloRequest, HelloResponse> hello() {
+    return request -> {
+      HelloResponse response = new HelloResponse();
+      response.setMessage("Hello, " + request.getName());
+      return response;
+    };
+  }
 
 }
