@@ -27,3 +27,11 @@ functions:
           path: main
     environment:
       FUNCTION_NAME: hello
+  reviews:
+    runtime: nodejs8.10
+    handler: reviews/handler.hello
+    events:
+      - http:
+          method: any
+          path: reviews
+
