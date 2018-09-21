@@ -1,3 +1,30 @@
-<p>
-  dashboard works!
-</p>
+<form class="form-inline justify-content-between">
+  <div class="form-group">
+    <label for="app-name" class="mr-2">App name</label>
+    <select class="form-control mr-2" id="app-name">
+      <option>FordPass</option>
+      <option>Ford Play</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="version" class="mr-2">Version</label>
+    <select class="form-control mr-2" id="version">
+      <option>version 1</option>
+      <option>version 2</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    Date
+    <app-datepicker></app-datepicker>
+    to
+    <app-datepicker></app-datepicker>
+  </div>
+
+  <div class="form-group">
+    <button type="button" class="btn btn-primary">Compare Apps</button>
+    <button type="button" class="btn btn-primary ml-2">Add Card</button>
+  </div>
+</form>
+
