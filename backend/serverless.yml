@@ -37,15 +37,15 @@ functions:
 
 resources:
   Resources:
-    rawReviewsTable:
+    reviewsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: rawReviewsTable
+        TableName: reviewsTable
         AttributeDefinitions:
-          - AttributeName: email
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          - AttributeName: email
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
