@@ -29,11 +29,28 @@
 </form>
 
 <div class="row my-4">
-  <app-card title="Overall Sentiment">This is where a graph would go.</app-card>
+  <app-card title="Overall Sentiment">
+      <div style="display: block">
+          <canvas baseChart
+                  [data]="pieChartData"
+                  [labels]="pieChartLabels"
+                  [chartType]="pieChartType"
+                  (chartHover)="chartHovered($event)"
+                  (chartClick)="chartClicked($event)"></canvas>
+        </div>
+  </app-card>
   <app-card title="Top Keywords"> This is where a chart would go.</app-card>
 </div>
 
 <div class="row">
-  <app-card title="Sentiment Over Time"> This is where a graph would go.</app-card>
+  <app-card title="Sentiment Over Time">
+      <canvas baseChart
+      [data]="lineChartData"
+      [labels]="lineChartLabels"
+      [options]="lineChartOptions"
+      [chartType]="lineChartType"
+      (chartHover)="chartHovered($event)"
+      (chartClick)="chartClicked($event)"></canvas>
+  </app-card>
 </div>
 
