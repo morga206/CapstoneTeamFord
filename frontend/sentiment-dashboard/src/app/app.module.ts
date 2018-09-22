@@ -10,6 +10,7 @@ import { NavComponent } from './shared/nav/nav.component';
 import { DatepickerComponent } from './shared/datepicker/datepicker.component';
 import { FormsModule } from '@angular/forms';
 import { LoginComponent } from './login/login.component';
+import { CardComponent } from './dashboard/card/card.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { LoginComponent } from './login/login.component';
     SettingsComponent,
     NavComponent,
     DatepickerComponent,
-    LoginComponent
+    LoginComponent,
+    CardComponent
   ],
   imports: [
     BrowserModule,
