@@ -28,9 +28,9 @@
   </div>
 </form>
 
-<div class="row my-4">
+<div class="row my-4 mb-md-0">
   <app-card title="Overall Sentiment">
-      <div style="display: block">
+      <div class="m-auto" style="width: 500px;">
           <canvas baseChart
                   [data]="pieChartData"
                   [labels]="pieChartLabels"
@@ -39,7 +39,52 @@
                   (chartClick)="chartClicked($event)"></canvas>
         </div>
   </app-card>
-  <app-card title="Top Keywords"> This is where a chart would go.</app-card>
+  <app-card title="Top Keywords">
+    <div class="row">
+      <div class="col">
+        <p class="h4">Postive Reviews</p>
+        <ol>
+            <li>
+              Keyword
+              <p class="small mb-2">xx% of reviews</p>
+            </li>
+            <li>
+                Keyword
+                <p class="small mb-2">xx% of reviews</p>
+            </li>
+            <li>
+                Keyword
+                <p class="small mb-2">xx% of reviews</p>
+            </li>
+            <li>
+                Keyword
+                <p class="small mb-2">xx% of reviews</p>
+            </li>
+          </ol>
+      </div>
+      <div class="col">
+          <p class="h4">Negative Reviews</p>
+          <ol>
+              <li>
+                Keyword
+                <p class="small mb-2">xx% of reviews</p>
+              </li>
+              <li>
+                  Keyword
+                  <p class="small mb-2">xx% of reviews</p>
+              </li>
+              <li>
+                  Keyword
+                  <p class="small mb-2">xx% of reviews</p>
+              </li>
+              <li>
+                  Keyword
+                  <p class="small mb-2">xx% of reviews</p>
+              </li>
+            </ol>
+      </div>
+    </div>
+  </app-card>
 </div>
 
 <div class="row">
