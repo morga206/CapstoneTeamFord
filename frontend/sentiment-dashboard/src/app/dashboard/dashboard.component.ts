@@ -17,6 +17,9 @@ export class DashboardComponent implements OnInit {
   ];
   public lineChartLabels: Array<any> = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
   public lineChartType = 'line';
+  public lineChartOptions:any = {
+    responsive: true
+  };
 
   constructor() { }
 
