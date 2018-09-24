@@ -35,3 +35,22 @@ functions:
           method: any
           path: reviews
 
+resources:
+  Resources:
+    appReviewsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: appReviewsTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: store
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: store
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
