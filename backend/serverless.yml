@@ -29,7 +29,7 @@ functions:
       FUNCTION_NAME: hello
   reviews:
     runtime: nodejs8.10
-    handler: reviews/handler.hello
+    handler: reviews/handler.handler
     events:
       - http:
           method: any
