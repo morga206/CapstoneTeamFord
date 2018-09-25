@@ -40,7 +40,7 @@ resources:
     appReviewsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: appReviewsTable
+        TableName: appReviewsTable-${self:provider.stage}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
