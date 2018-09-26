@@ -10,39 +10,63 @@ const APP_STORE_IDS = [1095418609]; // TODO get this from config DB
 const GPLAY_IDS = ['com.ford.fordpass']; // TODO get this from config DB
 
 module.exports.handler = async () => {
+  console.log(await getReviews());
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: scrapeApps()
+      message: await getReviews()
     }),
   };
 };
 
-function scrapeApps() {
+async function getReviews() {
   let reviews = [];
 
-  for (let appId in APP_STORE_IDS) {
-    reviews.concat(scrape(appId, appStoreScraper));
+  for (let i = 0; i < GPLAY_IDS.length; i++) {
+    let pages = await scrapeGPlay(GPLAY_IDS[i]);
+    pages = [].concat(...pages);
+    pages.forEach((review) => {
+      review.id = GPLAY_IDS[i];
+      review.store = "Google Play";
+    })
+    reviews = reviews.concat(pages);
   }
 
-  for (let appId in GPLAY_IDS) {
-    reviews.concat(scrape(appId, gPlayScraper));
+  for (let i = 0; i < APP_STORE_IDS.length; i++) {
+    let pages = await scrapeAppStore(APP_STORE_IDS[i]);
+    pages = [].concat(...pages);
+    pages.forEach((review) => {
+      review.id = APP_STORE_IDS[i];
+      review.store = "App Store";
+    })
+    reviews = reviews.concat(pages);
   }
 
   return reviews;
 }
 
-function scrape(appId, scraper) {
-  let reviews = [];
+function scrapeAppStore(appId) {
+  let promises = [];
 
   for (let i = START_PAGE; i <= MAX_PAGE; i++) {
-    scraper.reviews({
-      appId: appId,
+    promises.push(appStoreScraper.reviews({
+      id: appId,
       page: i
-    }).then (pageReviews => {
-      reviews.concat(pageReviews);
-    });
+    }));
   }
 
-  return reviews;
+  return Promise.all(promises);
+}
+
+function scrapeGPlay(appId) {
+  let promises = [];
+
+  for (let i = START_PAGE; i <= MAX_PAGE; i++) {
+    promises.push(gPlayScraper.reviews({
+      appId: appId,
+      page: i
+    }));
+  }
+
+  return Promise.all(promises);
 }
