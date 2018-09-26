@@ -12,7 +12,7 @@ module.exports = {
   handler,
   getReviews,
   scrape
-}
+};
 
 async function handler () {
   return {
@@ -21,7 +21,7 @@ async function handler () {
       message: await getReviews()
     }),
   };
-};
+}
 
 /**
  * Scrapes all available reviews for the configured apps from Google Play and the App Store 
