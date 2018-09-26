@@ -44,3 +44,20 @@ jobs:
       script:
         - mvn clean
         - mvn package
+    - name: "Node.js (Reviews API) Lint"
+      before_install:
+        - nvm install 8.9
+      install:
+        - cd backend/reviews
+        - npm install
+      script:
+        - npm run-script lint
+    - name: "Node.js (Reviews API) Test"
+      before_install:
+        - nvm install 8.9
+      install:
+        - cd backend/reviews
+        - npm install
+      script:
+        - npm test
+      
