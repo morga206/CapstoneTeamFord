@@ -1,6 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DashboardComponent } from './dashboard.component';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {DatepickerComponent} from '../shared/datepicker/datepicker.component';
+import {FormsModule} from '@angular/forms';
+import { ChartsModule } from 'ng2-charts';
+import { CardComponent } from './card/card.component';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -8,7 +13,8 @@ describe('DashboardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DashboardComponent ]
+      declarations: [ DashboardComponent, DatepickerComponent, CardComponent ],
+      imports: [NgbModule, FormsModule, ChartsModule]
     })
     .compileComponents();
   }));
