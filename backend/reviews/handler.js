@@ -8,7 +8,13 @@ const MAX_PAGE = 9;
 const APP_STORE_IDS = ['com.ford.fordpass']; // TODO get this from config DB
 const GPLAY_IDS = ['com.ford.fordpass']; // TODO get this from config DB
 
-module.exports.handler = async () => {
+module.exports = {
+  handler,
+  getReviews,
+  scrape
+}
+
+async function handler () {
   return {
     statusCode: 200,
     body: JSON.stringify({
@@ -17,6 +23,9 @@ module.exports.handler = async () => {
   };
 };
 
+/**
+ * Scrapes all available reviews for the configured apps from Google Play and the App Store 
+ */
 async function getReviews() {
   let allReviews = [];
 
@@ -43,6 +52,12 @@ async function getReviews() {
   return allReviews;
 }
 
+/**
+ * Pull all pages of an app's reviews from the given store
+ * @param appId The app ID string to use (NOT a numerical App Store id)
+ * @param scraper The scraping module to use 
+ * @param store The app store name
+ */
 async function scrape(appId, scraper, store) {
   let promises = [];
 
