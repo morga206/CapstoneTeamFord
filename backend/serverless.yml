@@ -48,12 +48,6 @@ resources:
             AttributeType: S
           - AttributeName: compSentiment
             AttributeType: N
-          # - AttributeName: posSentiment
-          #   AttributeType: N
-          # - AttributeName: neuSentiment
-          #   AttributeType: N
-          # - AttributeName: negSentiment
-          #   AttributeType: N
         KeySchema:
           - AttributeName: id
             KeyType: HASH
