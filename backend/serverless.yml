@@ -44,13 +44,40 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
-          - AttributeName: store
+          - AttributeName: reviewDate
             AttributeType: S
+          - AttributeName: compSentiment
+            AttributeType: N
+          # - AttributeName: posSentiment
+          #   AttributeType: N
+          # - AttributeName: neuSentiment
+          #   AttributeType: N
+          # - AttributeName: negSentiment
+          #   AttributeType: N
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-          - AttributeName: store
+          - AttributeName: reviewDate
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
+        GlobalSecondaryIndexes:
+          -
+            IndexName: sentiment
+            KeySchema:
+              -
+                AttributeName: id
+                KeyType: HASH
+              -
+                AttributeName: compSentiment
+                KeyType: RANGE
+            Projection:
+              NonKeyAttributes:
+                - posSentiment
+                - neuSentiment
+                - negSentiment
+              ProjectionType: INCLUDE
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
