@@ -6,6 +6,7 @@ import {DatepickerComponent} from '../shared/datepicker/datepicker.component';
 import {FormsModule} from '@angular/forms';
 import { ChartsModule } from 'ng2-charts';
 import { CardComponent } from './card/card.component';
+import { HttpClientModule } from '@angular/common/http';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -14,7 +15,7 @@ describe('DashboardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ DashboardComponent, DatepickerComponent, CardComponent ],
-      imports: [NgbModule, FormsModule, ChartsModule]
+      imports: [NgbModule, FormsModule, ChartsModule, HttpClientModule]
     })
     .compileComponents();
   }));

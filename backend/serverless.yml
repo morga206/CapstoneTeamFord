@@ -25,6 +25,7 @@ functions:
       - http:
           method: any
           path: main
+          cors: true
     environment:
       FUNCTION_NAME: hello
   reviews:
