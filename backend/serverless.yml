@@ -40,18 +40,18 @@ resources:
     appReviewsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: appReviewsTable-${self:provider.stage}
+        TableName: reviewsTable-${self:provider.stage}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: appId
             AttributeType: S
-          - AttributeName: reviewDate
+          - AttributeName: versionDate
             AttributeType: S
           - AttributeName: compSentiment
             AttributeType: N
         KeySchema:
-          - AttributeName: id
+          - AttributeName: appId
             KeyType: HASH
-          - AttributeName: reviewDate
+          - AttributeName: versionDate
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 5
@@ -61,7 +61,7 @@ resources:
             IndexName: sentiment
             KeySchema:
               -
-                AttributeName: id
+                AttributeName: appId
                 KeyType: HASH
               -
                 AttributeName: compSentiment
