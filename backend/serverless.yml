@@ -42,15 +42,33 @@ resources:
       Properties:
         TableName: appReviewsTable-${self:provider.stage}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: appIdStore
             AttributeType: S
-          - AttributeName: store
+          - AttributeName: versionDate
             AttributeType: S
+          - AttributeName: compSentiment
+            AttributeType: N
         KeySchema:
-          - AttributeName: id
+          - AttributeName: appIdStore
             KeyType: HASH
-          - AttributeName: store
+          - AttributeName: versionDate
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
+        GlobalSecondaryIndexes:
+          - IndexName: sentiment
+            KeySchema:
+              - AttributeName: appIdStore
+                KeyType: HASH
+              - AttributeName: compSentiment
+                KeyType: RANGE
+            Projection:
+              NonKeyAttributes:
+                - posSentiment
+                - neuSentiment
+                - negSentiment
+              ProjectionType: INCLUDE
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
