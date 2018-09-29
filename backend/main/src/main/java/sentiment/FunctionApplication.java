@@ -31,9 +31,9 @@ public class FunctionApplication {
       response.setMessage("Hello, " + request.getName());
 
       Message<HelloResponse> messageResponse = MessageBuilder
-        .withPayload(response)
-        .setHeader("Access-Control-Allow-Origin", "*")
-        .build();
+          .withPayload(response)
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .build();
         
       return messageResponse;
     };
