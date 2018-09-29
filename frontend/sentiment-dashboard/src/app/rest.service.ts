@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import {environment} from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import { Observable } from 'rxjs';
 
 export class RestService {
 
-  private API_URL = 'https://yzvx20h66a.execute-api.us-east-2.amazonaws.com/noah/main';
+  private API_URL = environment.backendUrl;
 
   constructor(private http: HttpClient) { }
 
