@@ -20,7 +20,7 @@ export class RestService {
       headers: new HttpHeaders({'Content-Type' : 'application/json'})
     };
     const body = JSON.stringify({ 'name' : name });
-    return this.http.post<HelloResponse>(this.API_URL, body, options);
+    return this.http.post<HelloResponse>(this.API_URL + 'main', body, options);
   }
 }
 

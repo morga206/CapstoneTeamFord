@@ -18,6 +18,7 @@ functions:
   main:
     runtime: java8
     timeout: 10
+    memorySize: 2048
     handler: sentiment.Handler
     package:
       artifact: main/target/sentiment-ALPHA-aws.jar

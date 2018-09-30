@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  backendUrl: 'https://yzvx20h66a.execute-api.us-east-2.amazonaws.com/noah/main'
+  backendUrl: 'https://raf0365294.execute-api.us-east-2.amazonaws.com/noah/'
 };
 
 /*
