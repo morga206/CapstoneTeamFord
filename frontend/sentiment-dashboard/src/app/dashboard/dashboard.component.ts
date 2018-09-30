@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { RestService } from '../rest.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -42,9 +45,12 @@ export class DashboardComponent implements OnInit {
       pointHoverBorderColor: 'rgba(204,65,65,0.8)'
     }];
 
-  constructor() { }
+  public greeting$?: Observable<String>;
+
+  constructor(public rest: RestService) { }
 
   ngOnInit() {
+    this.greeting$ = this.rest.sayHello('Test').pipe(map((response) => response.message));
   }
 
 }

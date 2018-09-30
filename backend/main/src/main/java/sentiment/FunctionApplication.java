@@ -3,6 +3,8 @@ package sentiment;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 
 import java.util.function.Function;
 
@@ -21,11 +23,19 @@ public class FunctionApplication {
    * @return HelloResponse to pass to API Gateway handler
    */
   @Bean
-  public Function<HelloRequest, HelloResponse> hello() {
-    return request -> {
+  public Function<Message<HelloRequest>, Message<HelloResponse>> hello() {
+    return messageRequest -> {
+      HelloRequest request = messageRequest.getPayload();
+
       HelloResponse response = new HelloResponse();
       response.setMessage("Hello, " + request.getName());
-      return response;
+
+      Message<HelloResponse> messageResponse = MessageBuilder
+          .withPayload(response)
+          .setHeader("Access-Control-Allow-Origin", "*")
+          .build();
+        
+      return messageResponse;
     };
   }
 

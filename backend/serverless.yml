@@ -18,6 +18,7 @@ functions:
   main:
     runtime: java8
     timeout: 10
+    memorySize: 2048
     handler: sentiment.Handler
     package:
       artifact: main/target/sentiment-ALPHA-aws.jar
@@ -25,6 +26,7 @@ functions:
       - http:
           method: any
           path: main
+          cors: true
     environment:
       FUNCTION_NAME: hello
   reviews:
@@ -72,3 +74,13 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 5
               WriteCapacityUnits: 5
+
+plugins:
+  localPath: './.serverless_plugins'
+  modules:
+    - serverless-finch
+
+custom:
+  client:
+    bucketName: ${self:service}-client-${self:provider.stage}
+    distributionFolder: ../frontend/sentiment-dashboard/dist/sentiment-dashboard
