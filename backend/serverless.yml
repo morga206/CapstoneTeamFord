@@ -74,3 +74,13 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 5
               WriteCapacityUnits: 5
+
+plugins:
+  localPath: './.serverless_plugins'
+  modules:
+    - serverless-finch
+
+custom:
+  client:
+    bucketName: ${self:service}-client-${self:provider.stage}
+    distributionFolder: ../frontend/sentiment-dashboard/dist/sentiment-dashboard
