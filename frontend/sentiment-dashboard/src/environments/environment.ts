@@ -3,7 +3,8 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  backendUrl: 'https://raf0365294.execute-api.us-east-2.amazonaws.com/noah/'
 };
 
 /*
