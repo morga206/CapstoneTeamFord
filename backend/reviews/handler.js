@@ -1,6 +1,9 @@
 'use strict';
 
 const crypto = require('crypto');
+
+var aws = require('aws-sdk');
+
 const appStoreScraper = require('app-store-scraper');
 const gPlayScraper = require('google-play-scraper');
 
@@ -18,12 +21,26 @@ module.exports = {
 };
 
 async function handler () {
+  let reviews = await getReviews();
+  var lambda = new aws.Lambda({ region: 'us-east-2' });
+
+  // Invoke NLP Lambda
+  lambda.invoke({
+    FunctionName: `sentiment-dashboard-${process.env.STAGE}-nlp`,
+    Payload: JSON.stringify(reviews)
+  }, function(error, data) {
+    if (error) {
+      console.log('Error contacting NLP Lambda: ' + error);
+    }
+
+    if (data.Payload) {
+      console.log('Response from NLP Lambda: ' + data.Payload);
+    }
+  });
+
   return {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: await getReviews()
-    }),
-  };
+    statusCode: 200
+  }
 }
 
 /**

@@ -3,6 +3,11 @@ provider:
   name: aws
   stage: ${opt:stage}
   region: us-east-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource: "*"
 
 package:
   individually: true
@@ -32,6 +37,8 @@ functions:
   reviews:
     runtime: nodejs8.10
     handler: reviews/handler.handler
+    environment:
+      STAGE: ${self:provider.stage}
     events:
       - http:
           method: any
