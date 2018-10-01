@@ -40,7 +40,7 @@ async function handler () {
 
   return {
     statusCode: 200
-  }
+  };
 }
 
 /**
@@ -124,5 +124,5 @@ function convertReviewToDynamoRepresentation(id, store) {
       version: version,
       review: review
     };
-  }
+  };
 }

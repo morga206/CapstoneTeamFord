@@ -67,7 +67,7 @@ describe('handler', function() {
         date: new Date('12-01-2001').toISOString(),
         version: '1.0.0',
         review: mockReview, 
-      }
+      };
 
       assert.deepEqual(expected, dynamoReview);
     });
