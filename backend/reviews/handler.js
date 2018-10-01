@@ -1,4 +1,6 @@
 'use strict';
+
+const crypto = require('crypto');
 const appStoreScraper = require('app-store-scraper');
 const gPlayScraper = require('google-play-scraper');
 
@@ -11,7 +13,8 @@ const GPLAY_IDS = ['com.ford.fordpass']; // TODO get this from config DB
 module.exports = {
   handler,
   getReviews,
-  scrape
+  scrape,
+  convertReviewToDynamoRepresentation
 };
 
 async function handler () {
@@ -78,11 +81,31 @@ async function scrape(appId, scraper, store) {
     return [];
   }
 
-  let reviews = [].concat(...allPages);
-  reviews.forEach((review) => {
-    review.id = appId;
-    review.store = store;
-  });
+  let reviews = [].concat(...allPages).map(convertReviewToDynamoRepresentation(appId, store));
 
   return reviews;
+}
+
+/**
+ * Returns a fucntion that can be used to convert a given review to a DynamoDB representation
+ * @param id The appId tp use for the DynamoDB object
+ * @param store The store to use for the DynamoDB oject
+ */
+function convertReviewToDynamoRepresentation(id, store) {
+  return (review) => {
+    let appIdStore = id + '*' + store;
+
+    let reviewHash = crypto.createHash('sha256');
+    reviewHash.update(review.text);
+
+    let date = review.date === undefined ? new Date().toISOString() : new Date(review.date).toISOString();
+    let version = review.version === undefined ? '-1' : review.version;
+    return {
+      appIdStore: appIdStore,
+      reviewHash:  reviewHash.digest('hex'),
+      date: date,
+      version: version,
+      review: review
+    };
+  }
 }
