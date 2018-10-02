@@ -25,7 +25,7 @@ async function handler () {
   var lambda = new aws.Lambda({ region: 'us-east-2' });
 
   // Invoke NLP Lambda
-  lambda.invoke({
+  await lambda.invoke({
     FunctionName: `sentiment-dashboard-${process.env.STAGE}-nlp`,
     Payload: JSON.stringify(reviews)
   }, function(error, data) {
@@ -36,7 +36,7 @@ async function handler () {
     if (data.Payload) {
       console.log('Response from NLP Lambda: ' + data.Payload);
     }
-  });
+  }).promise();
 
   return {
     statusCode: 200
@@ -51,8 +51,8 @@ async function getReviews() {
 
   for (let i = 0; i < APP_STORE_IDS.length; i++) {
     try {
-      let appReviews = await scrape(APP_STORE_IDS[i], appStoreScraper, 'App Store', true);
-      allReviews = allReviews.concat(appReviews);
+      let appStoreReviews = await scrape(APP_STORE_IDS[i], appStoreScraper, 'App Store', true);
+      allReviews = allReviews.concat(appStoreReviews);
     } catch (error) {
       console.log(`Error processing App Store reviews: ${error}`);
       return [];
@@ -61,8 +61,8 @@ async function getReviews() {
 
   for (let i = 0; i < GPLAY_IDS.length; i++) {
     try {
-      let appReviews = await scrape(GPLAY_IDS[i], gPlayScraper, 'Google Play', false);
-      allReviews = allReviews.concat(appReviews);
+      let gPlayReviews = await scrape(GPLAY_IDS[i], gPlayScraper, 'Google Play', false);
+      allReviews = allReviews.concat(gPlayReviews);
     } catch (error) {
       console.log(`Error processing Google Play reviews: ${error}`);
       return [];
@@ -98,17 +98,21 @@ async function scrape(appId, scraper, store) {
     return [];
   }
 
-  let reviews = [].concat(...allPages).map(convertReviewToDynamoRepresentation(appId, store));
+  let appInfo = await scraper.app({
+    appId: appId
+  });
+  let reviews = [].concat(...allPages).map(await convertReviewToDynamoRepresentation(appId, store, appInfo.version));
 
   return reviews;
 }
 
 /**
  * Returns a fucntion that can be used to convert a given review to a DynamoDB representation
- * @param id The appId tp use for the DynamoDB object
- * @param store The store to use for the DynamoDB oject
+ * @param id The appId to use for the DynamoDB object
+ * @param store The store to use for the DynamoDB object
+ * @param alternateVersion The app version to use if the review data doesn't contain one
  */
-function convertReviewToDynamoRepresentation(id, store) {
+function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
   return (review) => {
     let appIdStore = id + '*' + store;
 
@@ -116,7 +120,8 @@ function convertReviewToDynamoRepresentation(id, store) {
     reviewHash.update(review.text);
 
     let date = review.date === undefined ? new Date().toISOString() : new Date(review.date).toISOString();
-    let version = review.version === undefined ? '-1' : review.version;
+    let version = review.version === undefined ? alternateVersion : review.version;
+
     return {
       appIdStore: appIdStore,
       reviewHash:  reviewHash.digest('hex'),

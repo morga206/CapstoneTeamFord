@@ -31,6 +31,14 @@ describe('handler', function() {
             text: 'This is some sample review text.'
           }]);
         });
+      },
+      app: function (params) {
+        return new Promise((resolve) => {
+          resolve({
+            appId: params.appId,
+            version: '1.0.0'
+          });
+        });
       }
     };
     it('should scrape all pages of an app\'s reviews', async () => {
@@ -55,7 +63,7 @@ describe('handler', function() {
         version: '1.0.0'
       };
 
-      let reviewProcessingFunction = handler.convertReviewToDynamoRepresentation('test id', 'test store');
+      let reviewProcessingFunction = handler.convertReviewToDynamoRepresentation('test id', 'test store', '');
 
       let dynamoReview = reviewProcessingFunction(mockReview);
       
@@ -66,6 +74,27 @@ describe('handler', function() {
         reviewHash: testReviewHash.digest('hex'),
         date: new Date('12-01-2001').toISOString(),
         version: '1.0.0',
+        review: mockReview, 
+      };
+
+      assert.deepEqual(expected, dynamoReview);
+    });
+    it('should generate a DynamoDB review even if date or version is missing', function() {
+      let mockReview = {
+        text: 'This is some review text.',
+      };
+
+      let reviewProcessingFunction = handler.convertReviewToDynamoRepresentation('test id', 'test store', '');
+
+      let dynamoReview = reviewProcessingFunction(mockReview);
+      
+      let testReviewHash = crypto.createHash('sha256');
+      testReviewHash.update(mockReview.text);
+      let expected = {
+        appIdStore: 'test id*test store',
+        reviewHash: testReviewHash.digest('hex'),
+        date: new Date().toISOString(),
+        version: '',
         review: mockReview, 
       };
 
