@@ -4,23 +4,6 @@ var handler = require('../handler');
 var crypto = require('crypto');
 
 describe('handler', function() {
-  describe('#getReviews()', function() {
-    it('should return reviews from both App Store and Google Play', async () => {
-      const reviews = await handler.getReviews();
-      const appStoreReview = reviews.find(function (review) {
-        return review.appIdStore.endsWith('App Store');
-      });
-      assert.notEqual(appStoreReview, undefined);
-      const gPlayReview = reviews.find(function (review) {
-        return review.appIdStore.endsWith('*Google Play');
-      });
-      assert.notEqual(gPlayReview, undefined);
-    }).timeout(0);
-    it('should include the app id and store for app reviews', async () => {
-      const reviews = await handler.getReviews();
-      assert.notEqual(reviews[0].appIdStore, undefined);
-    }).timeout(0);
-  });
   describe('#scrape(appId, scraper, store)', function() {
     const mockScraper = {
       reviews: function (params) {
@@ -99,6 +82,26 @@ describe('handler', function() {
       };
 
       assert.deepEqual(expected, dynamoReview);
+    });
+  });
+  describe('#findFirstStoredReview(reviews, dbReviews)', function() {
+    it('should return -1 for an empty db', function() {
+      let dbReviews = [];
+      let reviews = [{ reviewHash: 'abcdef'}];
+
+      assert.equal(handler.findFirstStoredReview(reviews, dbReviews), -1);
+    });
+    it('should return -1 for all new reviews', function() {
+      let dbReviews = [{reviewHash: '123456'}, {reviewHash: 'tuvwxy'}, {reviewHash: '123jkl'}];
+      let reviews = [{ reviewHash: 'abcdef'}];
+
+      assert.equal(handler.findFirstStoredReview(reviews, dbReviews), -1);
+    });
+    it('should correctly return index of first duplicate when list and db overlap', function() {
+      let dbReviews = [{reviewHash: '123456'}, {reviewHash: 'tuvwxy'}, {reviewHash: '123jkl'}];
+      let reviews = [{reviewHash: 'abcdef'}, { reviewHash: 'tuvwxy'}, {reviewHash: '123jkl'}];
+
+      assert.equal(handler.findFirstStoredReview(reviews, dbReviews), 1);
     });
   });
 });

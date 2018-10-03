@@ -2,7 +2,10 @@
 
 const crypto = require('crypto');
 
-var aws = require('aws-sdk');
+const aws = require('aws-sdk');
+const region = process.env.DEPLOY_REGION;
+const table = process.env.TABLE_NAME;
+const stage = process.env.STAGE;
 
 const appStoreScraper = require('app-store-scraper');
 const gPlayScraper = require('google-play-scraper');
@@ -17,30 +20,34 @@ module.exports = {
   handler,
   getReviews,
   scrape,
-  convertReviewToDynamoRepresentation
+  convertReviewToDynamoRepresentation,
+  findFirstStoredReview
 };
 
 async function handler () {
   let reviews = await getReviews();
-  var lambda = new aws.Lambda({ region: 'us-east-2' });
+  var lambda = new aws.Lambda({ region: region });
 
   // Invoke NLP Lambda
-  await lambda.invoke({
-    FunctionName: `sentiment-dashboard-${process.env.STAGE}-nlp`,
-    Payload: JSON.stringify(reviews)
-  }, function(error, data) {
-    if (error) {
-      console.log('Error contacting NLP Lambda: ' + error);
-    }
-
-    if (data.Payload) {
-      console.log('Response from NLP Lambda: ' + data.Payload);
-    }
-  }).promise();
-
-  return {
-    statusCode: 200
-  };
+  try {
+    const response = await lambda.invoke({
+      FunctionName: `sentiment-dashboard-${stage}-nlp`,
+      Payload: JSON.stringify(reviews)
+    }).promise();
+    return {
+      statusCode: 200, // OK
+      body: JSON.stringify({
+        response: response.Payload,
+        reviews: reviews
+      })
+    };
+  }  catch (error) {
+    console.log('Error contacting NLP Lambda: ' + error);
+    return {
+      statusCode: 500, // Internal Server Error
+      error: `Error from NLP Lambda: ${error}`
+    };
+  }
 }
 
 /**
@@ -52,6 +59,7 @@ async function getReviews() {
   for (let i = 0; i < APP_STORE_IDS.length; i++) {
     try {
       let appStoreReviews = await scrape(APP_STORE_IDS[i], appStoreScraper, 'App Store', true);
+      appStoreReviews = await removeDuplicates(APP_STORE_IDS[i], 'App Store', appStoreReviews);
       allReviews = allReviews.concat(appStoreReviews);
     } catch (error) {
       console.log(`Error processing App Store reviews: ${error}`);
@@ -62,6 +70,7 @@ async function getReviews() {
   for (let i = 0; i < GPLAY_IDS.length; i++) {
     try {
       let gPlayReviews = await scrape(GPLAY_IDS[i], gPlayScraper, 'Google Play', false);
+      gPlayReviews = await removeDuplicates(GPLAY_IDS[i], 'Google Play', gPlayReviews);
       allReviews = allReviews.concat(gPlayReviews);
     } catch (error) {
       console.log(`Error processing Google Play reviews: ${error}`);
@@ -130,4 +139,53 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
       review: review
     };
   };
+}
+
+async function removeDuplicates(id, store, reviews) {
+  // Pull list of review hashes from DynamoDB, organized by date
+  const dynamoDb = new aws.DynamoDB.DocumentClient({
+    region: region
+  });
+
+  const params = {
+    TableName: table,
+    IndexName: 'date',
+    KeyConditionExpression: 'appIdStore = :appidstore',
+    ExpressionAttributeValues: {
+      ':appidstore': id + '*' + store
+    }
+  };
+
+  let dbReviews = [];
+  try {
+    let dynamoResponse = await dynamoDb.query(params).promise();
+    dbReviews = dynamoResponse.Items;
+  } catch (error) {
+    console.log('Error contacting DynamoDB: ' + error);
+    return [];
+  }
+
+  // Step through reviews list until we find one already in the DB
+  let existingIndex = findFirstStoredReview(reviews, dbReviews);
+
+  // Throw out all reviews older than that review
+  return existingIndex >= 0 ? reviews.slice(0, existingIndex) : reviews;
+}
+
+/**
+ * Find the first review in our list that is already stored in the database
+ * @param reviews The list of reviews to check for stored duplicates
+ * @param dbReviews The reviews we've already stored
+ * @return The index of the first review in reviews that's present in dbReviews
+ */
+function findFirstStoredReview(reviews, dbReviews) {
+  let reviewHashes = dbReviews.map((item) => item.reviewHash);
+
+  for (let i = 0; i < reviews.length; i++) {
+    if (reviewHashes.includes(reviews[i].reviewHash)) {
+      return i;
+    }
+  }
+
+  return -1;
 }
