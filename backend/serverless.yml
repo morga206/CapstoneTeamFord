@@ -31,13 +31,11 @@ package:
 functions:
   nlp:
     runtime: python3.6
-    handler: nlp/handler.main
+    handler: nlp/handler.hello
     events:
       - http:
-          method: post
+          method: get
           path: nlp
-    environment:
-      NLTK_DATA: "./nltk_data"
   main:
     runtime: java8
     timeout: 10
