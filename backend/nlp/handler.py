@@ -2,10 +2,17 @@ import json
 import imp
 import sys
 import os
+
+print(os.listdir(os.getcwd()))
+print(os.environ.get('NLTK_DATA'))
+print("ABOVE IS NLTK_DATA env var")
+
 sys.modules["sqlite"] = imp.new_module("sqlite")
 sys.modules["sqlite3.dbapi2"] = imp.new_module("sqlite.dbapi2")
 
 import nltk
+nltk.download('vader_lexicon')
+
 
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.sentiment.util import *
