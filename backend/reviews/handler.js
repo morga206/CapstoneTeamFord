@@ -7,7 +7,7 @@ const region = process.env.DEPLOY_REGION;
 const table = process.env.TABLE_NAME;
 const stage = process.env.STAGE;
 
-const appStoreScraper = require('app-store-scraper');
+const appStoreScraper = require('./old-xml-app-store-scraper');
 const gPlayScraper = require('google-play-scraper');
 
 const START_PAGE = 0;
@@ -129,6 +129,7 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
     reviewHash.update(review.text);
 
     let date = review.date === undefined ? new Date().toISOString() : new Date(review.date).toISOString();
+    // let date = review.date === new Date(review.date).toISOString();
     let version = review.version === undefined ? alternateVersion : review.version;
 
     return {
