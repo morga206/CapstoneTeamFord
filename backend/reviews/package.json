@@ -5,6 +5,7 @@
   "main": "handler.js",
   "dependencies": {
     "app-store-scraper": "^0.13.0",
+    "aws-sdk": "^2.327.0",
     "google-play-scraper": "^6.2.0"
   },
   "devDependencies": {

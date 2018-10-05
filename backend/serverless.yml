@@ -3,6 +3,27 @@ provider:
   name: aws
   stage: ${opt:stage}
   region: us-east-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}*"
+
+plugins:
+    - serverless-finch
+
+custom:
+  tableName: 'appReviewsTable-${self:provider.stage}'
+  
+  client:
+    bucketName: ${self:service}-client-${self:provider.stage}
+    distributionFolder: ../frontend/sentiment-dashboard/dist/sentiment-dashboard
 
 package:
   individually: true
@@ -32,6 +53,10 @@ functions:
   reviews:
     runtime: nodejs8.10
     handler: reviews/handler.handler
+    environment:
+      STAGE: ${self:provider.stage}
+      TABLE_NAME: ${self:custom.tableName}
+      DEPLOY_REGION: ${self:provider.region}
     events:
       - http:
           method: any
@@ -42,18 +67,20 @@ resources:
     appReviewsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: appReviewsTable-${self:provider.stage}
+        TableName: ${self:custom.tableName}
         AttributeDefinitions:
           - AttributeName: appIdStore
             AttributeType: S
-          - AttributeName: versionDate
+          - AttributeName: reviewHash
+            AttributeType: S
+          - AttributeName: date
             AttributeType: S
           - AttributeName: compSentiment
             AttributeType: N
         KeySchema:
           - AttributeName: appIdStore
             KeyType: HASH
-          - AttributeName: versionDate
+          - AttributeName: reviewHash
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 5
@@ -74,13 +101,16 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 5
               WriteCapacityUnits: 5
-
-plugins:
-  localPath: './.serverless_plugins'
-  modules:
-    - serverless-finch
-
-custom:
-  client:
-    bucketName: ${self:service}-client-${self:provider.stage}
-    distributionFolder: ../frontend/sentiment-dashboard/dist/sentiment-dashboard
+          - IndexName: date
+            KeySchema:
+              - AttributeName: appIdStore
+                KeyType: HASH
+              - AttributeName: date
+                KeyType: RANGE
+            Projection:
+              NonKeyAttributes:
+                - reviewHash
+              ProjectionType: INCLUDE
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
