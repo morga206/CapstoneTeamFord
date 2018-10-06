@@ -24,15 +24,16 @@ export class DashboardComponent implements OnInit {
     responsive: true
   };
 
-  public stat$?: Observable<StatResponse[]>;
+  public stat$?: Observable<any>;
 
   constructor(public rest: RestService) { }
 
   ngOnInit() {
-    let stats: StatRequest[] =[{
-      'rawReviews': undefined
+    const stats: StatRequest[] = [{
+      rawReviews: null
     }];
-    this.stat$ = this.rest.getSentimentStats('com.ford.fordpass', '2.4.0', new Date('05-21-2018'), new Date('05-23-2018'), stats);
+    this.stat$ = this.rest
+      .getSentimentStats('com.ford.fordpass*Google Play', '2.4.0', new Date('2018-05-21'), new Date('2018-05-23'), stats);
   }
 
 }
