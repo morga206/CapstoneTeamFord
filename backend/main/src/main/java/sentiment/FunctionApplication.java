@@ -6,7 +6,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
+import java.util.Date;
 import java.util.function.Function;
+
+import com.amazonaws.services.dynamodbv2.document.ItemCollection;
+import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 
 /**
  * Main Spring application.
@@ -23,20 +27,31 @@ public class FunctionApplication {
    * @return HelloResponse to pass to API Gateway handler
    */
   @Bean
-  public Function<Message<HelloRequest>, Message<HelloResponse>> hello() {
+  public Function<Message<Request>, Message<Response>> stats() {
     return messageRequest -> {
-      HelloRequest request = messageRequest.getPayload();
+      Request request = messageRequest.getPayload();
 
-      HelloResponse response = new HelloResponse();
-      response.setMessage("Hello, " + request.getName());
+      ItemCollection<QueryOutcome> items = getDynamoReviews(request.getAppId(), request.getVersion(), request.getStartDate(), request.getEndDate());
+      OutgoingStat<?>[] stats = calculateStats(items, request.getStats());
 
-      Message<HelloResponse> messageResponse = MessageBuilder
+      Response response = new Response(stats);
+      // Put stats in response
+
+      Message<Response> messageResponse = MessageBuilder
           .withPayload(response)
           .setHeader("Access-Control-Allow-Origin", "*")
           .build();
         
       return messageResponse;
     };
+  }
+
+  private ItemCollection<QueryOutcome> getDynamoReviews(String appId, String version, Date startDate, Date endDate) {
+
+  }
+
+  private OutgoingStat<?>[] calculateStats(ItemCollection<QueryOutcome> items, IncomingStat[] stats) {
+    
   }
 
 }
