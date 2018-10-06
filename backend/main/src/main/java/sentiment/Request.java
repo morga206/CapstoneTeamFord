@@ -1,57 +1,77 @@
 package sentiment;
 
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Request format for the sentiment stats lambda.
  */
 public class Request {
   /**
-  * The id for the app to compile stats for
+  * The id and store for the app to compile stats for.
   */
-  private String appId;
+  private String appIdStore;
 
   /**
-   * The app version to query
+   * The app version to query.
    */
   private String version;
 
   /**
-   * The beginning of the date range to query
+   * The beginning of the date range to query.
    */
-  private Date startDate;
-
-    /**
-   * The end of the date range to query
-   */
-  private Date endDate;
+  private LocalDate startDate;
 
   /**
-   * The specific stats to compile
+   * The end of the date range to query.
+   */
+  private LocalDate endDate;
+
+  /**
+   * The specific stats to compile.
    */
   private IncomingStat[] stats;
 
-  public Request(String appId, String version, Date startDate, Date endDate, IncomingStat[] stats) {
-    this.appId = appId;
+  /**
+   * Primary constructor.
+   * @param appIdStore The appId and store to query
+   * @param version The app version to query
+   * @param startDate The start of the date window
+   * @param endDate The end of the date window
+   * @param stats The list of stats to calculate, plus any parameters
+   */
+  @JsonCreator
+  public Request(
+      @JsonProperty("appIdStore") String appIdStore, 
+      @JsonProperty("version") String version, 
+      @JsonProperty("startDate") String startDate, 
+      @JsonProperty("endDate") String endDate, 
+      @JsonProperty("stats") IncomingStat[] stats) {
+    this.appIdStore = appIdStore;
     this.version = version;
-    this.startDate = startDate;
-    this.endDate = endDate;
+
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+    this.startDate = LocalDate.parse(startDate, formatter);
+    this.endDate = LocalDate.parse(endDate, formatter);
     this.stats = stats;
   }
 
-  public String getAppId() {
-    return this.appId;
+  public String getAppIdStore() {
+    return this.appIdStore;
   }
 
   public String getVersion() {
     return this.version;
   }
 
-  public Date getStartDate() {
+  public LocalDate getStartDate() {
     return this.startDate;
   }
 
-  public Date getEndDate() {
+  public LocalDate getEndDate() {
     return this.endDate;
   }
 

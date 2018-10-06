@@ -1,7 +1,12 @@
 package sentiment;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Class to send statistic values back to the frontend
+ * Class to send statistic values back to the frontend.
  */
 public class OutgoingStat<T> {
 
@@ -14,4 +19,14 @@ public class OutgoingStat<T> {
     this.values = values;
   }
 
+  /**
+   * Map stat name to values so Jackson serializes to JSON correctly.
+   * @return Map from stat name to values
+   */
+  @JsonAnyGetter
+  public Map<String, T[]> getData() {
+    Map<String, T[]> statDetails = new HashMap<String, T[]>();
+    statDetails.put(name, values);
+    return statDetails;
+  }
 }
