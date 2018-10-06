@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RestService } from '../rest.service';
+import { RestService, StatRequest, StatResponse } from '../rest.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -24,12 +24,15 @@ export class DashboardComponent implements OnInit {
     responsive: true
   };
 
-  public greeting$?: Observable<String>;
+  public stat$?: Observable<StatResponse[]>;
 
   constructor(public rest: RestService) { }
 
   ngOnInit() {
-    this.greeting$ = this.rest.sayHello('Test').pipe(map((response) => response.message));
+    let stats: StatRequest[] =[{
+      'rawReviews': undefined
+    }];
+    this.stat$ = this.rest.getSentimentStats('com.ford.fordpass', '2.4.0', new Date('05-21-2018'), new Date('05-23-2018'), stats);
   }
 
 }
