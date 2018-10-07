@@ -1,37 +1,34 @@
+""" Handler for nlp code, takes in text and analyzes
+"""
 import json
 import imp
 import sys
-import os
-
-print(os.listdir(os.getcwd()))
-print(os.environ.get('NLTK_DATA'))
-print("ABOVE IS NLTK_DATA env var")
 
 sys.modules["sqlite"] = imp.new_module("sqlite")
 sys.modules["sqlite3.dbapi2"] = imp.new_module("sqlite.dbapi2")
 
+#pylint: disable=wrong-import-position,unused-import
 import nltk
-nltk.download('vader_lexicon')
-
-
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from nltk.sentiment.util import *
-from nltk.sentiment.sentiment_analyzer import SentimentAnalyzer
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.corpus import stopwords
+#from nltk.sentiment.sentiment_analyzer import SentimentAnalyzer
+from nltk.tokenize import sent_tokenize
+#from nltk.corpus import stopwords
 
 
 
-"""
-The main handler function called by the lambda
-"""
-def main(event, context):
+def main(event, _):
+    """ Lambda Handler main function
+
+    Keyword arguments:
+    event -- POST event that triggers this lambda
+    _context -- unused variable
+    """
 
     reviews_list = json.loads(event["body"])
     processed_reviews = analyze_reviews(reviews_list)
 
     body = {
-        "message": "Successfully called the nlp lambda!",
+        "message": "AWS Lambda Success",
         "input": processed_reviews
     }
 
@@ -44,75 +41,70 @@ def main(event, context):
 
 
 
-"""
-Function that will do the actual sentiment analysis
 
-Returns sentiment:
-sentiment type: dictionary of 4 scores, pos, neg, com, neu
-{pos: ,neg: ,com: , neu: }
-
-Param text: text to analyze (goal is a whole review)
-text type: string "Review string"
-
-Param analyzer: the analyzer object that analyzes the text
-analyzer type: SentimentIntensityAnalyzer() object from nltk
-"""
 def analyze_text(text, analyzer):
+    """ analyze the text
+
+    Keyword arguments:
+    text -- text to analyze
+    analyzer -- the analyzer object
+    """
+
     sentiment = analyzer.polarity_scores(text)
 
     # Goal is to take in a whole review for the text
     # and do the majority of the review manipulation
     # and analyzing in ths function here
 
-
     return sentiment    # Return the sentiment score
 
 
 
-"""
-Function to take in a list of reviews and analyze them
-param reviews_list: list of reviews where reviews are dictionaries
-[{},{},{}]
-"""
-def analyze_reviews(reviews_list):
 
-    s = SentimentIntensityAnalyzer()    # Initialize the analyzer object
+def analyze_reviews(reviews_list):
+    """ Analyze a list of reviews
+
+    Keyword arguments:
+    reviews_list -- list of review json formatted objects
+    """
+
+    sent_analyzer = SentimentIntensityAnalyzer()    # Initialize the analyzer object
     list_processed_reviews = []           # Initialize the return list
 
     # For each review in the list
-    for index, review in enumerate(reviews_list):
+    for review in reviews_list:
         good = 0.0
         bad = 0.0
-        comp = 0.0
+        compound = 0.0
 
         processed_review = review
 
         # Currently analyzing by sentence, but goal is to analyze by review
         if review["text"].strip() != "":
-            try:
-                # Tokenize reviews into sentences
-                sentences = sent_tokenize(review["text"])
+            # Tokenize reviews into sentences
+            sentences = sent_tokenize(review["text"])
 
+            #try:
                 # Analyze each sentence
-                for sentence in sentences:
-                    sentiment_scores = analyze_text(sentence, s)
+            for sentence in sentences:
+                sentiment_scores = analyze_text(sentence, sent_analyzer)
 
-                    if sentiment_scores['pos'] > good:
-                        good = sentiment_scores['pos']
+                if sentiment_scores['pos'] > good:
+                    good = sentiment_scores['pos']
 
-                    if sentiment_scores['neg'] > bad:
-                        bad = sentiment_scores['neg']
+                if sentiment_scores['neg'] > bad:
+                    bad = sentiment_scores['neg']
 
-                    if abs(sentiment_scores['compound']) > abs(compound):
-                        compound = sentiment_scores['compound']
+                #if abs(sentiment_scores['compound']) > abs(compound):
+                compound += sentiment_scores['compound']
 
-                processed_review['neg'] = bad
-                processed_review['pos'] = good
-                processed_review['compound'] = compound
+            processed_review['neg'] = bad
+            processed_review['pos'] = good
+            processed_review['compound'] = compound
 
-                list_processed_reviews.append(processed_review)
+            list_processed_reviews.append(processed_review)
 
-            except:
-                print("An error has occurred tokenizing or analyzing the text")
+            #except:
+             #   print("An error has analyzing the text")
 
     return list_processed_reviews
