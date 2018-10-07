@@ -17,6 +17,7 @@ provider:
 
 plugins:
     - serverless-finch
+    - serverless-python-requirements
 
 custom:
   tableName: 'appReviewsTable-${self:provider.stage}'
@@ -31,10 +32,10 @@ package:
 functions:
   nlp:
     runtime: python3.6
-    handler: nlp/handler.hello
+    handler: nlp/handler.main
     events:
       - http:
-          method: get
+          method: post
           path: nlp
   main:
     runtime: java8
