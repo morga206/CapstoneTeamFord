@@ -7,7 +7,7 @@ const region = process.env.DEPLOY_REGION;
 const table = process.env.TABLE_NAME;
 const stage = process.env.STAGE;
 
-const appStoreScraper = require('./old-xml-app-store-scraper');
+const appStoreScraper = require('./xml-app-store-scraper');
 const gPlayScraper = require('google-play-scraper');
 
 const START_PAGE = 0;
@@ -91,10 +91,21 @@ async function scrape(appId, scraper, store) {
   let promises = [];
 
   for (let i = START_PAGE; i <= MAX_PAGE; i++) {
-    promises.push(scraper.reviews({
-      appId: appId,
-      page: i
-    }));
+    // if scraping Google Play, throttle request time
+    if(store === 'Google Play') {
+      promises.push(scraper.reviews({
+        appId: appId,
+        page: i,
+        throttle: 1
+      }));
+    }
+    // no need to throttle Apple App Store
+    else{
+      promises.push(scraper.reviews({
+        appId: appId,
+        page: i
+      }));
+    }
   }
 
   let allPagesPromise = Promise.all(promises);
