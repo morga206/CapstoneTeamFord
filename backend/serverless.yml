@@ -37,8 +37,6 @@ functions:
       - http:
           method: post
           path: nlp
-    environment:
-      NLTK_DATA: "/var/task/nltk_data"
   main:
     runtime: java8
     timeout: 10
