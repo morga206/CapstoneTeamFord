@@ -17,7 +17,6 @@ function fetchAppleReviews(appId, reviews, page_num){
       let ans_length = ans.length;
 
       let oldest_review = ans[ans_length - 1];
-      // oldest_review.date = new Date(oldest_review.date).toISOString();
       let edited_date = new Date(oldest_review.date).toISOString();
       console.log('this is the converted date');
       console.log(typeof edited_date);
