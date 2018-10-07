@@ -1,5 +1,4 @@
-const appleScraper = require('../old-xml-app-store-scraper');
-const handler = require('../handler.js');
+const appleScraper = require('../xml-app-store-scraper');
 // const appleScraper = require('app-store-scraper');
 // const appleScraper = require('google-play-scraper');
 const appId = 'com.ford.fordpass';
