@@ -67,7 +67,7 @@ async function getReviews() {
     }
   }
 
-  for (let i = 0; i < GPLAY_IDS.length; i++) {
+  /* for (let i = 0; i < GPLAY_IDS.length; i++) {
     try {
       let gPlayReviews = await scrape(GPLAY_IDS[i], gPlayScraper, 'Google Play', false);
       gPlayReviews = await removeDuplicates(GPLAY_IDS[i], 'Google Play', gPlayReviews);
@@ -76,7 +76,7 @@ async function getReviews() {
       console.log(`Error processing Google Play reviews: ${error}`);
       return [];
     }
-  }
+  }*/
 
   return allReviews;
 }
