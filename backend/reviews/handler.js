@@ -116,7 +116,7 @@ async function scrape(appId, scraper, store) {
 }
 
 /**
- * Returns a fucntion that can be used to convert a given review to a DynamoDB representation
+ * Returns a function that can be used to convert a given review to a DynamoDB representation
  * @param id The appId to use for the DynamoDB object
  * @param store The store to use for the DynamoDB object
  * @param alternateVersion The app version to use if the review data doesn't contain one
@@ -129,7 +129,6 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
     reviewHash.update(review.text);
 
     let date = review.date === undefined ? new Date().toISOString() : new Date(review.date).toISOString();
-    // let date = review.date === new Date(review.date).toISOString();
     let version = review.version === undefined ? alternateVersion : review.version;
 
     return {
