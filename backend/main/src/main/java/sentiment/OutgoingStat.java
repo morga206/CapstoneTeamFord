@@ -29,4 +29,12 @@ public class OutgoingStat<T> {
     statDetails.put(name, values);
     return statDetails;
   }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public T[] getValues() {
+    return this.values;
+  }
 }

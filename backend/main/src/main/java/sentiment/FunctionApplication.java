@@ -115,7 +115,7 @@ public class FunctionApplication {
    * @param stats The array of stats to calculate
    * @return An array of OutgoingStats to be place in the response
    */
-  private OutgoingStat<?>[] calculateStats(List<Map<String, AttributeValue>> items, 
+  protected OutgoingStat<?>[] calculateStats(List<Map<String, AttributeValue>> items, 
       IncomingStat[] stats) {
     OutgoingStat<?>[] results = new OutgoingStat<?>[stats.length];
     int nextIndex = 0;
@@ -132,7 +132,7 @@ public class FunctionApplication {
     return results;
   }
 
-  private OutgoingStat<String> processRawReviews(List<Map<String, AttributeValue>> items) {
+  protected OutgoingStat<String> processRawReviews(List<Map<String, AttributeValue>> items) {
     String[] result = new String[items.size()];
     int nextIndex = 0;
 
