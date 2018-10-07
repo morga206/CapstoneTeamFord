@@ -50,7 +50,9 @@ functions:
           path: main
           cors: true
     environment:
-      FUNCTION_NAME: hello
+      FUNCTION_NAME: stats
+      TABLE_NAME: ${self:custom.tableName}
+      DEPLOY_REGION: ${self:provider.region}
   reviews:
     runtime: nodejs8.10
     handler: reviews/handler.handler
@@ -111,6 +113,7 @@ resources:
             Projection:
               NonKeyAttributes:
                 - reviewHash
+                - version
               ProjectionType: INCLUDE
             ProvisionedThroughput:
               ReadCapacityUnits: 5
