@@ -7,7 +7,7 @@ import sys
 sys.modules["sqlite"] = imp.new_module("sqlite")
 sys.modules["sqlite3.dbapi2"] = imp.new_module("sqlite.dbapi2")
 
-#pylint: disable=wrong-import-position,unused-import
+#pylint: disable=unused-import
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 #from nltk.sentiment.sentiment_analyzer import SentimentAnalyzer
@@ -68,9 +68,10 @@ def analyze_reviews(reviews_list):
     reviews_list -- list of review json formatted objects
     """
 
-    sent_analyzer = SentimentIntensityAnalyzer()    # Initialize the analyzer object
-    list_processed_reviews = []           # Initialize the return list
-
+    # Initialize the analyzer object
+    sent_analyzer = SentimentIntensityAnalyzer()
+    # Initialize the return list
+    list_processed_reviews = []
     # For each review in the list
     for review in reviews_list:
         good = 0.0

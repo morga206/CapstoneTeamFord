@@ -66,5 +66,6 @@ jobs:
         - sudo apt-get install pylint
       install:
         - cd backend/nlp
+        - sudo pip install nltk
       script:
         - pylint handler.py
