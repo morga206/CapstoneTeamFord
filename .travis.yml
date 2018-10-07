@@ -63,9 +63,8 @@ jobs:
     - name: "Python Lint"
       before_install:
         - sudo apt-get update
-        - sudo apt-get install python
+        - sudo apt-get install pylint
       install:
-        - pip install pylint
         - cd backend/nlp
       script:
         - pylint handler.py
