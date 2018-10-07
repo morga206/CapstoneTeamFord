@@ -5,7 +5,7 @@ var crypto = require('crypto');
 
 describe('handler', function() {
   describe('#scrape(appId, scraper, store)', function() {
-      const mockScraper = {
+    const mockScraper = {
       reviews: function (params) {
         return new Promise((resolve) => {
           resolve([{
@@ -64,9 +64,9 @@ describe('handler', function() {
       assert.deepEqual(expected, dynamoReview);
     });
     it('should generate a DynamoDB review even if version is missing', function() {
-        let mockReview = {
-            text: 'This is some review text.',
-            date: new Date().toISOString()
+      let mockReview = {
+        text: 'This is some review text.',
+        date: new Date().toISOString()
       };
 
       let reviewProcessingFunction = handler.convertReviewToDynamoRepresentation('test id', 'test store', '');
