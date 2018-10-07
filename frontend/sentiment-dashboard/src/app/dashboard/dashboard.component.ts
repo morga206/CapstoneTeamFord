@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy} from '@angular/core';
 import { RestService, StatRequest, StatResponse } from '../rest.service';
-import { Observable } from 'rxjs';
+import {Observable, Subscription, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -45,7 +45,12 @@ export class DashboardComponent implements OnInit {
       pointHoverBorderColor: 'rgba(204,65,65,0.8)'
     }];
 
+  public autoUpdate: Subscription;
   public stat$?: Observable<any>;
+  private tick: string;
+  private subscripition: Subscription;
+
+
 
   constructor(public rest: RestService) { }
 
@@ -53,8 +58,19 @@ export class DashboardComponent implements OnInit {
     const stats: StatRequest[] = [{
       rawReviews: null
     }];
-    this.stat$ = this.rest
-      .getSentimentStats('com.ford.fordpass*Google Play', '2.4.0', new Date('2018-05-21'), new Date('2018-05-23'), stats);
+    this.autoUpdate = timer(0, 100000).subscribe(() => {
+      this.stat$ = this.rest
+          .getSentimentStats(
+            'com.ford.fordpass*Google Play',
+            '2.4.0',
+            new Date('2018-05-21'),
+            new Date('2018-05-23'),
+            stats);
+    });
+  }
+
+  ngOnDestroy(){
+    this.autoUpdate.unsubscribe();
   }
 
 }
