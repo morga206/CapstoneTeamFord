@@ -139,7 +139,7 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
     let reviewHash = crypto.createHash('sha256');
     reviewHash.update(review.text);
 
-    let date = review.date === undefined ? new Date().toISOString() : new Date(review.date).toISOString();
+    let date = new Date(review.date).toISOString();
     let version = review.version === undefined ? alternateVersion : review.version;
 
     return {
