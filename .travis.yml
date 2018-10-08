@@ -60,4 +60,12 @@ jobs:
         - npm install
       script:
         - npm test
-      
+    - name: "Python Lint"
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install pylint
+      install:
+        - cd backend/nlp
+        - sudo pip install nltk
+      script:
+        - pylint handler.py
