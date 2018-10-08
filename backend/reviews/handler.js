@@ -7,7 +7,7 @@ const region = process.env.DEPLOY_REGION;
 const table = process.env.TABLE_NAME;
 const stage = process.env.STAGE;
 
-const appStoreScraper = require('app-store-scraper');
+const appStoreScraper = require('./xml-app-store-scraper');
 const gPlayScraper = require('google-play-scraper');
 
 const START_PAGE = 0;
@@ -91,10 +91,21 @@ async function scrape(appId, scraper, store) {
   let promises = [];
 
   for (let i = START_PAGE; i <= MAX_PAGE; i++) {
-    promises.push(scraper.reviews({
-      appId: appId,
-      page: i
-    }));
+    // if scraping Google Play, throttle request time
+    if(store === 'Google Play') {
+      promises.push(scraper.reviews({
+        appId: appId,
+        page: i,
+        throttle: 1
+      }));
+    }
+    // no need to throttle Apple App Store
+    else{
+      promises.push(scraper.reviews({
+        appId: appId,
+        page: i
+      }));
+    }
   }
 
   let allPagesPromise = Promise.all(promises);
@@ -116,7 +127,7 @@ async function scrape(appId, scraper, store) {
 }
 
 /**
- * Returns a fucntion that can be used to convert a given review to a DynamoDB representation
+ * Returns a function that can be used to convert a given review to a DynamoDB representation
  * @param id The appId to use for the DynamoDB object
  * @param store The store to use for the DynamoDB object
  * @param alternateVersion The app version to use if the review data doesn't contain one
@@ -128,7 +139,7 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
     let reviewHash = crypto.createHash('sha256');
     reviewHash.update(review.text);
 
-    let date = review.date === undefined ? new Date().toISOString() : new Date(review.date).toISOString();
+    let date = new Date(review.date).toISOString();
     let version = review.version === undefined ? alternateVersion : review.version;
 
     return {
