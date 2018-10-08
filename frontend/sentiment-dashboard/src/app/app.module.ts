@@ -9,9 +9,12 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { SettingsComponent } from './settings/settings.component';
 import { NavComponent } from './shared/nav/nav.component';
 import { DatepickerComponent } from './shared/datepicker/datepicker.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoginComponent } from './login/login.component';
 import { CardComponent } from './dashboard/card/card.component';
+import { AuthService } from './auth/auth.service';
+
+import { AmplifyAngularModule, AmplifyService } from 'aws-amplify-angular';
 
 @NgModule({
   declarations: [
@@ -28,9 +31,11 @@ import { CardComponent } from './dashboard/card/card.component';
     AppRoutingModule,
     FormsModule,
     NgbModule,
-    ChartsModule
+    ChartsModule,
+    AmplifyAngularModule,
+    ReactiveFormsModule
   ],
-  providers: [],
+  providers: [AmplifyService, AuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

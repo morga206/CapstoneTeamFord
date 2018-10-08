@@ -1,0 +1,14 @@
+{
+    "providers": {
+        "awscloudformation": {
+            "AuthRoleName": "sentimentdashboard-20181004171551-authRole",
+            "UnauthRoleArn": "arn:aws:iam::948594532470:role/sentimentdashboard-20181004171551-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::948594532470:role/sentimentdashboard-20181004171551-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "sentimentdashboard-20181004171551-deployment",
+            "UnauthRoleName": "sentimentdashboard-20181004171551-unauthRole",
+            "StackName": "sentimentdashboard-20181004171551",
+            "StackId": "arn:aws:cloudformation:us-east-2:948594532470:stack/sentimentdashboard-20181004171551/a8ae72f0-c81a-11e8-b392-069412bea6c8"
+        }
+    }
+}
