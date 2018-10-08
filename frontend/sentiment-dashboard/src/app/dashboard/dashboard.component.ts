@@ -8,7 +8,7 @@ import { map } from 'rxjs/operators';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
 
   public pieChartLabels: string[] = ['Very Positive', 'Positive', 'Neutral', 'Negative', 'Very Negative'];
   public pieChartData: number[] = [20, 40, 40, 5, 5];
@@ -69,7 +69,7 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.autoUpdate.unsubscribe();
   }
 
