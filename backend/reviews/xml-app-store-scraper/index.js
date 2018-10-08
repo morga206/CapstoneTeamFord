@@ -6,10 +6,6 @@ const constants = require('./lib/constants');
 
 const methods = {
   app: require('./lib/app'),
-  list: require('./lib/list'),
-  search: require('./lib/search'),
-  suggest: require('./lib/suggest'),
-  similar: require('./lib/similar'),
   reviews: require('./lib/reviews')
 };
 
