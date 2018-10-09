@@ -9,8 +9,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.function.context.config.ContextFunctionCatalogAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
@@ -23,7 +25,8 @@ import java.util.function.Function;
 /**
  * Main Spring application.
  */
-@SpringBootApplication
+@Configuration
+@Import({ ContextFunctionCatalogAutoConfiguration.class, ObjectMapper.class })
 public class FunctionApplication {
 
   private static final String REGION = System.getenv("DEPLOY_REGION");
