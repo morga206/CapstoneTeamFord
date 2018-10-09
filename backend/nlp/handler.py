@@ -3,6 +3,8 @@
 import json
 import imp
 import sys
+import boto3
+import os
 
 sys.modules["sqlite"] = imp.new_module("sqlite")
 sys.modules["sqlite3.dbapi2"] = imp.new_module("sqlite.dbapi2")
@@ -14,6 +16,9 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.tokenize import sent_tokenize
 #from nltk.corpus import stopwords
 
+STAGE = os.environ.get('STAGE')
+TABLE_NAME = os.environ.get('TABLE_NAME')
+DEPLOY_REGION = os.environ.get('DEPLOY_REGION')
 
 
 def main(event, _):
@@ -24,6 +29,7 @@ def main(event, _):
     _context -- unused variable
     """
 
+    #print(event)
     reviews_list = json.loads(event["body"])
     processed_reviews = analyze_reviews(reviews_list)
 
@@ -78,17 +84,17 @@ def analyze_reviews(reviews_list):
         bad = 0.0
         compound = 0.0
 
-        processed_review = review
 
         # Currently analyzing by sentence, but goal is to analyze by review
         if review["text"].strip() != "":
             # Tokenize reviews into sentences
             sentences = sent_tokenize(review["text"])
 
-            #try:
-                # Analyze each sentence
+            # Analyze each sentence
             for sentence in sentences:
                 sentiment_scores = analyze_text(sentence, sent_analyzer)
+
+                # Gather the extreme sentiment scores from all sentences
 
                 if sentiment_scores['pos'] > good:
                     good = sentiment_scores['pos']
@@ -99,13 +105,41 @@ def analyze_reviews(reviews_list):
                 #if abs(sentiment_scores['compound']) > abs(compound):
                 compound += sentiment_scores['compound']
 
-            processed_review['neg'] = bad
-            processed_review['pos'] = good
-            processed_review['compound'] = compound
+            review['negSentiment'] = bad
+            review['posSentiment'] = good
+            review['compSentiment'] = compound
+            review['keywords'] = []
+            list_processed_reviews.append(review)
 
-            list_processed_reviews.append(processed_review)
-
-            #except:
-             #   print("An error has analyzing the text")
 
     return list_processed_reviews
+
+
+def write_reviews_to_DB(reviews_list):
+    """ Given a list of reviews that are analyzed, update database
+
+    Key arguments
+    reviews_list -- list of reviews to put in database
+    """
+
+    #dynamodb = boto3.resource('dynamodb')   # ????? What params
+
+    #table = dynamodb.Table('users') # ????? What for db name?
+
+
+    for review in reviews_list:
+        try:
+            table.put_item(review)
+
+            """ OR?
+            Item={
+                'appIdStore': review['appIdStore'],
+                'reviewHash':  review['reviewHash']',
+                'date': review['date'],
+                'version': review['version'],
+                'review': review['review']
+            }
+            """
+
+        except:
+            print("Unable to put items in database")
