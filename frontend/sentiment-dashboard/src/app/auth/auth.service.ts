@@ -14,6 +14,7 @@ export class AuthService {
   public loggedIn: BehaviorSubject<boolean>;
 
   constructor(private router: Router) {
+    Amplify.configure(environment.amplify);
     this.loggedIn = new BehaviorSubject<boolean>(false);
   }
 
