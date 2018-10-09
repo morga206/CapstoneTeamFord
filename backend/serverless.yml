@@ -13,6 +13,7 @@ provider:
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:GetItem
+        - dynamodb:PutItem
       Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}*"
 
 plugins:

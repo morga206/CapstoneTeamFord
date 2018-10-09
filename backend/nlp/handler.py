@@ -29,9 +29,12 @@ def main(event, _):
     _context -- unused variable
     """
 
-    #print(event)
+    print(event)
     reviews_list = json.loads(event["body"])
+
     processed_reviews = analyze_reviews(reviews_list)
+
+    write_reviews_to_DB(processed_reviews)
 
     body = {
         "message": "AWS Lambda Success",
@@ -105,9 +108,9 @@ def analyze_reviews(reviews_list):
                 #if abs(sentiment_scores['compound']) > abs(compound):
                 compound += sentiment_scores['compound']
 
-            review['negSentiment'] = bad
-            review['posSentiment'] = good
-            review['compSentiment'] = compound
+            review['negSentiment'] = int(bad * 100)
+            review['posSentiment'] = int(good * 100)
+            review['compSentiment'] = int(compound * 100)
             review['keywords'] = []
             list_processed_reviews.append(review)
 
@@ -122,24 +125,13 @@ def write_reviews_to_DB(reviews_list):
     reviews_list -- list of reviews to put in database
     """
 
-    #dynamodb = boto3.resource('dynamodb')   # ????? What params
+    dynamodb = boto3.resource('dynamodb')   # ????? What params
 
-    #table = dynamodb.Table('users') # ????? What for db name?
+    table = dynamodb.Table(TABLE_NAME) # ????? What for db name?
 
 
     for review in reviews_list:
-        try:
-            table.put_item(review)
 
-            """ OR?
-            Item={
-                'appIdStore': review['appIdStore'],
-                'reviewHash':  review['reviewHash']',
-                'date': review['date'],
-                'version': review['version'],
-                'review': review['review']
-            }
-            """
+        table.put_item(Item=review)
 
-        except:
-            print("Unable to put items in database")
+
