@@ -13,6 +13,7 @@ import { DatepickerComponent } from './shared/datepicker/datepicker.component';
 import { LoginComponent } from './login/login.component';
 import { CardComponent } from './dashboard/card/card.component';
 import { AuthService } from './auth/auth.service';
+import { AmplifyService, AmplifyAngularModule} from 'aws-amplify-angular';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,7 @@ import { AuthService } from './auth/auth.service';
     NgbModule,
     ChartsModule,
   ],
-  providers: [AuthService],
+  providers: [AmplifyService, AuthService],
   bootstrap: [AppComponent]
 })
 

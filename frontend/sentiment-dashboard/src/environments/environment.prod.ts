@@ -1,3 +1,11 @@
 export const environment = {
-  production: true
+  production: true,
+  amplify: {
+    Auth: {
+      identityPoolId: '',
+      region: '',
+      userPoolId: '',
+      userPoolWebClientId: ''
+    }
+  }
 };
