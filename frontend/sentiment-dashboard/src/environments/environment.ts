@@ -11,7 +11,8 @@ export const environment = {
       userPoolId: 'us-east-2_lwDxbALVG',
       userPoolWebClientId: '7c7kf36q1u5dqigi41evkiota4'
     }
-  }
+  },
+  backendUrl: 'https://3of8hfudu6.execute-api.us-east-2.amazonaws.com/yangmi13/'
 };
 
 /*

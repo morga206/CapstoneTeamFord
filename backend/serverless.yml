@@ -3,6 +3,28 @@ provider:
   name: aws
   stage: ${opt:stage}
   region: us-east-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}*"
+
+plugins:
+    - serverless-finch
+    - serverless-python-requirements
+
+custom:
+  tableName: 'appReviewsTable-${self:provider.stage}'
+  
+  client:
+    bucketName: ${self:service}-client-${self:provider.stage}
+    distributionFolder: ../frontend/sentiment-dashboard/dist/sentiment-dashboard
 
 package:
   individually: true
@@ -10,14 +32,15 @@ package:
 functions:
   nlp:
     runtime: python3.6
-    handler: nlp/handler.hello
+    handler: nlp/handler.main
     events:
       - http:
-          method: get
+          method: post
           path: nlp
   main:
     runtime: java8
     timeout: 10
+    memorySize: 2048
     handler: sentiment.Handler
     package:
       artifact: main/target/sentiment-ALPHA-aws.jar
@@ -25,11 +48,18 @@ functions:
       - http:
           method: any
           path: main
+          cors: true
     environment:
-      FUNCTION_NAME: hello
+      FUNCTION_NAME: stats
+      TABLE_NAME: ${self:custom.tableName}
+      DEPLOY_REGION: ${self:provider.region}
   reviews:
     runtime: nodejs8.10
     handler: reviews/handler.handler
+    environment:
+      STAGE: ${self:provider.stage}
+      TABLE_NAME: ${self:custom.tableName}
+      DEPLOY_REGION: ${self:provider.region}
     events:
       - http:
           method: any
@@ -40,17 +70,51 @@ resources:
     appReviewsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: appReviewsTable-${self:provider.stage}
+        TableName: ${self:custom.tableName}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: appIdStore
             AttributeType: S
-          - AttributeName: store
+          - AttributeName: reviewHash
             AttributeType: S
+          - AttributeName: date
+            AttributeType: S
+          - AttributeName: compSentiment
+            AttributeType: N
         KeySchema:
-          - AttributeName: id
+          - AttributeName: appIdStore
             KeyType: HASH
-          - AttributeName: store
+          - AttributeName: reviewHash
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
+        GlobalSecondaryIndexes:
+          - IndexName: sentiment
+            KeySchema:
+              - AttributeName: appIdStore
+                KeyType: HASH
+              - AttributeName: compSentiment
+                KeyType: RANGE
+            Projection:
+              NonKeyAttributes:
+                - posSentiment
+                - neuSentiment
+                - negSentiment
+              ProjectionType: INCLUDE
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
+          - IndexName: date
+            KeySchema:
+              - AttributeName: appIdStore
+                KeyType: HASH
+              - AttributeName: date
+                KeyType: RANGE
+            Projection:
+              NonKeyAttributes:
+                - reviewHash
+                - version
+              ProjectionType: INCLUDE
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5

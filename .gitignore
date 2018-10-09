@@ -1,3 +1,4 @@
 backend/.serverless/**
 backend/main/target/**
 **/node_modules
+**/.idea

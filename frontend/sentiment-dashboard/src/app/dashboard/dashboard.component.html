@@ -12,8 +12,8 @@
   <div class="form-group">
     <label for="version" class="mr-2">Version</label>
     <select class="form-control mr-2" id="version">
-      <option>version 1</option>
-      <option>version 2</option>
+      <option>1.0.0</option>
+      <option>1.2.1</option>
     </select>
   </div>
 
@@ -36,7 +36,8 @@
           <canvas baseChart
                   [data]="pieChartData"
                   [labels]="pieChartLabels"
-                  [chartType]="pieChartType"></canvas>
+                  [chartType]="pieChartType"
+                  [colors]="pieChartColors"></canvas>
         </div>
   </app-card>
   <app-card title="Top Keywords">
@@ -45,20 +46,20 @@
         <p class="h4">Postive Reviews</p>
         <ol>
             <li>
-              Keyword
-              <p class="small mb-2">xx% of reviews</p>
+              Ford
+              <p class="small mb-2">80% of positive reviews</p>
             </li>
             <li>
-                Keyword
-                <p class="small mb-2">xx% of reviews</p>
+                great
+                <p class="small mb-2">40% of positive reviews</p>
             </li>
             <li>
-                Keyword
-                <p class="small mb-2">xx% of reviews</p>
+                car
+                <p class="small mb-2">38% of positive reviews</p>
             </li>
             <li>
-                Keyword
-                <p class="small mb-2">xx% of reviews</p>
+                impressed
+                <p class="small mb-2">20% of positive reviews</p>
             </li>
           </ol>
       </div>
@@ -66,20 +67,20 @@
           <p class="h4">Negative Reviews</p>
           <ol>
               <li>
-                Keyword
-                <p class="small mb-2">xx% of reviews</p>
+                Ford
+                <p class="small mb-2">70% of negative reviews</p>
               </li>
               <li>
-                  Keyword
-                  <p class="small mb-2">xx% of reviews</p>
+                  bad
+                  <p class="small mb-2">60% of negative reviews</p>
               </li>
               <li>
-                  Keyword
-                  <p class="small mb-2">xx% of reviews</p>
+                  bug
+                  <p class="small mb-2">43% of negative reviews</p>
               </li>
               <li>
-                  Keyword
-                  <p class="small mb-2">xx% of reviews</p>
+                  crash
+                  <p class="small mb-2">37% of negative reviews</p>
               </li>
             </ol>
       </div>
@@ -90,10 +91,17 @@
 <div class="row">
   <app-card title="Sentiment Over Time">
       <canvas baseChart
-      [data]="lineChartData"
+      [datasets]="lineChartData"
       [labels]="lineChartLabels"
       [options]="lineChartOptions"
-      [chartType]="lineChartType"></canvas>
+      [chartType]="lineChartType"
+      [colors]="lineChartColors"></canvas>
+  </app-card>
+</div>
+
+<div class="row">
+  <app-card title="Test Spring Data">
+    {{ stat$ | async | json }}
   </app-card>
 </div>
 
