@@ -13,6 +13,7 @@ sys.modules["sqlite3.dbapi2"] = imp.new_module("sqlite.dbapi2")
 #pylint: disable=wrong-import-position
 #pylint: disable=ungrouped-imports
 #pylint: disable=import-error
+
 import nltk
 import boto3
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -32,9 +33,6 @@ def main(event, _):
     event -- POST event that triggers this lambda
     _context -- unused variable
     """
-
-    #print(event)
-    #reviews_list = json.loaevent)
 
     processed_reviews = analyze_reviews(event)
 
@@ -83,14 +81,16 @@ def analyze_reviews(reviews_list):
 
     # Initialize the analyzer object
     sent_analyzer = SentimentIntensityAnalyzer()
+
     # Initialize the return list
     list_processed_reviews = []
+
     # For each review in the list
     for review in reviews_list:
         good = 0.0
         bad = 0.0
         compound = 0.0
-
+        neutral = 0.0
 
         # Currently analyzing by sentence, but goal is to analyze by review
         if review["review"]["text"].strip() != "":
@@ -109,16 +109,20 @@ def analyze_reviews(reviews_list):
                 if sentiment_scores['neg'] > bad:
                     bad = sentiment_scores['neg']
 
-                #if abs(sentiment_scores['compound']) > abs(compound):
+                neutral += sentiment_scores['neu']
                 compound += sentiment_scores['compound']
 
+            compound /= len(sentences)
+            neutral /= len(sentences)
+
+            review['neuSentiment'] = int(neutral * 100)
             review['negSentiment'] = int(bad * 100)
             review['posSentiment'] = int(good * 100)
             review['compSentiment'] = int(compound * 100)
 
 
             if review["review"]["title"].strip() == "":
-                review["review"]["title"] = "No Title Given"
+                review["review"]["title"] = None
 
             list_processed_reviews.append(review)
 
@@ -133,9 +137,9 @@ def write_reviews_to_db(reviews_list):
     reviews_list -- list of reviews to put in database
     """
 
-    dynamodb = boto3.resource('dynamodb')   # ????? What params
+    dynamodb = boto3.resource('dynamodb')
 
-    table = dynamodb.Table(TABLE_NAME) # ????? What for db name?
+    table = dynamodb.Table(TABLE_NAME)
 
 
     for review in reviews_list:
