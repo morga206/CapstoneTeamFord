@@ -122,7 +122,7 @@ def analyze_reviews(reviews_list):
 
 
             if review["review"]["title"].strip() == "":
-                review["review"]["title"] = None
+                review["review"]["title"] = "NULL"
 
             list_processed_reviews.append(review)
 
