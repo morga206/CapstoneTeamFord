@@ -9,9 +9,6 @@ sys.modules["sqlite"] = imp.new_module("sqlite")
 sys.modules["sqlite3.dbapi2"] = imp.new_module("sqlite.dbapi2")
 
 #pylint: disable=unused-import
-#pylint: disable=wrong-import-order
-#pylint: disable=wrong-import-position
-#pylint: disable=ungrouped-imports
 #pylint: disable=import-error
 
 import nltk
@@ -122,7 +119,7 @@ def analyze_reviews(reviews_list):
 
 
             if review["review"]["title"].strip() == "":
-                review["review"]["title"] = "NULL"
+                del review["review"]["title"]
 
             list_processed_reviews.append(review)
 
