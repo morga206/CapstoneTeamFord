@@ -60,6 +60,7 @@ functions:
       DEPLOY_REGION: ${self:provider.region}
   reviews:
     runtime: nodejs8.10
+    timeout: 20
     handler: reviews/handler.handler
     environment:
       STAGE: ${self:provider.stage}

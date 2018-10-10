@@ -3,14 +3,18 @@
 import json
 import imp
 import sys
-import boto3
 import os
 
 sys.modules["sqlite"] = imp.new_module("sqlite")
 sys.modules["sqlite3.dbapi2"] = imp.new_module("sqlite.dbapi2")
 
 #pylint: disable=unused-import
+#pylint: disable=wrong-import-order
+#pylint: disable=wrong-import-position
+#pylint: disable=ungrouped-imports
+#pylint: disable=import-error
 import nltk
+import boto3
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 #from nltk.sentiment.sentiment_analyzer import SentimentAnalyzer
 from nltk.tokenize import sent_tokenize
@@ -29,12 +33,12 @@ def main(event, _):
     _context -- unused variable
     """
 
-    print(event)
-    reviews_list = json.loads(event["body"])
+    #print(event)
+    #reviews_list = json.loaevent)
 
-    processed_reviews = analyze_reviews(reviews_list)
+    processed_reviews = analyze_reviews(event)
 
-    write_reviews_to_DB(processed_reviews)
+    write_reviews_to_db(processed_reviews)
 
     body = {
         "message": "AWS Lambda Success",
@@ -89,9 +93,9 @@ def analyze_reviews(reviews_list):
 
 
         # Currently analyzing by sentence, but goal is to analyze by review
-        if review["text"].strip() != "":
+        if review["review"]["text"].strip() != "":
             # Tokenize reviews into sentences
-            sentences = sent_tokenize(review["text"])
+            sentences = sent_tokenize(review["review"]["text"])
 
             # Analyze each sentence
             for sentence in sentences:
@@ -111,14 +115,18 @@ def analyze_reviews(reviews_list):
             review['negSentiment'] = int(bad * 100)
             review['posSentiment'] = int(good * 100)
             review['compSentiment'] = int(compound * 100)
-            review['keywords'] = []
+
+
+            if review["review"]["title"].strip() == "":
+                review["review"]["title"] = "No Title Given"
+
             list_processed_reviews.append(review)
 
 
     return list_processed_reviews
 
 
-def write_reviews_to_DB(reviews_list):
+def write_reviews_to_db(reviews_list):
     """ Given a list of reviews that are analyzed, update database
 
     Key arguments
@@ -133,5 +141,3 @@ def write_reviews_to_DB(reviews_list):
     for review in reviews_list:
 
         table.put_item(Item=review)
-
-
