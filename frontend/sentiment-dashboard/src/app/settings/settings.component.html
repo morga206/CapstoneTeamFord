@@ -1,71 +1,90 @@
-<h1>Settings and Administration</h1>
-
-<div class="row">
-  <h2 class="h4">App Management</h2>
-  <button type="button" class="btn btn-sm btn-primary ml-auto">Add App</button>
+<div class="row mb-4">
+    <h1>Settings and Administration</h1>
 </div>
 
-
-<table class="table">
-  <thead>
-  <tr>
-    <th scope="col">Name</th>
-    <th scope="col">Store</th>
-    <th scope="col">App ID</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td>FordPass</td>
-    <td>App Store</td>
-    <td>com.ford.fordpass</td>
-    <button type="button" class="btn btn-sm btn-primary ml-auto">X</button>
-  </tr>
-  <tr>
-    <td>FordPass</td>
-    <td>App Store</td>
-    <td>com.ford.fordpass</td>
-    <button type="button" class="btn btn-sm btn-primary ml-auto">X</button>
-  </tr>
-  <tr>
-    <td>FordPass</td>
-    <td>App Store</td>
-    <td>com.ford.fordpass</td>
-    <button type="button" class="btn btn-sm btn-primary ml-auto">X</button>
-  </tr>
-  </tbody>
-</table>
-<div class="row align-items-start">
- <h2 class="h4 mb-0">Scraper Settings</h2>
-</div>
-<hr>
-<div class="col">
-  <label for="app-store-polling">App Store Polling Interval</label>
-  <input type="email" class="form-control" id="app-store-polling">
-</div>
-<div class="col">
-  <label for="play-polling">Google Play Polling Interval</label>
-  <input type="email" class="form-control" id="play-polling">
-</div>
-<div class="form-group">
-  <button type="button" class="btn btn-primary m-2">Save</button>
+<div class="row mb-4">
+    <h2 class="h4">App Management</h2>
+    <button type="button" class="btn btn-sm btn-primary ml-auto mb-2">Add App</button>
+    <table class="table">
+      <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Store</th>
+        <th scope="col">App ID</th>
+        <th scope="col"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>FordPass</td>
+        <td>App Store</td>
+        <td>com.ford.fordpass</td>
+        <td><button type="button" class="btn btn-sm btn-primary ml-auto">X</button></td>
+      </tr>
+      <tr>
+        <td>FordPass</td>
+        <td>Google Play</td>
+        <td>com.ford.fordpass</td>
+        <td><button type="button" class="btn btn-sm btn-primary ml-auto">X</button></td>
+      </tr>
+      <tr>
+        <td>Ford Play</td>
+        <td>App Store</td>
+        <td>com.ford.fordplay</td>
+        <td><button type="button" class="btn btn-sm btn-primary ml-auto">X</button></td>
+      </tr>
+      </tbody>
+    </table>
 </div>
 
-<div class="row align-items-start">
-  <h2 class="h4 mb-0">Slack Settings</h2>
+
+<div class="row mb-4 border-bottom">
+  <h2 class="h4">Scraper Settings</h2>
 </div>
 
-<hr>
+  <div class="form-group mb-4">
+    <div class="row">
+      <label for="app-store-polling">App Store Polling Interval</label>
+      <div class="input-group mb-2">
+        <input type="text" class="form-control" id="app-store-polling">
+        <div class="input-group-append">
+            <span class="input-group-text">minutes</span>
+        </div>
+      </div>
+    </div>
 
-<div class="col">
-  <label for="posting-channel">Posting Channel</label>
-  <input type="email" class="form-control" id="posting-channel">
+    <div class="row">
+      <label for="play-polling" >Google Play Polling Interval</label>
+      <div class="input-group mb-2">
+          <input type="text" class="form-control" id="play-store-polling">
+          <div class="input-group-append">
+              <span class="input-group-text">minutes</span>
+          </div>
+        </div>
+    </div>
+  
+    <div class="row">
+      <button type="button" class="btn btn-primary">Save</button>
+    </div>
+  </div>
+
+<div class="row mb-4 border-bottom">
+  <h2 class="h4">Slack Settings</h2>
 </div>
-<div class="col">
-  <label for="posting-interval">Posting Interval</label>
-  <input type="email" class="form-control" id="posting-interval">
-</div>
-<div class="form-group">
-  <button type="button" class="btn btn-primary m-2 ">Save</button>
+
+<div class="form-group mb-4">
+  <div class="row">
+    <label for="posting-channel">Posting Channel</label>
+    <input type="text" class="form-control mb-2" id="posting-channel">
+  </div>
+
+  <div class="row">
+      <label for="posting-interval">Posting Interval</label>
+      <input type="text" class="form-control mb-2" id="posting-interval">
+  </div>
+
+  <div class="row">
+    <button type="button" class="btn btn-primary">Save</button>
+  </div>
 </div>
 
