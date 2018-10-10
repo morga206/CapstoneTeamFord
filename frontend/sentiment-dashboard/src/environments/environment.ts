@@ -6,10 +6,10 @@ export const environment = {
   production: false,
   amplify: {
     Auth: {
-      identityPoolId: 'us-east-2:4957308e-33bf-4f0b-bb4d-c4b474ab5f60',
-      region: 'us-east-2',
-      userPoolId: 'us-east-2_lwDxbALVG',
-      userPoolWebClientId: '7c7kf36q1u5dqigi41evkiota4'
+      identityPoolId: '',
+      region: '',
+      userPoolId: '',
+      userPoolWebClientId: ''
     }
   }
 };

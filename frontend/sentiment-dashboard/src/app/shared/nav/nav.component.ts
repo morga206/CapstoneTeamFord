@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-nav',
@@ -9,9 +10,15 @@ export class NavComponent implements OnInit {
 
   public isCollapsed = true;
 
-  constructor() { }
+  constructor(
+    private auth: AuthService
+  ) { }
 
   ngOnInit() {
+  }
+
+  onClickLogout() {
+    this.auth.signOut();
   }
 
 }

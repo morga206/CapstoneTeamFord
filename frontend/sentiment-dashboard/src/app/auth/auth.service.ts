@@ -18,10 +18,19 @@ export class AuthService {
     this.loggedIn = new BehaviorSubject<boolean>(false);
   }
 
-  public signIn(email, password): Observable<any> {
-    return from(Auth.signIn(email, password))
+  public signIn(username, password) {
+    return from(Auth.signIn(username, password))
       .pipe(
         tap(() => this.loggedIn.next(true))
+      );
+  }
+
+  public signOut() {
+    from(Auth.signOut()).subscribe(
+        result => {
+          this.loggedIn.next(false);
+        },
+        error => console.log(error)
       );
   }
 
