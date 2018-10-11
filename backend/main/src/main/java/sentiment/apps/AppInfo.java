@@ -2,29 +2,27 @@ package sentiment.apps;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.time.LocalDate;
-
 /**
  * The necessary frontend form entries for a given app.
  */
 @JsonIgnoreProperties({"appIdStore"})
 public class AppInfo {
   private String appIdStore;
-  private LocalDate startDate;
-  private LocalDate endDate;
+  private String minDate;
+  private String maxDate;
   private String[] versions;
 
   /**
    * Primary constructor.
    * @param appIdStore The appId and store for this particular app.
-   * @param startDate The earliest possible review date for this app.
-   * @param endDate The latest possible review date for this app.
+   * @param minDate The earliest possible review date for this app (as an ISO string).
+   * @param maxDate The latest possible review date for this app (as an ISO string).
    * @param versions The possible versions for this app.
    */
-  public AppInfo(String appIdStore, LocalDate startDate, LocalDate endDate, String[] versions) {
+  public AppInfo(String appIdStore, String minDate, String maxDate, String[] versions) {
     this.appIdStore = appIdStore;
-    this.startDate = startDate;
-    this.endDate = endDate;
+    this.minDate = minDate;
+    this.maxDate = maxDate;
     this.versions = versions;
   }
 
@@ -32,12 +30,12 @@ public class AppInfo {
     return this.appIdStore;
   }
 
-  public LocalDate getStartDate() {
-    return this.startDate;
+  public String getMinDate() {
+    return this.minDate;
   }
 
-  public LocalDate getEndDate() {
-    return this.endDate;
+  public String getMaxDate() {
+    return this.maxDate;
   }
 
   public String[] getVersions() {

@@ -1,6 +1,8 @@
 package sentiment.apps;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import sentiment.Response;
 
 import java.util.HashMap;
@@ -26,6 +28,8 @@ public class AppsResponse extends Response {
     for (AppInfo app : apps) {
       data.put(app.getAppIdStore(), app);
     }
+
+    System.out.println(data.toString());
 
     return data;
   }
