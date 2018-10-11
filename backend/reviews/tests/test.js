@@ -11,7 +11,8 @@ describe('handler', function() {
           resolve([{
             page: params.page,
             title: 'Example Review',
-            text: 'This is some sample review text.'
+            text: 'This is some sample review text.',
+            date: new Date('12-01-2001').toISOString()
           }]);
         });
       },
@@ -62,9 +63,10 @@ describe('handler', function() {
 
       assert.deepEqual(expected, dynamoReview);
     });
-    it('should generate a DynamoDB review even if date or version is missing', function() {
+    it('should generate a DynamoDB review even if version is missing', function() {
       let mockReview = {
         text: 'This is some review text.',
+        date: new Date().toISOString()
       };
 
       let reviewProcessingFunction = handler.convertReviewToDynamoRepresentation('test id', 'test store', '');
