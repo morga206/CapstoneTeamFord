@@ -3,27 +3,28 @@ import {RouterTestingModule} from '@angular/router/testing';
 import { AppComponent } from './app.component';
 import { NavComponent } from './shared/nav/nav.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { Router } from '@angular/router';
+import { AuthService } from './auth/auth.service';
 
 describe('AppComponent', () => {
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         AppComponent,
         NavComponent
       ],
-      imports: [RouterTestingModule, NgbModule]
+      imports: [RouterTestingModule, NgbModule],
+      providers: [AuthService]
     }).compileComponents();
-  }));
-  it('should create the app', async(() => {
+  });
+  it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
-  }));
-  it('should render the nav', async(() => {
+  });
+  it('should render the nav', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
     expect(compiled.querySelector('nav')).toBeTruthy();
-  }));
+  });
 });
