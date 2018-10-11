@@ -13,6 +13,7 @@ provider:
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:GetItem
+        - dynamodb:PutItem
       Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}*"
 
 plugins:
@@ -37,6 +38,10 @@ functions:
       - http:
           method: post
           path: nlp
+    environment:
+      STAGE: ${self:provider.stage}
+      TABLE_NAME: ${self:custom.tableName}
+      DEPLOY_REGION: ${self:provider.region}
   main:
     runtime: java8
     timeout: 10
@@ -55,6 +60,7 @@ functions:
       DEPLOY_REGION: ${self:provider.region}
   reviews:
     runtime: nodejs8.10
+    timeout: 20
     handler: reviews/handler.handler
     environment:
       STAGE: ${self:provider.stage}
