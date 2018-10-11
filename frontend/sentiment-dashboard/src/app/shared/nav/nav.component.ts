@@ -11,7 +11,7 @@ export class NavComponent implements OnInit {
   public isCollapsed = true;
 
   constructor(
-    private auth: AuthService
+    public auth: AuthService
   ) { }
 
   ngOnInit() {
