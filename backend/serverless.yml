@@ -29,11 +29,18 @@ custom:
 
 package:
   individually: true
+  exclude:
+    - ./**
 
 functions:
   nlp:
     runtime: python3.6
     handler: nlp/handler.main
+    package:
+      include:
+        - nlp/**
+        - sentiment/**
+        - tokenizers/**
     events:
       - http:
           method: post
@@ -49,19 +56,26 @@ functions:
     handler: sentiment.Handler
     package:
       artifact: main/target/sentiment-ALPHA-aws.jar
-    events:
-      - http:
-          method: any
-          path: main
-          cors: true
     environment:
       FUNCTION_NAME: stats
       TABLE_NAME: ${self:custom.tableName}
       DEPLOY_REGION: ${self:provider.region}
+    events:
+      - http:
+          method: post
+          path: stats
+          cors: true
+      - http:
+          method: get
+          path: apps
+          cors: true
   reviews:
     runtime: nodejs8.10
     timeout: 20
     handler: reviews/handler.handler
+    package:
+      include:
+        - reviews/**
     environment:
       STAGE: ${self:provider.stage}
       TABLE_NAME: ${self:custom.tableName}
