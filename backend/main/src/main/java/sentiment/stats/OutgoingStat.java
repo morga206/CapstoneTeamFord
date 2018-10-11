@@ -1,4 +1,4 @@
-package sentiment;
+package sentiment.stats;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 

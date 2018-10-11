@@ -58,7 +58,11 @@ functions:
     events:
       - http:
           method: post
-          path: main
+          path: stats
+          cors: true
+      - http:
+          method: get
+          path: apps
           cors: true
   reviews:
     runtime: nodejs8.10
