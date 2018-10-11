@@ -1,7 +1,9 @@
-import { Component, OnInit, OnDestroy} from '@angular/core';
-import { RestService, StatRequest, StatResponse } from '../rest.service';
+import { Component, OnInit, OnDestroy, ViewChild} from '@angular/core';
+import { RestService, StatRequest, StatResponse, AppInfo } from '../rest.service';
 import {Observable, Subscription, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
+import { DatepickerComponent } from '../shared/datepicker/datepicker.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -45,32 +47,71 @@ export class DashboardComponent implements OnInit, OnDestroy {
       pointHoverBorderColor: 'rgba(204,65,65,0.8)'
     }];
 
-  public autoUpdate: Subscription;
-  public stat$?: Observable<any>;
-  private tick: string;
-  private subscripition: Subscription;
+  private autoUpdate: Subscription;
+  private stat$?: Observable<any>;
 
+  private appsSubscription: Subscription;
+  private appList: { [id: string]: AppInfo } = {};
+  private selectedApp?: AppInfo;
 
+  private statsFilterForm: FormGroup;
+  private appIdStore: AbstractControl;
+  private version: AbstractControl;
+  private startDate: AbstractControl;
+  private endDate: AbstractControl;
 
-  constructor(public rest: RestService) { }
+  constructor(private rest: RestService, private fb: FormBuilder) { }
 
   ngOnInit() {
-    const stats: StatRequest[] = [{
-      rawReviews: null
-    }];
+    this.statsFilterForm = this.fb.group({
+      'appName': ['', Validators.required],
+      'appVersion': ['', Validators.required],
+      'startDate': ['', Validators.required],
+      'endDate': ['', Validators.required]
+    });
+
+    this.appIdStore = this.statsFilterForm.get('appName');
+    this.version = this.statsFilterForm.get('appVersion');
+    this.startDate = this.statsFilterForm.get('startDate');
+    this.endDate = this.statsFilterForm.get('endDate');
+
+    this.appsSubscription = this.rest.getApps().subscribe((apps: { [id: string]: AppInfo }) => {
+      this.appList = apps;
+    });
+
     this.autoUpdate = timer(0, 100000).subscribe(() => {
-      this.stat$ = this.rest
-          .getSentimentStats(
-            'com.ford.fordpass*Google Play',
-            '2.4.0',
-            new Date('2018-05-21'),
-            new Date('2018-05-23'),
-            stats);
+      this.getAppStats();
     });
   }
 
   ngOnDestroy() {
     this.autoUpdate.unsubscribe();
+    this.appsSubscription.unsubscribe();
   }
 
+  private onAppSelect(appIdStore: string) {
+    this.selectedApp = this.appList[appIdStore];
+
+    if (this.selectedApp.versions.length > 0) {
+      this.version.setValue(this.selectedApp.versions[0]);
+    }
+  }
+
+  private getAppStats() {
+    if (this.statsFilterForm.invalid) {
+      return;
+    }
+
+    const stats: StatRequest[] = [{
+      rawReviews: null
+    }];
+
+    this.stat$ = this.rest
+          .getSentimentStats(
+            this.appIdStore.value,
+            this.version.value,
+            new Date(this.startDate.value),
+            new Date(this.endDate.value),
+            stats);
+  }
 }

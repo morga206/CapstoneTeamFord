@@ -35,13 +35,15 @@ public class AppsRequest extends Request {
     // TODO get these from the settings DB
     final String[] appIds = 
       new String[] { "com.ford.fordpass*App Store", "com.ford.fordpass*Google Play" };
+    final String[] appNames = 
+      new String[] { "Fordpass (App Store)", "FordPass (Google Play)"};
 
     List<AppInfo> apps = new ArrayList<AppInfo>();
 
     AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(REGION).build();
 
     for (int i = 0; i < appIds.length; i++) {
-      AppInfo info = getAppInfoFromDb(client, appIds[i]);
+      AppInfo info = getAppInfoFromDb(client, appIds[i], appNames[i]);
       if (info != null) {
         // We have reviews for this app
         apps.add(info);
@@ -51,7 +53,7 @@ public class AppsRequest extends Request {
     return new AppsResponse(apps.toArray(new AppInfo[0]));
   }
 
-  private AppInfo getAppInfoFromDb(AmazonDynamoDB db, String appIdStore) {
+  private AppInfo getAppInfoFromDb(AmazonDynamoDB db, String appIdStore, String name) {
     HashMap<String, AttributeValue> valueMap = new HashMap<String, AttributeValue>();
     valueMap.put(":id", new AttributeValue().withS(appIdStore));
 
@@ -128,6 +130,6 @@ public class AppsRequest extends Request {
     String[] versions = versionsSet.toArray(new String[0]);
 
     // Create an AppInfo object
-    return new AppInfo(appIdStore, minDate.toString(), maxDate.toString(), versions);
+    return new AppInfo(appIdStore, name, minDate.toString(), maxDate.toString(), versions);
   }
 }
