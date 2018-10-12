@@ -21,7 +21,8 @@ public class AppInfo {
    * @param maxDate The latest possible review date for this app (as an ISO string).
    * @param versions The possible versions for this app.
    */
-  public AppInfo(String appIdStore, String name, String minDate, String maxDate, String[] versions) {
+  public AppInfo(
+      String appIdStore, String name, String minDate, String maxDate, String[] versions) {
     this.appIdStore = appIdStore;
     this.name = name;
     this.minDate = minDate;
