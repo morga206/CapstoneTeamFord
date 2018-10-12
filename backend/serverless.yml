@@ -120,6 +120,7 @@ resources:
                 - posSentiment
                 - neuSentiment
                 - negSentiment
+                - keywords
               ProjectionType: INCLUDE
             ProvisionedThroughput:
               ReadCapacityUnits: 5
@@ -134,6 +135,11 @@ resources:
               NonKeyAttributes:
                 - reviewHash
                 - version
+                - posSentiment
+                - neuSentiment
+                - negSentiment
+                - compSentiment
+                - keywords
               ProjectionType: INCLUDE
             ProvisionedThroughput:
               ReadCapacityUnits: 5
