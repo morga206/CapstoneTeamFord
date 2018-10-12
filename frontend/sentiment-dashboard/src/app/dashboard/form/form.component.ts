@@ -24,14 +24,14 @@ export class FormComponent implements OnInit {
 
   @Output() filterChange = new EventEmitter<StatsFilterValues>();
 
-  private appList: { [id: string]: AppInfo } = {};
-  private selectedApp?: AppInfo;
+  public appList: { [id: string]: AppInfo } = {};
+  public selectedApp?: AppInfo;
 
-  private statsFilterForm: FormGroup;
-  private appIdStore: AbstractControl;
-  private version: AbstractControl;
-  private startDate: AbstractControl;
-  private endDate: AbstractControl;
+  public statsFilterForm: FormGroup;
+  public appIdStore: AbstractControl;
+  public version: AbstractControl;
+  public startDate: AbstractControl;
+  public endDate: AbstractControl;
 
   constructor(private fb: FormBuilder) { }
 

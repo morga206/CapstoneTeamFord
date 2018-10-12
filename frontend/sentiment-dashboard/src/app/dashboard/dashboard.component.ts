@@ -20,7 +20,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('stats1') stats: StatsComponent;
   @ViewChild('stats2') statsCompare: StatsComponent;
 
-  private currentlyComparing = false;
+  public currentlyComparing = false;
 
   private autoUpdate: Subscription;
   private appsSubscription: Subscription;
@@ -49,7 +49,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.statsSubscription.unsubscribe();
   }
 
-  private updateStatsSubscription(event: StatsFilterValues) {
+  public updateStatsSubscription(event: StatsFilterValues) {
     const statsToGet: StatRequest[] = [{
       rawReviews: null
     }];
