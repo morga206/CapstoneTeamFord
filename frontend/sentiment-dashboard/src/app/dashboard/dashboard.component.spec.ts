@@ -6,6 +6,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { ChartsModule } from 'ng2-charts';
 import { CardComponent } from './card/card.component';
 import { HttpClientModule } from '@angular/common/http';
+import { FormComponent } from './form/form.component';
+import { StatsComponent } from './stats/stats.component';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -13,7 +15,7 @@ describe('DashboardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DashboardComponent, DatepickerComponent, CardComponent ],
+      declarations: [ DashboardComponent, DatepickerComponent, CardComponent, FormComponent, StatsComponent ],
       imports: [NgbModule, ReactiveFormsModule, FormsModule, ChartsModule, HttpClientModule]
     })
     .compileComponents();
