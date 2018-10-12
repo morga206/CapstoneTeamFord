@@ -11,7 +11,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { SettingsComponent } from './settings/settings.component';
 import { NavComponent } from './shared/nav/nav.component';
 import { DatepickerComponent } from './shared/datepicker/datepicker.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoginComponent } from './login/login.component';
 import { CardComponent } from './dashboard/card/card.component';
 import { AuthService } from './auth/auth.service';
