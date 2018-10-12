@@ -118,8 +118,9 @@ def analyze_reviews(reviews_list):
             review['compSentiment'] = int(compound * 100)
 
 
-            if review["review"]["title"].strip() == "":
-                del review["review"]["title"]
+            for field in review["review"]:
+                if review["review"][field].strip() == "":
+                    del review["review"][field]
 
             list_processed_reviews.append(review)
 
