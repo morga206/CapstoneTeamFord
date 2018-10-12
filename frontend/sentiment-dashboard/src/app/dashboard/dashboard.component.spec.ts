@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard.component';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {DatepickerComponent} from '../shared/datepicker/datepicker.component';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { ChartsModule } from 'ng2-charts';
 import { CardComponent } from './card/card.component';
 import { HttpClientModule } from '@angular/common/http';
@@ -14,7 +14,7 @@ describe('DashboardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ DashboardComponent, DatepickerComponent, CardComponent ],
-      imports: [NgbModule, FormsModule, ChartsModule, HttpClientModule]
+      imports: [NgbModule, ReactiveFormsModule, FormsModule, ChartsModule, HttpClientModule]
     })
     .compileComponents();
   }));

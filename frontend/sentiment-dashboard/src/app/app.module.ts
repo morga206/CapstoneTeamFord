@@ -29,6 +29,7 @@ import { AmplifyService, AmplifyAngularModule} from 'aws-amplify-angular';
   imports: [
     BrowserModule,
     AppRoutingModule,
+    ReactiveFormsModule,
     FormsModule,
     ReactiveFormsModule,
     NgbModule,

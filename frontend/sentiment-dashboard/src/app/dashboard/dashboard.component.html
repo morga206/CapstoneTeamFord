@@ -1,27 +1,25 @@
 <h1 class="sr-only">Home</h1>
 
-<form class="form-inline flex-nowrap">
+<form class="form-inline flex-nowrap" [formGroup]="statsFilterForm">
   <div class="form-group">
     <label for="app-name" class="mr-2">App name</label>
-    <select class="form-control mr-2" id="app-name">
-      <option>FordPass</option>
-      <option>Ford Play</option>
+    <select class="form-control mr-2" id="app-name" formControlName="appName" (change)="onAppSelect($event.target.value)" [class.is-invalid]="appIdStore.invalid">
+      <option *ngFor="let app of appList | keyvalue" [value]="app.key">{{ app.value.name }}</option>
     </select>
   </div>
 
   <div class="form-group">
     <label for="version" class="mr-2">Version</label>
-    <select class="form-control mr-2" id="version">
-      <option>1.0.0</option>
-      <option>1.2.1</option>
+    <select class="form-control mr-2" id="version" formControlName="appVersion" (change)="getAppStats()" [class.is-invalid]="version.invalid">
+      <option *ngFor="let version of selectedApp?.versions">{{ version }}</option>
     </select>
   </div>
 
   <div class="form-group">
-    <label for="date-from">Date</label>
-    <app-datepicker controlId="date-from"></app-datepicker>
-    <label for="date-to">to</label>
-    <app-datepicker controlId="date-to"></app-datepicker>
+    <label for="start-date">Date</label>
+    <input type="date" class="form-control mx-2" placeholder="yyyy-mm-dd" id="start-date" formControlName="startDate" [class.is-invalid]="startDate.invalid" (change)="getAppStats()">
+    <label for="end-date">to</label>
+    <input type="date" class="form-control mx-2" placeholder="yyyy-mm-dd" id="end-date" formControlName="endDate" [class.is-invalid]="endDate.invalid" (change)="getAppStats()">
   </div>
 
   <div class="form-group">
@@ -31,6 +29,12 @@
 </form>
 
 <div class="row my-4 mb-md-0">
+    <app-card title="Test Spring Data">
+      {{ stat$ | async | json }}
+    </app-card>
+</div>
+
+<div class="row mb-md-0">
   <app-card title="Overall Sentiment">
       <div class="m-auto" style="width: 500px;">
           <canvas baseChart
@@ -71,7 +75,7 @@
                 <p class="small mb-2">70% of negative reviews</p>
               </li>
               <li>
-                  bad
+                  error
                   <p class="small mb-2">60% of negative reviews</p>
               </li>
               <li>
@@ -96,12 +100,6 @@
       [options]="lineChartOptions"
       [chartType]="lineChartType"
       [colors]="lineChartColors"></canvas>
-  </app-card>
-</div>
-
-<div class="row">
-  <app-card title="Test Spring Data">
-    {{ stat$ | async | json }}
   </app-card>
 </div>
 

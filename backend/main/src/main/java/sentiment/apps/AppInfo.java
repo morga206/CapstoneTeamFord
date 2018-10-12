@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties({"appIdStore"})
 public class AppInfo {
   private String appIdStore;
+  private String name;
   private String minDate;
   private String maxDate;
   private String[] versions;
@@ -15,12 +16,15 @@ public class AppInfo {
   /**
    * Primary constructor.
    * @param appIdStore The appId and store for this particular app.
+   * @param name The human-readable app name.
    * @param minDate The earliest possible review date for this app (as an ISO string).
    * @param maxDate The latest possible review date for this app (as an ISO string).
    * @param versions The possible versions for this app.
    */
-  public AppInfo(String appIdStore, String minDate, String maxDate, String[] versions) {
+  public AppInfo(
+      String appIdStore, String name, String minDate, String maxDate, String[] versions) {
     this.appIdStore = appIdStore;
+    this.name = name;
     this.minDate = minDate;
     this.maxDate = maxDate;
     this.versions = versions;
@@ -28,6 +32,10 @@ public class AppInfo {
 
   public String getAppIdStore() {
     return this.appIdStore;
+  }
+
+  public String getName() {
+    return this.name;
   }
 
   public String getMinDate() {
