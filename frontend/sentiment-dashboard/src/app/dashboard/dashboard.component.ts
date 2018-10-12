@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild} from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RestService, StatRequest, StatResponse, AppInfo } from '../rest.service';
 import {Observable, Subscription, timer } from 'rxjs';
 import { map } from 'rxjs/operators';

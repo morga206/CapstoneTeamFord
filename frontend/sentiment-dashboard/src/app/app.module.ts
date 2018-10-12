@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChartsModule } from 'ng2-charts';
 import { HttpClientModule } from '@angular/common/http';
@@ -13,6 +14,8 @@ import { DatepickerComponent } from './shared/datepicker/datepicker.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LoginComponent } from './login/login.component';
 import { CardComponent } from './dashboard/card/card.component';
+import { AuthService } from './auth/auth.service';
+import { AmplifyService, AmplifyAngularModule} from 'aws-amplify-angular';
 
 @NgModule({
   declarations: [
@@ -29,11 +32,13 @@ import { CardComponent } from './dashboard/card/card.component';
     AppRoutingModule,
     ReactiveFormsModule,
     FormsModule,
+    ReactiveFormsModule,
     NgbModule,
     ChartsModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [AmplifyService, AuthService],
   bootstrap: [AppComponent]
 })
+
 export class AppModule { }
