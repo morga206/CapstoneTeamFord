@@ -168,7 +168,11 @@ public class StatsRequest extends Request {
     for (Map<String, AttributeValue> item : items) {
       Map<String, String> review = new HashMap<String, String>();
       item.forEach((key, val) -> {
-        review.put(key, val.getS());
+        if (val.getS() != null) {
+          review.put(key, val.getS());
+        } else if (val.getN() != null) {
+          review.put(key, val.getN());
+        }
       });
 
       try {
