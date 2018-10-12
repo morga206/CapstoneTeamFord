@@ -47,18 +47,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       pointHoverBorderColor: 'rgba(204,65,65,0.8)'
     }];
 
+  public stat$?: Observable<any>;
   private autoUpdate: Subscription;
-  private stat$?: Observable<any>;
 
+  public appList: { [id: string]: AppInfo } = {};
+  public selectedApp?: AppInfo;
   private appsSubscription: Subscription;
-  private appList: { [id: string]: AppInfo } = {};
-  private selectedApp?: AppInfo;
 
-  private statsFilterForm: FormGroup;
-  private appIdStore: AbstractControl;
-  private version: AbstractControl;
-  private startDate: AbstractControl;
-  private endDate: AbstractControl;
+  public statsFilterForm: FormGroup;
+  public appIdStore: AbstractControl;
+  public version: AbstractControl;
+  public startDate: AbstractControl;
+  public endDate: AbstractControl;
 
   constructor(private rest: RestService, private fb: FormBuilder) { }
 
@@ -89,7 +89,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.appsSubscription.unsubscribe();
   }
 
-  private onAppSelect(appIdStore: string) {
+  public onAppSelect(appIdStore: string) {
     this.selectedApp = this.appList[appIdStore];
 
     if (this.selectedApp.versions.length > 0) {
@@ -97,7 +97,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getAppStats() {
+  public getAppStats() {
     if (this.statsFilterForm.invalid) {
       return;
     }
