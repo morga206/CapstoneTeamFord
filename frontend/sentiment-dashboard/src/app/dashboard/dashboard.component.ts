@@ -47,7 +47,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.appsSubscription.unsubscribe();
     this.statsSubscription.unsubscribe();
   }
-  
+
   public updateStatsSubscription(event: StatsFilterValues) {
     const statsToGet: StatRequest[] = [{
       rawReviews: null
