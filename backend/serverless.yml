@@ -35,6 +35,7 @@ package:
 functions:
   nlp:
     runtime: python3.6
+    timeout: 10
     handler: nlp/handler.main
     package:
       include:
@@ -71,7 +72,7 @@ functions:
           cors: true
   reviews:
     runtime: nodejs8.10
-    timeout: 20
+    timeout: 30
     handler: reviews/handler.handler
     package:
       include:
