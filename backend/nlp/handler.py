@@ -124,7 +124,6 @@ def analyze_reviews(reviews_list):
                     remove_fields.append(field)
 
             for field in remove_fields:
-
                 del review["review"][field]
 
             list_processed_reviews.append(review)
