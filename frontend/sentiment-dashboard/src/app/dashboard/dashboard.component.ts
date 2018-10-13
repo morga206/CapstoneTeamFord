@@ -1,9 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { RestService, StatRequest, StatResponse, AppInfo } from '../rest.service';
 import {Observable, Subscription, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { DatepickerComponent } from '../shared/datepicker/datepicker.component';
+import { FormComponent, StatsFilterValues } from './form/form.component';
+import { StatsComponent } from './stats/stats.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,106 +14,56 @@ import { DatepickerComponent } from '../shared/datepicker/datepicker.component';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
-  public pieChartLabels: string[] = ['Very Positive', 'Positive', 'Neutral', 'Negative', 'Very Negative'];
-  public pieChartData: number[] = [20, 40, 40, 5, 5];
-  public pieChartType = 'pie';
-  public pieChartColors: Array<any> = [
-    { backgroundColor: ['rgba(0,229,0,1)', 'rgba(83,204,65,1)', 'rgba(200, 200, 200, 1)', 'rgba(158,0,0,1)', 'rgba(204,65,65,1)'] }
-  ];
+  @ViewChild('form1') form: FormComponent;
+  @ViewChild('form2') formCompare: FormComponent;
 
-  public lineChartData: Array<any> = [
-    { data: [100, 75, 40, 50, 72, 67, 80], label: 'Positive' },
-    { data: [0, 25, 20, 50, 28, 42, 20], label: 'Negative' }
-  ];
-  public lineChartLabels: Array<any> =
-    ['September 1', 'September 2', 'September 3', 'September 4', 'September 5', 'September 6', 'September 7'];
-  public lineChartType = 'line';
-  public lineChartOptions: any = {
-    responsive: true
-  };
-  public lineChartColors: Array<any> = [
-    { // green
-      backgroundColor: 'rgba(0,0,0,0)',
-      borderColor: 'rgba(83,204,65,1)',
-      pointBackgroundColor: 'rgba(83,204,65,1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(83,204,65,1)'
-    },
-    { // red
-      backgroundColor: 'rgba(0,0,0,0)',
-      borderColor: 'rgba(204,65,65,1)',
-      pointBackgroundColor: 'rgba(204,65,65,1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(204,65,65,0.8)'
-    }];
+  @ViewChild('stats1') stats: StatsComponent;
+  @ViewChild('stats2') statsCompare: StatsComponent;
+  public currentlyComparing = false;
 
-  public stat$?: Observable<any>;
   private autoUpdate: Subscription;
-
-  public appList: { [id: string]: AppInfo } = {};
-  public selectedApp?: AppInfo;
   private appsSubscription: Subscription;
-
-  public statsFilterForm: FormGroup;
-  public appIdStore: AbstractControl;
-  public version: AbstractControl;
-  public startDate: AbstractControl;
-  public endDate: AbstractControl;
+  private statsSubscription?: Subscription;
 
   constructor(private rest: RestService, private fb: FormBuilder) { }
 
   ngOnInit() {
-    this.statsFilterForm = this.fb.group({
-      'appName': ['', Validators.required],
-      'appVersion': ['', Validators.required],
-      'startDate': ['', Validators.required],
-      'endDate': ['', Validators.required]
-    });
-
-    this.appIdStore = this.statsFilterForm.get('appName');
-    this.version = this.statsFilterForm.get('appVersion');
-    this.startDate = this.statsFilterForm.get('startDate');
-    this.endDate = this.statsFilterForm.get('endDate');
-
     this.appsSubscription = this.rest.getApps().subscribe((apps: { [id: string]: AppInfo }) => {
-      this.appList = apps;
+      this.form.setAppList(apps);
+      this.formCompare.setAppList(apps);
     });
 
     this.autoUpdate = timer(0, 100000).subscribe(() => {
-      this.getAppStats();
+      const values: StatsFilterValues | undefined = this.form.getCurrentValues();
+
+      if (values !== undefined) {
+        this.updateStatsSubscription(values);
+      }
     });
   }
 
   ngOnDestroy() {
     this.autoUpdate.unsubscribe();
     this.appsSubscription.unsubscribe();
+    this.statsSubscription.unsubscribe();
   }
 
-  public onAppSelect(appIdStore: string) {
-    this.selectedApp = this.appList[appIdStore];
-
-    if (this.selectedApp.versions.length > 0) {
-      this.version.setValue(this.selectedApp.versions[0]);
-    }
-  }
-
-  public getAppStats() {
-    if (this.statsFilterForm.invalid) {
-      return;
-    }
-
-    const stats: StatRequest[] = [{
+  public updateStatsSubscription(event: StatsFilterValues) {
+    const statsToGet: StatRequest[] = [{
       rawReviews: null
     }];
 
-    this.stat$ = this.rest
-          .getSentimentStats(
-            this.appIdStore.value,
-            this.version.value,
-            new Date(this.startDate.value),
-            new Date(this.endDate.value),
-            stats);
+    this.statsSubscription = this.rest.getSentimentStats(
+            event.appIdStore,
+            event.version,
+            event.startDate,
+            event.endDate,
+            statsToGet).subscribe((response) => {
+              this.stats.setStats(response);
+            });
+  }
+
+  public setCurrentlyComparing(event: boolean) {
+    this.currentlyComparing = event;
   }
 }
