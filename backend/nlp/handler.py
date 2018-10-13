@@ -120,13 +120,10 @@ def analyze_reviews(reviews_list):
             remove_fields.clear()
 
             for field in review["review"]:
-                print("examining field", field)
                 if review["review"][field] == "":
-                    print("adding field to remove list", field)
                     remove_fields.append(field)
 
             for field in remove_fields:
-                print("attempting to remove field", field, "from", review)
 
                 del review["review"][field]
 
