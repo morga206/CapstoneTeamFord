@@ -8,8 +8,7 @@ import os
 sys.modules["sqlite"] = imp.new_module("sqlite")
 sys.modules["sqlite3.dbapi2"] = imp.new_module("sqlite.dbapi2")
 
-#pylint: disable=unused-import
-#pylint: disable=import-error
+#pylint: disable=unused-import, import-error, wrong-import-position, ungrouped-imports
 
 import nltk
 import boto3
