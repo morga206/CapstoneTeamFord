@@ -81,6 +81,7 @@ def analyze_reviews(reviews_list):
 
     # Initialize the return list
     list_processed_reviews = []
+    remove_fields = []
 
     # For each review in the list
     for review in reviews_list:
@@ -117,13 +118,20 @@ def analyze_reviews(reviews_list):
             review['posSentiment'] = int(good * 100)
             review['compSentiment'] = int(compound * 100)
 
+            remove_fields.clear()
 
             for field in review["review"]:
-                if review["review"][field].strip() == "":
-                    del review["review"][field]
+                print("examining field", field)
+                if review["review"][field] == "":
+                    print("adding field to remove list", field)
+                    remove_fields.append(field)
+
+            for field in remove_fields:
+                print("attempting to remove field", field, "from", review)
+
+                del review["review"][field]
 
             list_processed_reviews.append(review)
-
 
     return list_processed_reviews
 
