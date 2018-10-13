@@ -63,7 +63,8 @@ jobs:
     - name: "Python Lint"
       before_install:
         - sudo apt-get update
-        - sudo apt-get install pylint3
+        - sudo apt-get install python3-pip
+        - sudo pip3 install pylint
       install:
         - cd backend/nlp
         - sudo pip install nltk
