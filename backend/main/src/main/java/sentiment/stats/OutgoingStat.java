@@ -1,6 +1,7 @@
 package sentiment.stats;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,10 +31,12 @@ public class OutgoingStat<T> {
     return statDetails;
   }
 
+  @JsonIgnore
   public String getName() {
     return this.name;
   }
 
+  @JsonIgnore
   public T[] getValues() {
     return this.values;
   }
