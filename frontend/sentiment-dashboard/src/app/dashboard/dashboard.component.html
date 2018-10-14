@@ -1,107 +1,18 @@
 <h1 class="sr-only">Home</h1>
 
-<form class="form-inline flex-nowrap">
-  <div class="form-group">
-    <label for="app-name" class="mr-2">App name</label>
-    <select class="form-control mr-2" id="app-name">
-      <option>FordPass</option>
-      <option>Ford Play</option>
-    </select>
-  </div>
-
-  <div class="form-group">
-    <label for="version" class="mr-2">Version</label>
-    <select class="form-control mr-2" id="version">
-      <option>1.0.0</option>
-      <option>1.2.1</option>
-    </select>
-  </div>
-
-  <div class="form-group">
-    <label for="date-from">Date</label>
-    <app-datepicker controlId="date-from"></app-datepicker>
-    <label for="date-to">to</label>
-    <app-datepicker controlId="date-to"></app-datepicker>
-  </div>
-
-  <div class="form-group">
-    <button type="button" class="btn btn-primary">Compare Apps</button>
-    <button type="button" class="btn btn-primary ml-2">Add Card</button>
-  </div>
-</form>
-
-<div class="row my-4 mb-md-0">
-  <app-card title="Overall Sentiment">
-      <div class="m-auto" style="width: 500px;">
-          <canvas baseChart
-                  [data]="pieChartData"
-                  [labels]="pieChartLabels"
-                  [chartType]="pieChartType"
-                  [colors]="pieChartColors"></canvas>
-        </div>
-  </app-card>
-  <app-card title="Top Keywords">
-    <div class="row">
-      <div class="col">
-        <p class="h4">Postive Reviews</p>
-        <ol>
-            <li>
-              Ford
-              <p class="small mb-2">80% of positive reviews</p>
-            </li>
-            <li>
-                great
-                <p class="small mb-2">40% of positive reviews</p>
-            </li>
-            <li>
-                car
-                <p class="small mb-2">38% of positive reviews</p>
-            </li>
-            <li>
-                impressed
-                <p class="small mb-2">20% of positive reviews</p>
-            </li>
-          </ol>
-      </div>
-      <div class="col">
-          <p class="h4">Negative Reviews</p>
-          <ol>
-              <li>
-                Ford
-                <p class="small mb-2">70% of negative reviews</p>
-              </li>
-              <li>
-                  bad
-                  <p class="small mb-2">60% of negative reviews</p>
-              </li>
-              <li>
-                  bug
-                  <p class="small mb-2">43% of negative reviews</p>
-              </li>
-              <li>
-                  crash
-                  <p class="small mb-2">37% of negative reviews</p>
-              </li>
-            </ol>
-      </div>
-    </div>
-  </app-card>
+<div [class.mb-2]="currentlyComparing">
+  <app-form #form1 (compare)="setCurrentlyComparing($event)" (filterChange)="updateStatsSubscription($event)"></app-form>
 </div>
 
-<div class="row">
-  <app-card title="Sentiment Over Time">
-      <canvas baseChart
-      [datasets]="lineChartData"
-      [labels]="lineChartLabels"
-      [options]="lineChartOptions"
-      [chartType]="lineChartType"
-      [colors]="lineChartColors"></canvas>
-  </app-card>
+<div [hidden]="!currentlyComparing">
+  <app-form #form2 [showCompare]="false"></app-form>
 </div>
 
-<div class="row">
-  <app-card title="Test Spring Data">
-    {{ stat$ | async | json }}
-  </app-card>
+<div [class.row]="currentlyComparing">
+  <div [class.col-md-6]="currentlyComparing">
+    <app-stats #stats1></app-stats>
+  </div>
+  <div *ngIf="currentlyComparing" class="col-md-6">
+    <app-stats #stats2></app-stats>
+  </div>
 </div>
-

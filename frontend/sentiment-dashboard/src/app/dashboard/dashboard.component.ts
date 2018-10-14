@@ -1,7 +1,11 @@
-import { Component, OnInit, OnDestroy} from '@angular/core';
-import { RestService, StatRequest, StatResponse } from '../rest.service';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { RestService, StatRequest, StatResponse, AppInfo } from '../rest.service';
 import {Observable, Subscription, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
+import { DatepickerComponent } from '../shared/datepicker/datepicker.component';
+import { FormComponent, StatsFilterValues } from './form/form.component';
+import { StatsComponent } from './stats/stats.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,67 +14,56 @@ import { map } from 'rxjs/operators';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
-  public pieChartLabels: string[] = ['Very Positive', 'Positive', 'Neutral', 'Negative', 'Very Negative'];
-  public pieChartData: number[] = [20, 40, 40, 5, 5];
-  public pieChartType = 'pie';
-  public pieChartColors: Array<any> = [
-    { backgroundColor: ['rgba(0,229,0,1)', 'rgba(83,204,65,1)', 'rgba(200, 200, 200, 1)', 'rgba(158,0,0,1)', 'rgba(204,65,65,1)'] }
-  ];
+  @ViewChild('form1') form: FormComponent;
+  @ViewChild('form2') formCompare: FormComponent;
 
-  public lineChartData: Array<any> = [
-    { data: [100, 75, 40, 50, 72, 67, 80], label: 'Positive' },
-    { data: [0, 25, 20, 50, 28, 42, 20], label: 'Negative' }
-  ];
-  public lineChartLabels: Array<any> =
-    ['September 1', 'September 2', 'September 3', 'September 4', 'September 5', 'September 6', 'September 7'];
-  public lineChartType = 'line';
-  public lineChartOptions: any = {
-    responsive: true
-  };
-  public lineChartColors: Array<any> = [
-    { // green
-      backgroundColor: 'rgba(0,0,0,0)',
-      borderColor: 'rgba(83,204,65,1)',
-      pointBackgroundColor: 'rgba(83,204,65,1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(83,204,65,1)'
-    },
-    { // red
-      backgroundColor: 'rgba(0,0,0,0)',
-      borderColor: 'rgba(204,65,65,1)',
-      pointBackgroundColor: 'rgba(204,65,65,1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(204,65,65,0.8)'
-    }];
+  @ViewChild('stats1') stats: StatsComponent;
+  @ViewChild('stats2') statsCompare: StatsComponent;
+  public currentlyComparing = false;
 
-  public autoUpdate: Subscription;
-  public stat$?: Observable<any>;
-  private tick: string;
-  private subscripition: Subscription;
+  private autoUpdate: Subscription;
+  private appsSubscription: Subscription;
+  private statsSubscription?: Subscription;
 
-
-
-  constructor(public rest: RestService) { }
+  constructor(private rest: RestService, private fb: FormBuilder) { }
 
   ngOnInit() {
-    const stats: StatRequest[] = [{
-      rawReviews: null
-    }];
+    this.appsSubscription = this.rest.getApps().subscribe((apps: { [id: string]: AppInfo }) => {
+      this.form.setAppList(apps);
+      this.formCompare.setAppList(apps);
+    });
+
     this.autoUpdate = timer(0, 100000).subscribe(() => {
-      this.stat$ = this.rest
-          .getSentimentStats(
-            'com.ford.fordpass*Google Play',
-            '2.4.0',
-            new Date('2018-05-21'),
-            new Date('2018-05-23'),
-            stats);
+      const values: StatsFilterValues | undefined = this.form.getCurrentValues();
+
+      if (values !== undefined) {
+        this.updateStatsSubscription(values);
+      }
     });
   }
 
   ngOnDestroy() {
     this.autoUpdate.unsubscribe();
+    this.appsSubscription.unsubscribe();
+    this.statsSubscription.unsubscribe();
   }
 
+  public updateStatsSubscription(event: StatsFilterValues) {
+    const statsToGet: StatRequest[] = [{
+      rawReviews: null
+    }];
+
+    this.statsSubscription = this.rest.getSentimentStats(
+            event.appIdStore,
+            event.version,
+            event.startDate,
+            event.endDate,
+            statsToGet).subscribe((response) => {
+              this.stats.setStats(response);
+            });
+  }
+
+  public setCurrentlyComparing(event: boolean) {
+    this.currentlyComparing = event;
+  }
 }

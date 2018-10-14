@@ -16,6 +16,8 @@ import { CardComponent } from './dashboard/card/card.component';
 import { AuthService } from './auth/auth.service';
 import { AmplifyService, AmplifyAngularModule} from 'aws-amplify-angular';
 import { AuthGuardService } from './auth/auth.guard';
+import { StatsComponent } from './dashboard/stats/stats.component';
+import { FormComponent } from './dashboard/form/form.component';
 
 @NgModule({
   declarations: [
@@ -25,11 +27,14 @@ import { AuthGuardService } from './auth/auth.guard';
     NavComponent,
     DatepickerComponent,
     LoginComponent,
-    CardComponent
+    CardComponent,
+    StatsComponent,
+    FormComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
+    ReactiveFormsModule,
     FormsModule,
     ReactiveFormsModule,
     NgbModule,
