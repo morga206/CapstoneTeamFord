@@ -18,7 +18,7 @@ export class AuthService {
     this.loggedIn = new BehaviorSubject<boolean>(false);
   }
 
-  public signIn(username, password) {
+  public signIn(username, password): Observable<boolean> {
     return from(Auth.signIn(username, password))
       .pipe(
         tap(() => this.loggedIn.next(true))

@@ -15,6 +15,7 @@ import { LoginComponent } from './login/login.component';
 import { CardComponent } from './dashboard/card/card.component';
 import { AuthService } from './auth/auth.service';
 import { AmplifyService, AmplifyAngularModule} from 'aws-amplify-angular';
+import { AuthGuardService } from './auth/auth.guard';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,7 @@ import { AmplifyService, AmplifyAngularModule} from 'aws-amplify-angular';
     ChartsModule,
     HttpClientModule
   ],
-  providers: [AmplifyService, AuthService],
+  providers: [AmplifyService, AuthGuardService, AuthService],
   bootstrap: [AppComponent]
 })
 
