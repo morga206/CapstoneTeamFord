@@ -43,9 +43,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.autoUpdate.unsubscribe();
-    this.appsSubscription.unsubscribe();
-    this.statsSubscription.unsubscribe();
+
+    if (this.autoUpdate !== undefined) {
+      this.autoUpdate.unsubscribe();
+    }
+
+    if (this.appsSubscription !== undefined) {
+      this.appsSubscription.unsubscribe();
+    }
+
+    if (this.statsSubscription !== undefined) {
+      this.statsSubscription.unsubscribe();
+    }
   }
 
   public updateStatsSubscription(event: StatsFilterValues) {
