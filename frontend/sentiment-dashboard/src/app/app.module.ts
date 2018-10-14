@@ -15,6 +15,7 @@ import { LoginComponent } from './login/login.component';
 import { CardComponent } from './dashboard/card/card.component';
 import { AuthService } from './auth/auth.service';
 import { AmplifyService, AmplifyAngularModule} from 'aws-amplify-angular';
+import { AuthGuardService } from './auth/auth.guard';
 import { StatsComponent } from './dashboard/stats/stats.component';
 import { FormComponent } from './dashboard/form/form.component';
 
@@ -40,7 +41,7 @@ import { FormComponent } from './dashboard/form/form.component';
     ChartsModule,
     HttpClientModule
   ],
-  providers: [AmplifyService, AuthService],
+  providers: [AmplifyService, AuthGuardService, AuthService],
   bootstrap: [AppComponent]
 })
 
