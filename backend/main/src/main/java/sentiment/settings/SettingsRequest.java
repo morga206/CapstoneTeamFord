@@ -15,7 +15,7 @@ import sentiment.Response;
 import sentiment.settings.SettingsResponse.Status;
 
 /**
- * A query for the apps list to populate the frontend forms.
+ * A query to get or set an admin portal setting.
  */
 public class SettingsRequest extends Request {
   private enum Command {
@@ -28,15 +28,21 @@ public class SettingsRequest extends Request {
   private String name;
   private String value;
 
+  /**
+   * Creates a settings request.
+   * @param command The command to perform (either get or set a parameter value)
+   * @param name The name of the parameter to set
+   * @param value The value of the parameter to set (null for GET commands)
+   */
   @JsonCreator
   public SettingsRequest(
-    @JsonProperty("command") String command, 
-    @JsonProperty("name") String name, 
-    @JsonProperty("value") String value) {
+      @JsonProperty("command") String command, 
+      @JsonProperty("name") String name, 
+      @JsonProperty("value") String value) {
 
     try {
       this.command = Command.valueOf(command.toUpperCase());
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException exp) {
       this.command = Command.NONE; // We'll send an error to the client during processing
     }
 
@@ -53,7 +59,9 @@ public class SettingsRequest extends Request {
         String settingValue = this.getSetting(this.name);
 
         if (settingValue == null) {
-          return new SettingsResponse(Status.ERROR, "Could not retrieve " + this.name + " from SSM");
+          return new SettingsResponse(
+            Status.ERROR, 
+            "Could not retrieve " + this.name + " from SSM");
         } else {
           return new SettingsResponse(Status.VALUE, settingValue);
         }
@@ -86,10 +94,10 @@ public class SettingsRequest extends Request {
 
     try {
       client.putParameter(new PutParameterRequest()
-        .withName(name)
-        .withValue(value)
-        .withType(ParameterType.String)
-        .withOverwrite(true));
+          .withName(name)
+          .withValue(value)
+          .withType(ParameterType.String)
+          .withOverwrite(true));
     } catch (Exception exp) {
       return exp.getMessage();
     }
