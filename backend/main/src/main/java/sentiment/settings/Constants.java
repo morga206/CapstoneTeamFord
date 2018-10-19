@@ -14,7 +14,7 @@ public final class Constants {
     return paramName + "-" + STAGE;
   }
 
-    /**
+  /**
    * Add the current stage to a list of parameter names.
    * @param paramNames The original parameter names.
    */
