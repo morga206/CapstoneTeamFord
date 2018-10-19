@@ -40,6 +40,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.updateStatsSubscription(values);
       }
     });
+
+    this.autoUpdate = timer(0, 100000).subscribe(() => {
+      const values: StatsFilterValues | undefined = this.formCompare.getCurrentValues();
+
+      if (values !== undefined) {
+        this.updateStatsSubscription2(values);
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -70,6 +78,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
             statsToGet).subscribe((response) => {
               this.stats.setStats(response);
             });
+  }
+
+  public updateStatsSubscription2(event: StatsFilterValues) {
+    const statsToGet: StatRequest[] = [{
+      rawReviews: null
+    }];
+
+    this.statsSubscription = this.rest.getSentimentStats(
+      event.appIdStore,
+      event.version,
+      event.startDate,
+      event.endDate,
+      statsToGet).subscribe((response) => {
+      this.statsCompare.setStats(response);
+    });
+
   }
 
   public setCurrentlyComparing(event: boolean) {
