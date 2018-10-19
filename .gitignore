@@ -1,4 +1,11 @@
 backend/.serverless/**
 backend/main/target/**
+backend/main/bin/**
+frontend/sentiment-dashboard/src/environments/*
 **/node_modules
 **/.idea
+**/.vscode/*
+**/.classpath
+**/.factorypath
+**/.project
+**/.settings
