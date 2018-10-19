@@ -42,10 +42,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
 
     this.autoUpdate = timer(0, 100000).subscribe(() => {
+      if (this.formCompare || this.statsCompare){
+        return;
+      }
       const values: StatsFilterValues | undefined = this.formCompare.getCurrentValues();
 
       if (values !== undefined) {
-        this.updateStatsSubscription2(values);
+        this.updateCompareStatsSubscription(values);
       }
     });
   }
@@ -80,7 +83,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             });
   }
 
-  public updateStatsSubscription2(event: StatsFilterValues) {
+  public updateCompareStatsSubscription(event: StatsFilterValues) {
     const statsToGet: StatRequest[] = [{
       rawReviews: null
     }];
