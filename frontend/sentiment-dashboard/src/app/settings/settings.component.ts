@@ -2,7 +2,6 @@ import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { RestService } from '../rest/rest.service';
-import { map } from 'rxjs/operators';
 import { App } from '../rest/domain';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AddAppComponent } from './add-app/add-app.component';
@@ -17,6 +16,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   public appListError = '';
   public appListSuccess = false;
   private appListSubscription: Subscription;
+  private appListTimer: any;
 
   public scrapingForm: FormGroup;
   public appStorePolling: AbstractControl;
@@ -26,6 +26,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   public scrapingFormSuccess = false;
   private scrapingFormGetSubscription: Subscription;
   private scrapingFormSetSubscription: Subscription;
+  private scrapingFormTimer: any;
 
   public slackForm: FormGroup;
   public postingChannel: AbstractControl;
@@ -35,6 +36,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   public slackFormSuccess = false;
   private slackFormGetSubscription: Subscription;
   private slackFormSetSubscription: Subscription;
+  private slackFormTimer: any;
 
   constructor(private fb: FormBuilder, private rest: RestService, private modalService: NgbModal) { }
 
@@ -125,7 +127,8 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.appListSuccess = true;
         this.appList = response.appList;
-        setInterval(() => {
+        clearTimeout(this.appListTimer);
+        this.appListTimer = setTimeout(() => {
           this.appListSuccess = false;
         }, 3000);
       }
@@ -144,7 +147,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.appListSuccess = true;
         this.appList = response.appList;
-        setInterval(() => {
+        setTimeout(() => {
           this.appListSuccess = false;
         }, 3000);
       }
@@ -160,7 +163,8 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.scrapingFormError = response.message;
       } else {
         this.scrapingFormSuccess = true;
-        setInterval(() => {
+        clearTimeout(this.scrapingFormTimer);
+        this.scrapingFormTimer = setTimeout(() => {
           this.scrapingFormSuccess = false;
         }, 3000);
       }
@@ -176,7 +180,8 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.slackFormError = response.message;
       } else {
         this.slackFormSuccess = true;
-        setInterval(() => {
+        clearTimeout(this.slackFormTimer);
+        this.slackFormTimer = setTimeout(() => {
           this.slackFormSuccess = false;
         }, 3000);
       }
