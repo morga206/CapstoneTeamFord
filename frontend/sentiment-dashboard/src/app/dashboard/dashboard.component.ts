@@ -42,7 +42,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
 
     this.autoUpdate = timer(0, 100000).subscribe(() => {
-      if (this.formCompare || this.statsCompare){
+      if (this.formCompare === undefined || this.statsCompare === undefined){
         return;
       }
       const values: StatsFilterValues | undefined = this.formCompare.getCurrentValues();
