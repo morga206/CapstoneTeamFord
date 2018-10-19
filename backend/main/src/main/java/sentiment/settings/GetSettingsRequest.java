@@ -53,7 +53,7 @@ public class GetSettingsRequest extends Request {
       result = client.getParameter(new GetParameterRequest().withName(name));
       value = result.getParameter().getValue();
     } catch (ParameterNotFoundException exp) {
-      // No-op
+      value = "";
     }
 
     return value;

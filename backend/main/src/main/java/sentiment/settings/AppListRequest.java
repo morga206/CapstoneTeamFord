@@ -81,7 +81,7 @@ public class AppListRequest extends Request {
       result = client.getParameter(new GetParameterRequest().withName(Constants.APPLIST_SSM_PARAM));
       value = result.getParameter().getValue();
     } catch (ParameterNotFoundException exp) {
-      return "Unable to retrieve app list from SSM.";
+      value = "[]";
     }
 
     try {
