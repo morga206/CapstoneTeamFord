@@ -31,7 +31,8 @@ public class SetSettingsRequest extends Request {
    */
   public Response process() {
     for (Setting setting: settings) {
-      String response = this.setSetting(setting.getName(), setting.getValue());
+      // We add the stage to maintain parameter isolation between stages in SSM.
+      String response = this.setSetting(Constants.concatStage(setting.getName()), setting.getValue());
       if (!response.isEmpty()) {
         return new SetSettingsResponse(response);
       }

@@ -20,7 +20,6 @@ import java.util.Arrays;
  * A query to get or update the list of apps to scrape.
  */
 public class AppListRequest extends Request {
-  private static final String SSM_PARAM_NAME = "appList";
 
   private enum Command {
     ADD,
@@ -79,7 +78,7 @@ public class AppListRequest extends Request {
     GetParameterResult result = null;
     String value = null;
     try {
-      result = client.getParameter(new GetParameterRequest().withName(SSM_PARAM_NAME));
+      result = client.getParameter(new GetParameterRequest().withName(Constants.APPLIST_SSM_PARAM));
       value = result.getParameter().getValue();
     } catch (ParameterNotFoundException exp) {
       return "Unable to retrieve app list from SSM.";
@@ -180,7 +179,7 @@ public class AppListRequest extends Request {
 
     try {
       client.putParameter(new PutParameterRequest()
-          .withName(SSM_PARAM_NAME)
+          .withName(Constants.APPLIST_SSM_PARAM)
           .withValue(json)
           .withType(ParameterType.String)
           .withOverwrite(true));
