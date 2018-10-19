@@ -17,6 +17,18 @@ export interface Setting {
   value: string;
 }
 
+export interface AppListResponse {
+  appList: App[];
+  status: string;
+  message: string;
+}
+
+export interface App {
+  name: string;
+  store: string;
+  appId: string;
+}
+
 export interface AppInfo {
   minDate: string;
   maxDate: string;

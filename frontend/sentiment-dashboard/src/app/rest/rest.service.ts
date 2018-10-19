@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {environment} from '../../environments/environment';
-import { AppInfo, StatResponse, StatRequest, Setting, SettingResponse } from './domain';
+import { AppInfo, StatResponse, StatRequest, Setting, SettingResponse, App, AppListResponse } from './domain';
 
 @Injectable({
   providedIn: 'root'
@@ -54,5 +54,37 @@ export class RestService {
       settings: settings
     });
     return this.http.post<SettingResponse>(this.API_URL + 'settings/set', body, options);
+  }
+
+  getAppList(): Observable<AppListResponse> {
+    const options = {
+      headers: new HttpHeaders({'Content-Type' : 'application/json'})
+    };
+    const body = JSON.stringify({
+      command: 'GET'
+    });
+    return this.http.post<AppListResponse>(this.API_URL + 'settings/apps', body, options);
+  }
+
+  addApp(app: App): Observable<AppListResponse> {
+    const options = {
+      headers: new HttpHeaders({'Content-Type' : 'application/json'})
+    };
+    const body = JSON.stringify({
+      command: 'ADD',
+      app: app
+    });
+    return this.http.post<AppListResponse>(this.API_URL + 'settings/apps', body, options);
+  }
+
+  deleteApp(app: App): Observable<AppListResponse> {
+    const options = {
+      headers: new HttpHeaders({'Content-Type' : 'application/json'})
+    };
+    const body = JSON.stringify({
+      command: 'DELETE',
+      app: app
+    });
+    return this.http.post<AppListResponse>(this.API_URL + 'settings/apps', body, options);
   }
 }

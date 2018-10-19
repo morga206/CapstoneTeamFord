@@ -1,0 +1,26 @@
+<div class="modal-header">
+  <h3>Add App</h3>
+  <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss()">
+      <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<form [formGroup]="addAppForm">
+  <div class="modal-body">
+    <label for="app-name">App Name</label>
+    <input type="text" class="form-control" id="app-name" formControlName="appName" [class.is-invalid]="appName.invalid">
+  
+    <label for="app-store" class="mr-2">Store</label>
+    <select class="form-control" id="app-store" formControlName="appStore" [class.is-invalid]="appStore.invalid">
+      <option>App Store</option>
+      <option>Google Play</option>
+    </select>
+  
+    <label for="app-id">App ID</label>
+    <input type="text" class="form-control" id="app-id" formControlName="appId" [class.is-invalid]="appId.invalid">    
+  </div>
+  
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" [disabled]="addAppForm.invalid" (click)="onSubmit()">Save</button>
+    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">Cancel</button>
+  </div>
+</form>
