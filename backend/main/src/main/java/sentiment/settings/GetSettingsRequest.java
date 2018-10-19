@@ -33,7 +33,7 @@ public class GetSettingsRequest extends Request {
       String settingValue = this.getSetting(this.names[i]);
 
       if (settingValue == null) {
-        return new GetSettingsResponse( "Could not retrieve " + settingName + " from SSM");
+        return new GetSettingsResponse( "Could not retrieve " + settingName + " from SSM.");
       }
 
       results[i] = new Setting(settingName, settingValue);

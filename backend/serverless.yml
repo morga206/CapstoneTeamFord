@@ -83,6 +83,10 @@ functions:
           cors: true
       - http:
           method: post
+          path: settings/apps
+          cors: true
+      - http:
+          method: post
           path: settings/get
           cors: true
       - http:

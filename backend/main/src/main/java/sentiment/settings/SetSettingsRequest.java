@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import sentiment.Request;
 import sentiment.Response;
-import sentiment.settings.SetSettingsResponse.Status;
 
 /**
  * A query to set an admin portal setting.
@@ -34,11 +33,11 @@ public class SetSettingsRequest extends Request {
     for (Setting setting: settings) {
       String response = this.setSetting(setting.getName(), setting.getValue());
       if (!response.isEmpty()) {
-        return new SetSettingsResponse(Status.ERROR, response);
+        return new SetSettingsResponse(response);
       }
     }
         
-    return new SetSettingsResponse(Status.SUCCESS, "");
+    return new SetSettingsResponse();
   }
 
   private String setSetting(String name, String value) {

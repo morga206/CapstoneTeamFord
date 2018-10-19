@@ -10,17 +10,17 @@ import java.util.Map;
  * A response to a query to set admin portal setting.
  */
 public class SetSettingsResponse extends Response {
-  protected enum Status {
-    SUCCESS,
-    ERROR;
-  }
 
   private Status status;
   private String message;
 
-  public SetSettingsResponse(Status status, String message) {
-    this.status = status;
+  public SetSettingsResponse(String message) {
+    this.status = Status.ERROR;
     this.message = message;
+  }
+
+  public SetSettingsResponse() {
+    this.status = Status.SUCCESS;
   }
 
   /**
