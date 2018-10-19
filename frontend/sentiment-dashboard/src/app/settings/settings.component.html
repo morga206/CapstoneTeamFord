@@ -42,49 +42,76 @@
   <h2 class="h4">Scraper Settings</h2>
 </div>
 
-  <div class="form-group mb-4">
-    <div class="row">
-      <label for="app-store-polling">App Store Polling Interval</label>
-      <div class="input-group mb-2">
-        <input type="text" class="form-control" id="app-store-polling">
-        <div class="input-group-append">
-            <span class="input-group-text">minutes</span>
-        </div>
-      </div>
-    </div>
+<div class="alert alert-danger" role="alert" *ngIf="scrapingFormError !== ''">
+  Error: {{ scrapingFormError }}
+</div>
+<div class="alert alert-success" role="alert" *ngIf="scrapingFormSuccess">
+  Saved Successfully.
+</div>
 
-    <div class="row">
-      <label for="play-polling" >Google Play Polling Interval</label>
-      <div class="input-group mb-2">
-          <input type="text" class="form-control" id="play-store-polling">
+<form [formGroup]="scrapingForm" (ngSubmit)="onScrapingSubmit()">
+  <div class="form-group mb-4">
+      <div class="row">
+        <label for="app-store-polling">App Store Polling Interval</label>
+        <div class="input-group mb-2">
+          <input type="text" class="form-control" id="app-store-polling" formControlName="appStorePolling" [class.is-invalid]="appStorePolling.invalid">
           <div class="input-group-append">
               <span class="input-group-text">minutes</span>
           </div>
         </div>
-    </div>
+      </div>
   
-    <div class="row">
-      <button type="button" class="btn btn-primary">Save</button>
+      <div class="row">
+        <label for="play-polling">Google Play Polling Interval</label>
+        <div class="input-group mb-2">
+            <input type="text" class="form-control" id="play-store-polling" formControlName="playStorePolling" [class.is-invalid]="playStorePolling.invalid">
+            <div class="input-group-append">
+                <span class="input-group-text">minutes</span>
+            </div>
+          </div>
+      </div>
+    
+      <div class="row">
+        <button type="submit" class="btn btn-primary" [disabled]="scrapingForm.invalid">Save</button>
+      </div>
     </div>
-  </div>
+</form>
 
 <div class="row mb-4 border-bottom">
   <h2 class="h4">Slack Settings</h2>
 </div>
 
-<div class="form-group mb-4">
-  <div class="row">
-    <label for="posting-channel">Posting Channel</label>
-    <input type="text" class="form-control mb-2" id="posting-channel">
-  </div>
-
-  <div class="row">
-      <label for="posting-interval">Posting Interval</label>
-      <input type="text" class="form-control mb-2" id="posting-interval">
-  </div>
-
-  <div class="row">
-    <button type="button" class="btn btn-primary">Save</button>
-  </div>
+<div class="alert alert-danger" role="alert" *ngIf="slackFormError !== ''">
+  Error: {{ slackFormError }}
 </div>
+<div class="alert alert-success" role="alert" *ngIf="slackFormSuccess">
+  Saved Successfully.
+</div>
+
+<form [formGroup]="slackForm" (ngSubmit)="onSlackSubmit()">
+  <div class="form-group mb-4">
+      <div class="row">
+        <label for="posting-channel">Posting Channel</label>
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <span class="input-group-text">#</span>
+          </div>
+          <input type="text" class="form-control" id="posting-channel" formControlName="postingChannel" [class.is-invalid]="postingChannel.invalid">
+        </div>
+      </div>
+    
+      <div class="row">
+          <label for="posting-interval">Posting Interval</label>
+          <div class="input-group mb-2">
+            <input type="text" class="form-control" id="posting-interval" formControlName="postingInterval" [class.is-invalid]="postingInterval.invalid">
+            <div class="input-group-append">
+                <span class="input-group-text">minutes</span>
+            </div>
+          </div>
+      </div>
+      <div class="row">
+          <button type="submit" class="btn btn-primary" [disabled]="slackForm.invalid">Save</button>
+      </div>
+  </div>
+</form>
 

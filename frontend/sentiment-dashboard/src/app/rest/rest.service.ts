@@ -1,23 +1,9 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import {environment} from '../environments/environment';
-
-export interface StatRequest {
-  [statName: string]: string[] | undefined;
-}
-
-export interface StatResponse {
-  [statName: string]: string[] | number[] | { [keyword: string]: number } | any; // TODO Remove "any," just for testing"
-}
-
-export interface AppInfo {
-  minDate: string;
-  maxDate: string;
-  versions: string[];
-}
+import {environment} from '../../environments/environment';
+import { AppInfo, StatResponse, StatRequest, Setting, SettingResponse } from './domain';
 
 @Injectable({
   providedIn: 'root'
@@ -47,5 +33,26 @@ export class RestService {
       stats: stats
     });
     return this.http.post<StatResponse[]>(this.API_URL + 'stats', body, options);
+  }
+
+  getSettings(names: string[]): Observable<SettingResponse> {
+    const options = {
+      headers: new HttpHeaders({'Content-Type' : 'application/json'})
+    };
+    const body = JSON.stringify({
+      names: names
+    });
+
+    return this.http.post<SettingResponse>(this.API_URL + 'settings/get', body, options);
+  }
+
+  setSettings(settings: Setting[]): Observable<SettingResponse> {
+    const options = {
+      headers: new HttpHeaders({'Content-Type' : 'application/json'})
+    };
+    const body = JSON.stringify({
+      settings: settings
+    });
+    return this.http.post<SettingResponse>(this.API_URL + 'settings/set', body, options);
   }
 }

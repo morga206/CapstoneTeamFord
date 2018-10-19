@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { StatResponse } from 'src/app/rest.service';
+import { StatResponse } from 'src/app/rest/domain';
 
 @Component({
   selector: 'app-stats',
