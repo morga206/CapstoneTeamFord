@@ -83,7 +83,11 @@ functions:
           cors: true
       - http:
           method: post
-          path: settings
+          path: settings/get
+          cors: true
+      - http:
+          method: post
+          path: settings/set
           cors: true
   reviews:
     runtime: nodejs8.10

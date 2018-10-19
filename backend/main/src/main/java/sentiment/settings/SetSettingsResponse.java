@@ -1,27 +1,24 @@
 package sentiment.settings;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import sentiment.Response;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A response to a query for an admin portal setting.
+ * A response to a query to set admin portal setting.
  */
-public class SettingsResponse extends Response {
+public class SetSettingsResponse extends Response {
   protected enum Status {
     SUCCESS,
-    VALUE,
     ERROR;
   }
 
   private Status status;
   private String message;
 
-  public SettingsResponse(Status status, String message) {
+  public SetSettingsResponse(Status status, String message) {
     this.status = status;
     this.message = message;
   }
