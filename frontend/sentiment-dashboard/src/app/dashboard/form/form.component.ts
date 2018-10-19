@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, AbstractControl, Validators, FormBuilder } from '@angular/forms';
-import { AppInfo } from 'src/app/rest.service';
+import { AppInfo } from 'src/app/rest/domain';
 
 export interface StatsFilterValues {
   appIdStore: string;

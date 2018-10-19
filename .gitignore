@@ -1,4 +1,10 @@
 backend/.serverless/**
 backend/main/target/**
+backend/main/bin/**
 **/node_modules
 **/.idea
+**/.vscode/*
+**/.classpath
+**/.factorypath
+**/.project
+**/.settings

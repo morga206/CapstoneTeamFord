@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { RestService, StatRequest, StatResponse, AppInfo } from '../rest.service';
+import { StatRequest, StatResponse, AppInfo } from '../rest/domain';
 import {Observable, Subscription, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { DatepickerComponent } from '../shared/datepicker/datepicker.component';
 import { FormComponent, StatsFilterValues } from './form/form.component';
 import { StatsComponent } from './stats/stats.component';
+import { RestService } from '../rest/rest.service';
 
 @Component({
   selector: 'app-dashboard',
