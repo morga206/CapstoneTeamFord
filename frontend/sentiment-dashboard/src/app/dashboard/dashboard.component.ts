@@ -29,7 +29,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(private rest: RestService, private fb: FormBuilder) { }
 
   ngOnInit() {
-    this.appsSubscription = this.rest.getApps().subscribe((apps: { [id: string]: AppInfo }) => {
+    this.appsSubscription = this.rest.getFilterApps().subscribe((apps: { [id: string]: AppInfo }) => {
       this.form.setAppList(apps);
       this.formCompare.setAppList(apps);
     });
