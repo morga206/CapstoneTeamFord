@@ -18,6 +18,7 @@ import { AmplifyService, AmplifyAngularModule} from 'aws-amplify-angular';
 import { AuthGuardService } from './auth/auth.guard';
 import { StatsComponent } from './dashboard/stats/stats.component';
 import { FormComponent } from './dashboard/form/form.component';
+import { AddAppComponent } from './settings/add-app/add-app.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { FormComponent } from './dashboard/form/form.component';
     LoginComponent,
     CardComponent,
     StatsComponent,
-    FormComponent
+    FormComponent,
+    AddAppComponent
   ],
   imports: [
     BrowserModule,
@@ -42,7 +44,8 @@ import { FormComponent } from './dashboard/form/form.component';
     HttpClientModule
   ],
   providers: [AmplifyService, AuthGuardService, AuthService],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [AddAppComponent]
 })
 
 export class AppModule { }

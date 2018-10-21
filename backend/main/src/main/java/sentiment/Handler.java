@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import org.springframework.cloud.function.adapter.aws.SpringBootApiGatewayRequestHandler;
 
 import sentiment.apps.AppsRequest;
+import sentiment.settings.AppListRequest;
 import sentiment.settings.GetSettingsRequest;
 import sentiment.settings.SetSettingsRequest;
 import sentiment.stats.StatsRequest;
@@ -24,6 +25,8 @@ public class Handler extends SpringBootApiGatewayRequestHandler {
         return StatsRequest.class;
       case "/apps":
         return AppsRequest.class;
+      case "/settings/apps":
+        return AppListRequest.class;
       case "/settings/get":
         return GetSettingsRequest.class;
       case "/settings/set":

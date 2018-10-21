@@ -30,10 +30,12 @@ public class GetSettingsRequest extends Request {
     Setting[] results = new Setting[this.names.length];
     for (int i = 0; i < this.names.length; i++) {
       String settingName = this.names[i];
-      String settingValue = this.getSetting(this.names[i]);
+
+      // We add the stage to maintain parameter isolation between stages in SSM.
+      String settingValue = this.getSetting(Constants.concatStage(this.names[i]));
 
       if (settingValue == null) {
-        return new GetSettingsResponse( "Could not retrieve " + settingName + " from SSM");
+        return new GetSettingsResponse( "Could not retrieve " + settingName + " from SSM.");
       }
 
       results[i] = new Setting(settingName, settingValue);
@@ -51,7 +53,7 @@ public class GetSettingsRequest extends Request {
       result = client.getParameter(new GetParameterRequest().withName(name));
       value = result.getParameter().getValue();
     } catch (ParameterNotFoundException exp) {
-      // No-op
+      value = "";
     }
 
     return value;

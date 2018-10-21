@@ -2,9 +2,17 @@
     <h1>Settings and Administration</h1>
 </div>
 
+<div class="row mb-2">
+  <h2 class="h4">App Management</h2>
+  <button type="button" class="btn btn-sm btn-primary ml-auto mb-2" (click)="openModal()">Add App</button>
+</div>
+<div class="alert alert-danger row" role="alert" *ngIf="appListError !== ''">
+    Error: {{ appListError }}
+  </div>
+<div class="alert alert-success row" role="alert" *ngIf="appListSuccess">
+  Saved Successfully.
+</div>
 <div class="row mb-4">
-    <h2 class="h4">App Management</h2>
-    <button type="button" class="btn btn-sm btn-primary ml-auto mb-2">Add App</button>
     <table class="table">
       <thead>
       <tr>
@@ -15,23 +23,11 @@
       </tr>
       </thead>
       <tbody>
-      <tr>
-        <td>FordPass</td>
-        <td>App Store</td>
-        <td>com.ford.fordpass</td>
-        <td><button type="button" class="btn btn-sm btn-primary ml-auto">X</button></td>
-      </tr>
-      <tr>
-        <td>FordPass</td>
-        <td>Google Play</td>
-        <td>com.ford.fordpass</td>
-        <td><button type="button" class="btn btn-sm btn-primary ml-auto">X</button></td>
-      </tr>
-      <tr>
-        <td>Ford Play</td>
-        <td>App Store</td>
-        <td>com.ford.fordplay</td>
-        <td><button type="button" class="btn btn-sm btn-primary ml-auto">X</button></td>
+      <tr *ngFor="let app of appList">
+        <td>{{ app.name }}</td>
+        <td>{{ app.store }}</td>
+        <td>{{ app.appId }}</td> 
+        <td><button type="button" class="btn btn-sm btn-primary ml-auto" (click)="onDeleteApp(app)">&times;</button></td>
       </tr>
       </tbody>
     </table>

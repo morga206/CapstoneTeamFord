@@ -72,6 +72,7 @@ functions:
       FUNCTION_NAME: stats
       TABLE_NAME: ${self:custom.tableName}
       DEPLOY_REGION: ${self:provider.region}
+      STAGE: ${self:provider.stage}
     events:
       - http:
           method: post
@@ -80,6 +81,10 @@ functions:
       - http:
           method: get
           path: apps
+          cors: true
+      - http:
+          method: post
+          path: settings/apps
           cors: true
       - http:
           method: post

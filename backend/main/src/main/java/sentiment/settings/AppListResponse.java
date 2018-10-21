@@ -1,41 +1,39 @@
 package sentiment.settings;
 
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+
 import sentiment.Response;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A response to a query to get admin portal setting.
+ * A response to a request to get or update the app scraping list.
  */
-public class GetSettingsResponse extends Response {
-
+public class AppListResponse extends Response {
+  private App[] appList;
   private Status status;
   private String message;
 
-  private Setting[] settings;
-
   /**
-   * Create a respone containing the requested settings values.
-   * @param settings The name-value pairs for each requested setting.
+   * Create an AppListResponse (success condition).
+   * @param appList The updated list of apps to scrape.
    */
-  public GetSettingsResponse(Setting[] settings) {
-    this.settings = settings;
-
+  public AppListResponse(App[] appList) {
+    this.appList = appList;
     this.status = Status.SUCCESS;
     this.message = "";
   }
 
   /**
-   * Return an error in response to a get settings request.
-   * @param error The error message to send.
+   * Create an AppListResponse (error condition).
+   * @param message The error message.
    */
-  public GetSettingsResponse(String error) {
-    this.settings = null;
-
+  public AppListResponse(String message) {
+    this.appList = null;
     this.status = Status.ERROR;
-    this.message = error;
+    this.message = message;
   }
 
   /**
@@ -46,13 +44,12 @@ public class GetSettingsResponse extends Response {
     Map<String, Object> data = new HashMap<String, Object>();
 
     data.put("status", this.status);
-    if (this.settings != null) {
-      data.put("settings", this.settings);
+    if (this.appList != null) {
+      data.put("appList", this.appList);
     } else {
       data.put("message", this.message);
     }
 
     return data;
   }
-  
 }
