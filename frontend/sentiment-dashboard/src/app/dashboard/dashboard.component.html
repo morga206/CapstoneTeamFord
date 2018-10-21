@@ -5,7 +5,7 @@
 </div>
 
 <div [hidden]="!currentlyComparing">
-  <app-form #form2 [showCompare]="false"></app-form>
+  <app-form #form2 [showCompare]="false" (filterChange)="updateCompareStatsSubscription($event)"></app-form>
 </div>
 
 <div [class.row]="currentlyComparing">
