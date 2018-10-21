@@ -107,7 +107,8 @@ public class AppListRequest extends Request {
     }
 
     for (App existingApp : appList) {
-      if (existingApp.getAppId().equals(app.getAppId())) {
+      if (existingApp.getAppId().equals(app.getAppId())
+          && existingApp.getStore().equals(app.getStore())) {
         return new AppListResponse(
           "App with id " + app.getAppId() + " already exists in the list.");
       }
@@ -143,7 +144,8 @@ public class AppListRequest extends Request {
 
     boolean present = false;
     for (App existingApp : appList) {
-      if (existingApp.getAppId().equals(app.getAppId())) {
+      if (existingApp.getAppId().equals(app.getAppId())
+          && existingApp.getStore().equals(app.getStore())) {
         present = true;
       } else if (idx < appList.length - 1) {
         newList[idx] = existingApp;

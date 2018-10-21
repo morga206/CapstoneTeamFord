@@ -54,8 +54,8 @@ public class AppListTests {
     expectedResponse = new AppListResponse("App with id Valid.ID already exists in the list.");
     assertThat(response.getData()).isEqualTo(expectedResponse.getData());
 
-    // Successful case
-    App anotherApp = new App("Valid Name", "App Store", "Valid.ID2");
+    // Successful case (store values differ)
+    App anotherApp = new App("Valid Name", "Google Play", "Valid.ID");
     request = new AppListRequest("ADD", anotherApp);
     response = request.addApp(new MockSSM(), new App[]{ app });
 
@@ -63,6 +63,17 @@ public class AppListTests {
     Map<String, Object> expectedData = expectedResponse.getData();
     for (Map.Entry<String, Object> entry : response.getData().entrySet()) {
       assertThat(entry.getValue()).isEqualTo(expectedData.get(entry.getKey()));
+    }
+
+     // Successful case (id values differ)
+     anotherApp = new App("Valid Name", "App Store", "Valid.ID2");
+     request = new AppListRequest("ADD", anotherApp);
+     response = request.addApp(new MockSSM(), new App[]{ app });
+ 
+     expectedResponse = new AppListResponse(new App[]{ app, anotherApp });
+     expectedData = expectedResponse.getData();
+     for (Map.Entry<String, Object> entry : response.getData().entrySet()) {
+       assertThat(entry.getValue()).isEqualTo(expectedData.get(entry.getKey()));
     }
   }
 
