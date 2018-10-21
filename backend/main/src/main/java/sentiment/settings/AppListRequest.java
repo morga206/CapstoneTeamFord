@@ -59,9 +59,9 @@ public class AppListRequest extends Request {
 
     switch (this.command) {
       case ADD:
-        return addApp(client, this.app);
+        return addApp(client, this.appList);
       case DELETE:
-        return deleteApp(client, this.app);
+        return deleteApp(client, this.appList);
       case GET:
         return new AppListResponse(this.appList);
       default:
@@ -96,10 +96,10 @@ public class AppListRequest extends Request {
   /**
    * Add an app to the SSM list.
    * @param client The SSM client to use.
-   * @param app THe app to add.
+   * @param appList The existing app list.
    * @return An AppListResponse with either an error message or the updated list.
    */
-  private AppListResponse addApp(AWSSimpleSystemsManagement client, App app) {
+  protected AppListResponse addApp(AWSSimpleSystemsManagement client, App[] appList) {
     String message = app.checkValidity();
 
     if (!message.isEmpty()) {
@@ -128,10 +128,10 @@ public class AppListRequest extends Request {
   /**
    * Delete an app from the SSM list.
    * @param client The SSM client to use.
-   * @param app THe app to delete.
+   * @param appList The existing app list.
    * @return An AppListResponse with either an error message or the updated list.
    */
-  private AppListResponse deleteApp(AWSSimpleSystemsManagement client, App app) {
+  protected AppListResponse deleteApp(AWSSimpleSystemsManagement client, App[] appList) {
     String message = app.checkValidity();
 
     if (!message.isEmpty()) {
