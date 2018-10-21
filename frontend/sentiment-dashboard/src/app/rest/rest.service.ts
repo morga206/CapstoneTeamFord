@@ -14,7 +14,7 @@ export class RestService {
 
   constructor(private http: HttpClient) { }
 
-  getApps(): Observable<{ [id: string]: AppInfo }> {
+  getFilterApps(): Observable<{ [id: string]: AppInfo }> {
     const options = {
       headers: new HttpHeaders({'Content-Type' : 'application/json'})
     };

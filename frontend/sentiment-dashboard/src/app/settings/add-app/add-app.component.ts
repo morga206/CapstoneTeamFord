@@ -9,9 +9,6 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
   styleUrls: ['./add-app.component.scss']
 })
 export class AddAppComponent implements OnInit {
-
-  @Output() submit = new EventEmitter<App>();
-
   public addAppForm: FormGroup;
   public appName: AbstractControl;
   public appStore: AbstractControl;
@@ -37,5 +34,4 @@ export class AddAppComponent implements OnInit {
       appId: this.appId.value
     });
   }
-
 }
