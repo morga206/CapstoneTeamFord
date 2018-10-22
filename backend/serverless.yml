@@ -29,7 +29,6 @@ provider:
 
 plugins:
     - serverless-finch
-    - serverless-python-requirements
 
 custom:
   tableName: 'appReviewsTable-${self:provider.stage}'
@@ -44,23 +43,6 @@ package:
     - ./**
 
 functions:
-  nlp:
-    runtime: python3.6
-    timeout: 10
-    handler: nlp/handler.main
-    package:
-      include:
-        - nlp/**
-        - sentiment/**
-        - tokenizers/**
-    events:
-      - http:
-          method: post
-          path: nlp
-    environment:
-      STAGE: ${self:provider.stage}
-      TABLE_NAME: ${self:custom.tableName}
-      DEPLOY_REGION: ${self:provider.region}
   main:
     runtime: java8
     timeout: 10
