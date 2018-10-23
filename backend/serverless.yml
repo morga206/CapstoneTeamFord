@@ -17,6 +17,11 @@ provider:
       Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}*"
     - Effect: Allow
       Action:
+        - comprehend:BatchDetectSentiment
+        - comprehend:BatchDetectKeyPhrases
+      Resource: "*"
+    - Effect: Allow
+      Action:
         - ssm:GetParameter
         - ssm:PutParameter
       Resource:
@@ -84,7 +89,6 @@ functions:
       include:
         - reviews/**
     environment:
-      STAGE: ${self:provider.stage}
       TABLE_NAME: ${self:custom.tableName}
       DEPLOY_REGION: ${self:provider.region}
     events:
@@ -105,8 +109,8 @@ resources:
             AttributeType: S
           - AttributeName: date
             AttributeType: S
-          - AttributeName: compSentiment
-            AttributeType: N
+          - AttributeName: sentiment
+            AttributeType: S
         KeySchema:
           - AttributeName: appIdStore
             KeyType: HASH
@@ -120,13 +124,11 @@ resources:
             KeySchema:
               - AttributeName: appIdStore
                 KeyType: HASH
-              - AttributeName: compSentiment
+              - AttributeName: sentiment
                 KeyType: RANGE
             Projection:
               NonKeyAttributes:
-                - posSentiment
-                - neuSentiment
-                - negSentiment
+                - sentimentScore
                 - keywords
               ProjectionType: INCLUDE
             ProvisionedThroughput:
@@ -142,10 +144,8 @@ resources:
               NonKeyAttributes:
                 - reviewHash
                 - version
-                - posSentiment
-                - neuSentiment
-                - negSentiment
-                - compSentiment
+                - sentiment
+                - sentimentScore
                 - keywords
               ProjectionType: INCLUDE
             ProvisionedThroughput:

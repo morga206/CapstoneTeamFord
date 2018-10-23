@@ -5,7 +5,6 @@ const crypto = require('crypto');
 const aws = require('aws-sdk');
 const region = process.env.DEPLOY_REGION;
 const table = process.env.TABLE_NAME;
-const stage = process.env.STAGE;
 
 const appStoreScraper = require('./xml-app-store-scraper');
 const gPlayScraper = require('google-play-scraper');
@@ -26,28 +25,34 @@ module.exports = {
 
 async function handler () {
   let reviews = await getReviews();
-  var lambda = new aws.Lambda({ region: region });
 
-  // Invoke NLP Lambda
+  let processedReviews = [];
   try {
-    const response = await lambda.invoke({
-      FunctionName: `sentiment-dashboard-${stage}-nlp`,
-      Payload: JSON.stringify(reviews)
-    }).promise();
-    return {
-      statusCode: 200, // OK
-      body: JSON.stringify({
-        response: response.Payload,
-        reviews: reviews
-      })
-    };
-  }  catch (error) {
-    console.log('Error contacting NLP Lambda: ' + error);
-    return {
-      statusCode: 500, // Internal Server Error
-      error: `Error from NLP Lambda: ${error}`
-    };
+    processedReviews = await analyzeReviews(reviews);
+  } catch (error){
+      console.log('Error during sentiment analysis: ' + error);
+      return {
+          statusCode: 500, // Internal Server Error
+          error: `Error during sentiment analysis: ${error}`
+      };
   }
+
+
+  try {
+   // writeReviewsToDB(processedReviews);
+  } catch (error){
+      console.log('Error writing to Database' + error);
+      return {
+          statusCode: 500, // Internal Server Error
+          error: `Error writing to DynamoDB: ${error}`
+      };
+  };
+  return {
+        statusCode: 200, // OK
+        body: JSON.stringify({
+            reviews: processedReviews
+        })
+  };
 }
 
 /**
@@ -199,4 +204,51 @@ function findFirstStoredReview(reviews, dbReviews) {
   }
 
   return -1;
+}
+
+/**
+ * Analyze the reviews and supplement with sentiment data
+ * @param reviews The list of reviews we want to analyze for sentiment
+ * @return Array list of reviews with sentiment data
+ */
+async function analyzeReviews(reviews){
+  let comprehend = new aws.Comprehend();
+  let processedReviews = [];
+
+  // AWS Comprehend only allows 25 strings per request
+  for(let i = 0; i < reviews.length; i += 25){
+    let start = i;
+    let end = i + 25 <= reviews.length ? i + 25 : reviews.length;
+
+    // segment is a shallow copy, changes propagate to reviews array
+    let segment = reviews.slice(start, end);
+    let params = {
+      LanguageCode: 'en',
+      TextList: segment.map((review) => review.review.text)
+    };
+    console.log(segment);
+
+    let comprehendResponse = await comprehend.batchDetectSentiment(params).promise();
+    let comprehendResults = comprehendResponse.ResultList;
+   comprehendResults.forEach((sentiment) => {
+      let review = segment[sentiment.Index];
+      console.log(review);
+      console.log(sentiment.Sentiment);
+
+      review.sentiment = sentiment.Sentiment; // POSITIVE, NEGATIVE, NEUTRAL, or MIXED
+      review.sentimentScore = sentiment.SentimentScore; // Confidence of sentiment rating
+
+      processedReviews.push(review);
+    });
+  }
+
+  return processedReviews;
+}
+
+/**
+ * Write the reviews with sentiment to the DynamoDB
+ * @param reviews The reviews we want to write to
+ */
+function writeReviewsToDB(reviews){
+
 }
