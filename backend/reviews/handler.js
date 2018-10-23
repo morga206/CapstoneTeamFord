@@ -332,7 +332,7 @@ async function writeReviewsToDB(reviews){
       try {
         await dynamo.put(params).promise();
       } catch (err) {
-        console.log(reviews[i]);
+        throw err;
       }
 
 
