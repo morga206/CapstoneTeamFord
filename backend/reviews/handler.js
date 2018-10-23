@@ -264,14 +264,26 @@ async function analyzeReviews(reviews){
       LanguageCode: 'en',
       TextList: segment.map((review) => review.review.text)
     };
-    console.log(segment);
 
+    // Get the noun key phrases
+    let comprehendPhrases = await comprehend.batchDetectKeyPhrases(params).promise();
+    let comprehendPhrasesResults = comprehendPhrases.ResultList;
+    comprehendPhrasesResults.forEach((keyPhrases) => {
+      let keyWords = []
+      let review = segment[keyPhrases.Index];
+
+      for(let k = 0; k < keyPhrases.KeyPhrases.length; k++){
+        keyWords.push(keyPhrases.KeyPhrases[k].Text)
+      }
+
+      review.keywords = keyWords
+    });
+
+    // Get the actual sentiment and sentimentScore
     let comprehendResponse = await comprehend.batchDetectSentiment(params).promise();
     let comprehendResults = comprehendResponse.ResultList;
-      comprehendResults.forEach((sentiment) => {
+    comprehendResults.forEach((sentiment) => {
       let review = segment[sentiment.Index];
-      console.log(review);
-      console.log(sentiment.Sentiment);
 
       review.sentiment = sentiment.Sentiment; // POSITIVE, NEGATIVE, NEUTRAL, or MIXED
       review.sentimentScore = sentiment.SentimentScore; // Confidence of sentiment rating
@@ -288,5 +300,6 @@ async function analyzeReviews(reviews){
  * @param reviews The reviews we want to write to
  */
 function writeReviewsToDB(reviews){
+
 
 }
