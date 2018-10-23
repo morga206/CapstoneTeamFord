@@ -39,9 +39,9 @@ async function handler () {
 
 
   try {
-   // writeReviewsToDB(processedReviews);
+    await writeReviewsToDB(processedReviews);
   } catch (error){
-      console.log('Error writing to Database' + error);
+      console.log('Error writing to Database: ' + error);
       return {
           statusCode: 500, // Internal Server Error
           error: `Error writing to DynamoDB: ${error}`
@@ -299,7 +299,36 @@ async function analyzeReviews(reviews){
  * Write the reviews with sentiment to the DynamoDB
  * @param reviews The reviews we want to write to
  */
-function writeReviewsToDB(reviews){
+async function writeReviewsToDB(reviews){
+
+    let dynamo = new aws.DynamoDB.DocumentClient();
+
+    for (let i = 0; i < reviews.length; i++){
+      let params = {
+        TableName: table,
+        Item: reviews[i]
+      };
+
+      // DynamoDB doesn't allow for emptry strings so we'll remove any keys with emptry string values
+      let removeFields = [];
+
+      for (let key in Object.keys(reviews[i])){
+        if (reviews[i][key] == "") {
+          removeFields.push(key);
+        }
+      }
+
+      for (let removeField in removeFields) {
+        console.log(removeField);
+        delete reviews[i][removeField];
+      }
+
+      try {
+        await dynamo.put(params).promise();
+      } catch (err) {
+        console.log(reviews[i]);
+      }
 
 
+    }
 }
