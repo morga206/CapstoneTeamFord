@@ -215,6 +215,44 @@ async function analyzeReviews(reviews){
   let comprehend = new aws.Comprehend();
   let processedReviews = [];
 
+  // truncate reviews longer than 5000 bytes, to the nearest word
+  // https://stackoverflow.com/questions/1515884/using-javascript-to-truncate-text-to-a-certain-size-8-kb
+  // always cite your sources!
+  for(let i = 0; i < reviews.length; i+=1){
+    let text = reviews[i].review.text;
+
+    // convert to a bytestring and get its length
+    let textBytes = unescape(encodeURIComponent(text));
+    let textByteLength = textBytes.length;
+
+    // only truncates reviews that are too long
+    if(textByteLength > 5000){
+      let textBytesTrunc = textBytes.substring(0, 5000);
+
+      // this section tests the truncated string to make sure there isn't a partial character
+      let trimming = true;
+      let textTrunc = '';
+      while(trimming) {
+        try {
+          textTrunc = decodeURIComponent(escape(textBytesTrunc));
+          trimming = false;
+        }
+        catch (err) {
+          textBytesTrunc = textBytesTrunc.substring(0, textBytesTrunc.length - 1);
+          console.log(err);
+        }
+      }
+
+      // remove last word - no sense in giving NLP a fragment
+      let truncArray = textTrunc.split(' ');
+      truncArray.pop();
+      textTrunc = truncArray.join(' ');
+
+      // update text field of reviews array entry
+      reviews[i].review.text = textTrunc;
+    }
+  }
+
   // AWS Comprehend only allows 25 strings per request
   for(let i = 0; i < reviews.length; i += 25){
     let start = i;
