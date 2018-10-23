@@ -222,7 +222,7 @@ async function analyzeReviews(reviews){
     let text = reviews[i].review.text;
 
     // convert to a bytestring and get its length
-    let textBytes = unescape(encodeURIComponent(text));
+    let textBytes = decodeURI(encodeURIComponent(text));
     let textByteLength = textBytes.length;
 
     // only truncates reviews that are too long
@@ -234,7 +234,7 @@ async function analyzeReviews(reviews){
       let textTrunc = '';
       while(trimming) {
         try {
-          textTrunc = decodeURIComponent(escape(textBytesTrunc));
+          textTrunc = decodeURIComponent(encodeURI(textBytesTrunc));
           trimming = false;
         }
         catch (err) {
