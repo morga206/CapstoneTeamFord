@@ -304,23 +304,29 @@ async function writeReviewsToDB(reviews){
     let dynamo = new aws.DynamoDB.DocumentClient();
 
     for (let i = 0; i < reviews.length; i++){
-      let params = {
-        TableName: table,
-        Item: reviews[i]
-      };
 
       // DynamoDB doesn't allow for emptry strings so we'll remove any keys with emptry string values
       let removeFields = [];
 
-      for (let key in Object.keys(reviews[i])){
-        if (reviews[i][key] == "") {
-          removeFields.push(key);
+      let raw_review = reviews[i].review;
+      let raw_review_keys = Object.keys(raw_review);  // Get the keys
+
+      // Determine fields that are empty strings
+      for (let index in raw_review_keys){
+        if (raw_review[raw_review_keys[index]] == "") {
+          removeFields.push(raw_review_keys[index]);
         }
       }
 
+      // After determining fields to delete, delete them
       for (let removeField in removeFields) {
-        console.log(removeField);
-        delete reviews[i][removeField];
+        delete raw_review[removeFields[removeField]];
+      }
+
+      // Params for writing the review to database
+      let params = {
+        TableName: table,
+        Item: reviews[i]
       }
 
       try {
