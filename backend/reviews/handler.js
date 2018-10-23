@@ -230,7 +230,7 @@ async function analyzeReviews(reviews){
 
     let comprehendResponse = await comprehend.batchDetectSentiment(params).promise();
     let comprehendResults = comprehendResponse.ResultList;
-   comprehendResults.forEach((sentiment) => {
+      comprehendResults.forEach((sentiment) => {
       let review = segment[sentiment.Index];
       console.log(review);
       console.log(sentiment.Sentiment);
