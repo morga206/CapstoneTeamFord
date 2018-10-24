@@ -19,7 +19,10 @@ module.exports = {
   getReviews,
   scrape,
   convertReviewToDynamoRepresentation,
-  findFirstStoredReview
+  removeEmptyFields,
+  findFirstStoredReview,
+  truncateReviews,
+  createDynamoBatchRequest
 };
 
 async function handler () {
