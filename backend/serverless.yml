@@ -13,8 +13,13 @@ provider:
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:GetItem
-        - dynamodb:PutItem
+        - dynamodb:BatchWriteItem
       Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}*"
+    - Effect: Allow
+      Action:
+        - comprehend:BatchDetectSentiment
+        - comprehend:BatchDetectKeyPhrases
+      Resource: "*"
     - Effect: Allow
       Action:
         - ssm:GetParameter
@@ -29,7 +34,6 @@ provider:
 
 plugins:
     - serverless-finch
-    - serverless-python-requirements
 
 custom:
   tableName: 'appReviewsTable-${self:provider.stage}'
@@ -44,23 +48,6 @@ package:
     - ./**
 
 functions:
-  nlp:
-    runtime: python3.6
-    timeout: 10
-    handler: nlp/handler.main
-    package:
-      include:
-        - nlp/**
-        - sentiment/**
-        - tokenizers/**
-    events:
-      - http:
-          method: post
-          path: nlp
-    environment:
-      STAGE: ${self:provider.stage}
-      TABLE_NAME: ${self:custom.tableName}
-      DEPLOY_REGION: ${self:provider.region}
   main:
     runtime: java8
     timeout: 10
@@ -96,13 +83,12 @@ functions:
           cors: true
   reviews:
     runtime: nodejs8.10
-    timeout: 30
+    timeout: 60
     handler: reviews/handler.handler
     package:
       include:
         - reviews/**
     environment:
-      STAGE: ${self:provider.stage}
       TABLE_NAME: ${self:custom.tableName}
       DEPLOY_REGION: ${self:provider.region}
     events:
@@ -123,8 +109,8 @@ resources:
             AttributeType: S
           - AttributeName: date
             AttributeType: S
-          - AttributeName: compSentiment
-            AttributeType: N
+          - AttributeName: sentiment
+            AttributeType: S
         KeySchema:
           - AttributeName: appIdStore
             KeyType: HASH
@@ -138,13 +124,11 @@ resources:
             KeySchema:
               - AttributeName: appIdStore
                 KeyType: HASH
-              - AttributeName: compSentiment
+              - AttributeName: sentiment
                 KeyType: RANGE
             Projection:
               NonKeyAttributes:
-                - posSentiment
-                - neuSentiment
-                - negSentiment
+                - sentimentScore
                 - keywords
               ProjectionType: INCLUDE
             ProvisionedThroughput:
@@ -160,10 +144,8 @@ resources:
               NonKeyAttributes:
                 - reviewHash
                 - version
-                - posSentiment
-                - neuSentiment
-                - negSentiment
-                - compSentiment
+                - sentiment
+                - sentimentScore
                 - keywords
               ProjectionType: INCLUDE
             ProvisionedThroughput:

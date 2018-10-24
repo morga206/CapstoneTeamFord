@@ -1,11 +1,9 @@
 'use strict';
-
 const crypto = require('crypto');
 
 const aws = require('aws-sdk');
 const region = process.env.DEPLOY_REGION;
 const table = process.env.TABLE_NAME;
-const stage = process.env.STAGE;
 
 const appStoreScraper = require('./xml-app-store-scraper');
 const gPlayScraper = require('google-play-scraper');
@@ -25,29 +23,44 @@ module.exports = {
 };
 
 async function handler () {
-  let reviews = await getReviews();
-  var lambda = new aws.Lambda({ region: region });
-
-  // Invoke NLP Lambda
+  let reviews = [];
   try {
-    const response = await lambda.invoke({
-      FunctionName: `sentiment-dashboard-${stage}-nlp`,
-      Payload: JSON.stringify(reviews)
-    }).promise();
-    return {
-      statusCode: 200, // OK
-      body: JSON.stringify({
-        response: response.Payload,
-        reviews: reviews
-      })
-    };
-  }  catch (error) {
-    console.log('Error contacting NLP Lambda: ' + error);
+    reviews = await getReviews();
+  } catch (error) {
     return {
       statusCode: 500, // Internal Server Error
-      error: `Error from NLP Lambda: ${error}`
+      error: `Error getting reviews: ${error}`
+    };
+  } 
+
+  let processedReviews = [];
+  try {
+    processedReviews = await analyzeReviews(reviews);
+  } catch (error) {
+    console.log(`Error during sentiment analysis: ${error}`);
+    return {
+      statusCode: 500, // Internal Server Error
+      error: `Error during sentiment analysis: ${error}`
     };
   }
+
+
+  try {
+    await writeReviewsToDB(processedReviews);
+  } catch (error) {
+    return {
+      statusCode: 500, // Internal Server Error
+      error: `Error writing to DynamoDB: ${error}`
+    };
+  }
+
+  return {
+    statusCode: 200, // OK
+    body: JSON.stringify({
+      length: processedReviews.length,
+      reviews: processedReviews
+    })
+  };
 }
 
 /**
@@ -63,7 +76,7 @@ async function getReviews() {
       allReviews = allReviews.concat(appStoreReviews);
     } catch (error) {
       console.log(`Error processing App Store reviews: ${error}`);
-      return [];
+      throw error;
     }
   }
 
@@ -74,7 +87,7 @@ async function getReviews() {
       allReviews = allReviews.concat(gPlayReviews);
     } catch (error) {
       console.log(`Error processing Google Play reviews: ${error}`);
-      return [];
+      throw error;
     }
   }
 
@@ -115,7 +128,7 @@ async function scrape(appId, scraper, store) {
     allPages = await allPagesPromise;
   } catch (error) {
     console.log(`Error getting reviews from ${store}: ${error}`);
-    return [];
+    throw error;
   }
 
   let appInfo = await scraper.app({
@@ -137,10 +150,13 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
     let appIdStore = id + '*' + store;
 
     let reviewHash = crypto.createHash('sha256');
-    reviewHash.update(review.text);
+    reviewHash.update(review.text + review.id);
 
     let date = new Date(review.date).toISOString();
     let version = review.version === undefined ? alternateVersion : review.version;
+
+    // DynamoDB doesn't like empty strings
+    removeEmptyFields(review);
 
     return {
       appIdStore: appIdStore,
@@ -150,6 +166,22 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
       review: review
     };
   };
+}
+
+/**
+ * Remove the empty fields from a review
+ * @param  review The review to process
+ */
+function removeEmptyFields(review) {
+  let toRemove = [];
+
+  Object.keys(review).forEach((key) => {
+    if (review[key] === '') {
+      toRemove.push(key);
+    }
+  });
+
+  toRemove.forEach((key) => delete review[key]);
 }
 
 async function removeDuplicates(id, store, reviews) {
@@ -172,8 +204,8 @@ async function removeDuplicates(id, store, reviews) {
     let dynamoResponse = await dynamoDb.query(params).promise();
     dbReviews = dynamoResponse.Items;
   } catch (error) {
-    console.log('Error contacting DynamoDB: ' + error);
-    return [];
+    console.log(`Error contacting DynamoDB: ${error}`);
+    throw error;
   }
 
   // Step through reviews list until we find one already in the DB
@@ -199,4 +231,124 @@ function findFirstStoredReview(reviews, dbReviews) {
   }
 
   return -1;
+}
+
+/**
+ * Analyze the reviews and supplement with sentiment data
+ * @param reviews The list of reviews we want to analyze for sentiment
+ * @return Array list of reviews with sentiment data
+ */
+async function analyzeReviews(reviews) {
+  let comprehend = new aws.Comprehend();
+  let processedReviews = [];
+
+  // AWS Comprehend only allows 5000 bytes per string
+  // (Some app stores are slightly longer than this, ~6000 bytes, so we truncate)
+  truncateReviews(reviews);
+
+  // AWS Comprehend only allows 25 strings per request
+  for(let i = 0; i < reviews.length; i += 25){
+    let start = i;
+    let end = i + 25 <= reviews.length ? i + 25 : reviews.length;
+
+    let segment = reviews.slice(start, end);
+    let params = {
+      LanguageCode: 'en',
+      TextList: segment.map((review) => review.review.text)
+    };
+
+    // Get the noun key phrases
+    let comprehendPhrases = await comprehend.batchDetectKeyPhrases(params).promise();
+    let comprehendPhrasesResults = comprehendPhrases.ResultList;
+    comprehendPhrasesResults.forEach((result) => {
+      let review = segment[result.Index];
+      review.keywords = result.KeyPhrases.map((phrase) => phrase.Text);
+    });
+
+    // Get the sentiment and sentimentScore
+    let comprehendResponse = await comprehend.batchDetectSentiment(params).promise();
+    let comprehendResults = comprehendResponse.ResultList;
+    comprehendResults.forEach((sentiment) => {
+      let review = segment[sentiment.Index];
+
+      review.sentiment = sentiment.Sentiment; // POSITIVE, NEGATIVE, NEUTRAL, or MIXED
+      review.sentimentScore = sentiment.SentimentScore; // Confidence of sentiment rating
+
+      processedReviews.push(review);
+    });
+  }
+
+  return processedReviews;
+}
+
+/**
+ * Truncate reviews by the word to be less than 5000 bytes
+ * @param reviews The list of reviews to process
+ */
+function truncateReviews(reviews) {
+  const MAX_LENGTH_BYTES = 5000;
+  const textEncoder = new (require('util').TextEncoder)('utf-8');
+
+  for(let i = 0; i < reviews.length; i+=1){
+    let text = reviews[i].review.text;
+
+    // Get string length in bytes
+    // https://stackoverflow.com/questions/5515869/string-length-in-bytes-in-javascript
+    let lengthInBytes = textEncoder.encode(text).length;
+
+    while (lengthInBytes > MAX_LENGTH_BYTES) {
+      // Remove last word
+      let lastSpace = text.lastIndexOf(' ');
+      text = text.substring(0, lastSpace);
+
+      lengthInBytes = textEncoder.encode(text).length;
+    }
+
+    reviews[i].review.text = text;
+  }
+}
+
+/**
+ * Write the reviews to the DynamoDB table
+ * @param reviews The reviews to write
+ */
+async function writeReviewsToDB(reviews){
+
+  let dynamoDb = new aws.DynamoDB.DocumentClient();
+
+  // DynamoDB only allows 25 PutRequests at a time
+  for (let i = 0; i < reviews.length; i += 25) {
+    let start = i;
+    let end = i + 25 <= reviews.length ? i + 25 : reviews.length;
+
+    let dynamoRequest = createDynamoBatchRequest(reviews.slice(start, end));
+    try {
+      await dynamoDb.batchWrite(dynamoRequest).promise();
+    } catch (error) {
+      console.log(`Error writing to DynamoDB: ${error}`);
+      throw error;
+    }
+  }
+}
+
+/**
+ * Create a series of Put requests for the DynamoDB BatchWrite operation
+ * @param items The items to Put
+ */
+function createDynamoBatchRequest(items) {
+  let putItems = [];
+  for (let i = 0; i < items.length; i++) {
+    putItems.push({
+      PutRequest: {
+        Item: items[i]
+      }
+    });
+  }
+
+  let dynamoRequest = {
+    RequestItems: {}
+  };
+  dynamoRequest.RequestItems[table] = putItems;
+
+  return dynamoRequest;
 }

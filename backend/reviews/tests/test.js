@@ -42,6 +42,7 @@ describe('handler', function() {
   describe('#convertReviewToDynamoRepresentation(id, store)', function() {
     it('should generate a DynamoDB review with the correct metadata included', function() {
       let mockReview = {
+        id: '12345',
         text: 'This is some review text.',
         date: new Date('12-01-2001').toISOString(),
         version: '1.0.0'
@@ -52,7 +53,7 @@ describe('handler', function() {
       let dynamoReview = reviewProcessingFunction(mockReview);
       
       let testReviewHash = crypto.createHash('sha256');
-      testReviewHash.update(mockReview.text);
+      testReviewHash.update(mockReview.text + mockReview.id);
       let expected = {
         appIdStore: 'test id*test store',
         reviewHash: testReviewHash.digest('hex'),
@@ -65,6 +66,7 @@ describe('handler', function() {
     });
     it('should generate a DynamoDB review even if version is missing', function() {
       let mockReview = {
+        id: 'abcd567',
         text: 'This is some review text.',
         date: new Date().toISOString()
       };
@@ -74,7 +76,7 @@ describe('handler', function() {
       let dynamoReview = reviewProcessingFunction(mockReview);
       
       let testReviewHash = crypto.createHash('sha256');
-      testReviewHash.update(mockReview.text);
+      testReviewHash.update(mockReview.text + mockReview.id);
       let expected = {
         appIdStore: 'test id*test store',
         reviewHash: testReviewHash.digest('hex'),
