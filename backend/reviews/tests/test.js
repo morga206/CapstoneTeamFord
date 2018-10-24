@@ -92,6 +92,48 @@ describe('handler', function() {
 
       assert.deepEqual(expected, dynamoReview);
     });
+    it('should generate different hashes even for identical review text', function() {
+      let mockReview1 = {
+        id: 'abcd567',
+        text: 'This is some review text.',
+        date: new Date('12-21-2001').toISOString()
+      };
+
+      let mockReview2 = {
+        id: '123456',
+        text: 'This is some review text.',
+        date: new Date('12-21-2001').toISOString()
+      };
+
+      let reviewProcessingFunction = handler.convertReviewToDynamoRepresentation('test id', 'test store', '');
+
+      let dynamoReview1 = reviewProcessingFunction(mockReview1);
+      let dynamoReview2 = reviewProcessingFunction(mockReview2);
+      
+      let testReviewHash = crypto.createHash('sha256');
+      testReviewHash.update(mockReview1.text + mockReview1.id);
+      let expected1 = {
+        appIdStore: 'test id*test store',
+        reviewHash: testReviewHash.digest('hex'),
+        date: new Date('12-21-2001').toISOString(),
+        version: '',
+        review: mockReview1 
+      };
+
+      testReviewHash = crypto.createHash('sha256');
+      testReviewHash.update(mockReview2.text + mockReview2.id);
+      let expected2 = {
+        appIdStore: 'test id*test store',
+        reviewHash: testReviewHash.digest('hex'),
+        date: new Date('12-21-2001').toISOString(),
+        version: '',
+        review: mockReview2
+      };
+
+      assert.deepEqual(expected1, dynamoReview1);
+      assert.deepEqual(expected2, dynamoReview2);
+      assert.notDeepEqual(dynamoReview1.reviewHash, dynamoReview2.reviewHash);
+    });
   });
   describe('#removeEmptyFields(review)', function() {
     it('should handle an empty object', function () {
