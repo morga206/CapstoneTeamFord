@@ -222,26 +222,37 @@ async function analyzeReviews(reviews){
     let text = reviews[i].review.text;
 
     // convert to a bytestring and get its length
-    let textBytes = decodeURI(encodeURIComponent(text));
+    let textBytes = decodeURIComponent(encodeURIComponent(text));
+    //let textBytes = encodeURIComponent(text);
     let textByteLength = textBytes.length;
 
     // only truncates reviews that are too long
     if(textByteLength > 5000){
-      let textBytesTrunc = textBytes.substring(0, 5000);
+      let truncLength = 5000;
+      let textBytesTrunc = textBytes.substring(0, truncLength);
 
       // this section tests the truncated string to make sure there isn't a partial character
       let trimming = true;
       let textTrunc = '';
       while(trimming) {
         try {
-          textTrunc = decodeURIComponent(encodeURI(textBytesTrunc));
+          textTrunc = encodeURIComponent(decodeURIComponent(textBytesTrunc));
+          //textTrunc = decodeURIComponent(textBytesTrunc);
           trimming = false;
+          /*if(textBytesTrunc.length < 5000){
+            trimming = false;
+          }
+          else{
+            textBytesTrunc = textBytesTrunc.substring(0, textBytesTrunc.length - 1);
+          }*/
         }
         catch (err) {
           textBytesTrunc = textBytesTrunc.substring(0, textBytesTrunc.length - 1);
           console.log(err);
         }
       }
+
+      console.log('made it past truncate while loop');
 
       // remove last word - no sense in giving NLP a fragment
       let truncArray = textTrunc.split(' ');
