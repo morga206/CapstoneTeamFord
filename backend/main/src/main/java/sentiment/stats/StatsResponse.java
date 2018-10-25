@@ -10,9 +10,9 @@ import java.util.Map;
  */
 public class StatsResponse extends Response {
 
-  private OutgoingStat<?>[] stats;
+  private OutgoingStat<?, ?>[] stats;
 
-  public StatsResponse(OutgoingStat<?>[] stats) {
+  public StatsResponse(OutgoingStat<?, ?>[] stats) {
     this.stats = stats;
   }
 
@@ -21,7 +21,9 @@ public class StatsResponse extends Response {
    */
   public Map<String, Object> getData() {
     Map<String, Object> data = new HashMap<String, Object>();
-    data.put("stats", stats);
+    for (OutgoingStat<?, ?> stat : stats) {
+      data.put(stat.getName(), stat.getValues());
+    }
     return data;
   }
 }

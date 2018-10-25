@@ -9,26 +9,15 @@ import java.util.Map;
 /**
  * Class to send statistic values back to the frontend.
  */
-public class OutgoingStat<T> {
+public class OutgoingStat<K, V> {
 
   private String name;
 
-  private T[] values;
+  private Map<K, V> values;
 
-  public OutgoingStat(String name, T[] values) {
+  public OutgoingStat(String name, Map<K, V> values) {
     this.name = name;
     this.values = values;
-  }
-
-  /**
-   * Map stat name to values so Jackson serializes to JSON correctly.
-   * @return Map from stat name to values
-   */
-  @JsonAnyGetter
-  public Map<String, T[]> getData() {
-    Map<String, T[]> statDetails = new HashMap<String, T[]>();
-    statDetails.put(name, values);
-    return statDetails;
   }
 
   @JsonIgnore
@@ -37,7 +26,7 @@ public class OutgoingStat<T> {
   }
 
   @JsonIgnore
-  public T[] getValues() {
+  public Map<K, V> getValues() {
     return this.values;
   }
 }
