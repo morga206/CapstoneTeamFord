@@ -34,3 +34,8 @@ export interface AppInfo {
   maxDate: string;
   versions: string[];
 }
+
+export interface Keyword {
+  keyword: string;
+  percentage: number;
+}

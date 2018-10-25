@@ -1,60 +1,35 @@
-<div class="row my-4 mb-md-0">
-  <app-card title="Test Spring Data">
-    {{ stats | json }}
-  </app-card>
-</div>
+<ng-template #noData>
+  <p>No data is available - please select new filter criteria above.</p>
+</ng-template>
 
-<div class="row mb-md-0">
+<div class="row mb-md-0 mt-2">
 <app-card title="Overall Sentiment">
-    <div class="m-auto" style="width: 500px;">
+    <div class="m-auto" style="width: 500px;" *ngIf="pieChartData.length !== 0; else noData">
         <canvas baseChart
                 [data]="pieChartData"
                 [labels]="pieChartLabels"
                 [chartType]="pieChartType"
-                [colors]="pieChartColors"></canvas>
+                [colors]="pieChartColors"
+                [options]="pieChartOptions"></canvas>
       </div>
 </app-card>
 <app-card title="Top Keywords">
-  <div class="row">
+  <div class="row" *ngIf="positiveKeywords.length !== 0 && negativeKeywords.length !== 0; else noData">
     <div class="col">
       <p class="h4">Postive Reviews</p>
       <ol>
-          <li>
-            Ford
-            <p class="small mb-2">80% of positive reviews</p>
-          </li>
-          <li>
-              great
-              <p class="small mb-2">40% of positive reviews</p>
-          </li>
-          <li>
-              car
-              <p class="small mb-2">38% of positive reviews</p>
-          </li>
-          <li>
-              impressed
-              <p class="small mb-2">20% of positive reviews</p>
+          <li *ngFor="let keyword of positiveKeywords">
+            {{ keyword.keyword }}
+            <p class="small mb-2">{{ keyword.percentage | number }}% of positive reviews</p>
           </li>
         </ol>
     </div>
     <div class="col">
         <p class="h4">Negative Reviews</p>
         <ol>
-            <li>
-              Ford
-              <p class="small mb-2">70% of negative reviews</p>
-            </li>
-            <li>
-                error
-                <p class="small mb-2">60% of negative reviews</p>
-            </li>
-            <li>
-                bug
-                <p class="small mb-2">43% of negative reviews</p>
-            </li>
-            <li>
-                crash
-                <p class="small mb-2">37% of negative reviews</p>
+            <li *ngFor="let keyword of negativeKeywords">
+                {{ keyword.keyword }}
+                <p class="small mb-2">{{ keyword.percentage | number }}% of negative reviews</p>
             </li>
           </ol>
     </div>

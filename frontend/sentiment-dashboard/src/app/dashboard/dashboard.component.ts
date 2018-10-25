@@ -70,9 +70,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   public updateStatsSubscription(event: StatsFilterValues) {
-    const statsToGet: StatRequest[] = [{
-      rawReviews: null
-    }];
+    const statsToGet: StatRequest[] = [
+      { overallSentiment: null },
+      { keywords: null }
+    ];
 
     this.statsSubscription = this.rest.getSentimentStats(
             event.appIdStore,
@@ -85,9 +86,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   public updateCompareStatsSubscription(event: StatsFilterValues) {
-    const statsToGet: StatRequest[] = [{
-      rawReviews: null
-    }];
+    const statsToGet: StatRequest[] = [
+      { overallSentiment: null },
+      { keywords: null }
+    ];
 
     this.statsSubscription = this.rest.getSentimentStats(
       event.appIdStore,
