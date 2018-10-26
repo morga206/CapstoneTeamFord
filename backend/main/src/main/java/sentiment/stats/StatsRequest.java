@@ -15,9 +15,11 @@ import sentiment.Response;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -94,9 +96,13 @@ public class StatsRequest extends Request {
                          version, 
                          startDate, 
                          endDate);
-    OutgoingStat<?, ?>[] stats = calculateStats(items, this.stats);
-
-    return new StatsResponse(stats);
+    
+    if (items != null) {
+      OutgoingStat<?, ?>[] stats = calculateStats(items, this.stats);
+      return new StatsResponse(stats);
+    } else {
+      return new StatsResponse("Error retrieving reviews from DynamoDB");
+    }
   }
 
   /**
@@ -203,7 +209,6 @@ public class StatsRequest extends Request {
       }
     }
 
-
     return new OutgoingStat<String, String>("rawReviews", result);
   }
 
@@ -253,7 +258,7 @@ public class StatsRequest extends Request {
       }
     }
 
-    // Reducing step: Sentiment Values -> Counts
+    // Reducing step: Keyword Values -> Counts
     Map<String, Integer> positiveKeywordCounts = 
         new HashMap<String, Integer>();
     for (String keyword : positiveReviews) {
@@ -274,29 +279,29 @@ public class StatsRequest extends Request {
       }
     }
 
-
     // Get top N keywords and map them to percentages
     Keyword[] positiveResults = positiveKeywordCounts.entrySet().stream()
     .sorted(Map.Entry.comparingByValue(Collections.reverseOrder())) // Sort by count, decreasing
     .limit(NUM_KEYWORDS) // Get only top N results
-    .map(keyword -> {
+    .map(keyword -> { // Convert count to percentage, create keyword object
       double percentage = 
           keyword.getValue() == 0 ? 0 : (double)keyword.getValue() / positiveReviews.size() * 100;
       return new Keyword(keyword.getKey(), percentage);
-    }) // Convert count to percentage, create keyword object
+    })
     .toArray(Keyword[]::new); // Collect in array
 
     Keyword[] negativeResults = negativeKeywordCounts.entrySet().stream()
     .sorted(Map.Entry.comparingByValue(Collections.reverseOrder())) // Sort by count, decreasing
     .limit(NUM_KEYWORDS) // Get only top N results
-    .map(keyword -> {
+    .map(keyword -> { // Convert count to percentage, create keyword object
       double percentage = 
           keyword.getValue() == 0 ? 0 : (double)keyword.getValue() / negativeReviews.size() * 100;
       return new Keyword(keyword.getKey(), percentage);
-    }) // Convert count to percentage, create keyword object
+    })
     .toArray(Keyword[]::new); // Collect in array
 
 
+    // Wrap result in a Map for Jackson to serialize
     Map<String, Keyword[]> result = new HashMap<String, Keyword[]>();
     result.put("positive", positiveResults);
     result.put("negative", negativeResults);
@@ -312,8 +317,59 @@ public class StatsRequest extends Request {
     return keywords;
   }
 
-  protected OutgoingStat<String, double[]> processSentimentOverTime(
+  protected OutgoingStat<String, Object[]> processSentimentOverTime(
       List<Map<String, AttributeValue>> items) {
-    return null;
+
+    // Mapping Step: DB Items -> Sentiment Counts (per Date)
+    // (using LinkedHashMap to maintain order)
+    Map<LocalDate, Integer> positiveCountsByDate = new LinkedHashMap<LocalDate, Integer>();
+    Map<LocalDate, Integer> totalCountsByDate = new LinkedHashMap<LocalDate, Integer>();
+
+    // Chart labels to send to frontend
+    List<String> chartLabels = new ArrayList<String>();
+
+    // Initialize map to store sentiment for each date
+    // https://stackoverflow.com/questions/40671689/how-to-build-a-list-of-localdate-from-a-given-range
+    final int days = (int) startDate.until(endDate, ChronoUnit.DAYS) + 1;
+
+    // Chart uses Month + Day format
+    DateTimeFormatter labelFormatter = DateTimeFormatter.ofPattern("MMMM dd");
+    Stream.iterate(startDate, date -> date.plusDays(1))
+        .limit(days)
+        .forEach((date) -> {
+          // Create chart label for this date (displayed on dashboard)
+          chartLabels.add(date.format(labelFormatter));
+
+          // Initialize review counts for this date
+          positiveCountsByDate.put(date, 0);
+          totalCountsByDate.put(date, 0);
+        });
+
+    // DB items use ISO format
+    DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_DATE_TIME; 
+    for (Map<String, AttributeValue> review : items) {
+      LocalDate date = LocalDate.parse(review.get("date").getS(), isoFormatter);
+      String sentiment = review.get("sentiment").getS();
+
+      totalCountsByDate.put(date, totalCountsByDate.get(date) + 1);
+      if (sentiment.equals("POSITIVE")) {
+        positiveCountsByDate.put(date, positiveCountsByDate.get(date) + 1);
+      }
+    }
+
+    // Reduce Step: Lists of Sentiment Values -> Sentiment Percentages
+    List<Double> positivePercentagesByDate = new ArrayList<Double>();
+    for (Map.Entry<LocalDate, Integer> count : positiveCountsByDate.entrySet()) {
+      int total = totalCountsByDate.get(count.getKey());
+      Double percentage = 
+          total == 0 ? null : (double)count.getValue() / total * 100;
+      positivePercentagesByDate.add(percentage);
+    }
+
+    Map<String, Object[]> result = new HashMap<String, Object[]>();
+    result.put("labels", chartLabels.toArray());
+    result.put("data", positivePercentagesByDate.toArray());
+
+    return new OutgoingStat<String, Object[]>("sentimentOverTime", result);
   }
 }
