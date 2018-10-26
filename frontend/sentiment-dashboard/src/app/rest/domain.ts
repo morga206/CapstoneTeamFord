@@ -3,7 +3,7 @@ export interface StatRequest {
 }
 
 export interface StatResponse {
-  [statName: string]: string[] | number[] | { [keyword: string]: number } | any; // TODO Remove "any," just for testing"
+  [statName: string] : { [statField: string]: string[] | number[] | { [keyword: string]: number } | any }; // TODO Remove "any," just for testing"
 }
 
 export interface SettingResponse {

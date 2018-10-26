@@ -14,7 +14,7 @@
       </div>
 </app-card>
 <app-card title="Top Keywords">
-  <div class="row" *ngIf="positiveKeywords.length !== 0 && negativeKeywords.length !== 0; else noData">
+  <div class="row" style="width: 500px;" *ngIf="positiveKeywords.length !== 0 && negativeKeywords.length !== 0; else noData">
     <div class="col">
       <p class="h4">Postive Reviews</p>
       <ol>
@@ -39,12 +39,14 @@
 
 <div class="row">
 <app-card title="Sentiment Over Time">
+  <div *ngIf="lineChartData.length !== 0; else noData">
     <canvas baseChart
     [datasets]="lineChartData"
     [labels]="lineChartLabels"
     [options]="lineChartOptions"
     [chartType]="lineChartType"
     [colors]="lineChartColors"></canvas>
+  </div>
 </app-card>
 </div>
 
