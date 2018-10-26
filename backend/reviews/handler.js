@@ -11,7 +11,7 @@ const gPlayScraper = require('google-play-scraper');
 const START_PAGE = 0;
 const MAX_PAGE = 9;
 
-const APP_STORE_IDS = ['com.ford.fordpass']; // TODO get this from config DB
+const APP_STORE_IDS = ['com.ford.vr']; // TODO get this from config DB
 const GPLAY_IDS = ['com.ford.fordpass']; // TODO get this from config DB
 
 module.exports = {
@@ -74,11 +74,16 @@ async function getReviews() {
 
   for (let i = 0; i < APP_STORE_IDS.length; i++) {
     try {
+      console.log('before await scrape');
+      console.log(`app_store_ids entry: ${APP_STORE_IDS[i]}`);
       let appStoreReviews = await scrape(APP_STORE_IDS[i], appStoreScraper, 'App Store', true);
+      console.log('past Await Scrape');
       appStoreReviews = await removeDuplicates(APP_STORE_IDS[i], 'App Store', appStoreReviews);
+      console.log('past remove duplicates');
       allReviews = allReviews.concat(appStoreReviews);
+      console.log('past concat');
     } catch (error) {
-      console.log(`Error processing App Store reviews: ${error}`);
+      console.log(`Error processing App Store reviews: App: ${APP_STORE_IDS[i]} ${error}`);
       throw error;
     }
   }
@@ -117,10 +122,15 @@ async function scrape(appId, scraper, store) {
     }
     // no need to throttle Apple App Store
     else{
-      promises.push(scraper.reviews({
+      //check for empty pages
+      let review_page = scraper.reviews({
         appId: appId,
         page: i
-      }));
+      });
+      promises.push(review_page);
+      //if(review_page.length > 0) {
+      //  promises.push(review_page);
+      //}
     }
   }
 
@@ -153,7 +163,14 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
     let appIdStore = id + '*' + store;
 
     let reviewHash = crypto.createHash('sha256');
-    reviewHash.update(review.text + review.id);
+    console.log('before hash');
+    try {
+      reviewHash.update(review.text + review.id);
+    } catch(error){
+      console.log('hash failed');
+      throw error;
+    }
+    console.log('after hash');
 
     let date = new Date(review.date).toISOString();
     let version = review.version === undefined ? alternateVersion : review.version;
