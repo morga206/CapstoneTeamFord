@@ -5,6 +5,7 @@ import { RestService } from './rest.service';
 import { HttpClient } from 'selenium-webdriver/http';
 import { HttpClientModule } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { StatResponse } from './domain';
 
 describe('RestService', () => {
   const API_URL = environment.backendUrl;
@@ -52,7 +53,7 @@ describe('RestService', () => {
       const stats = [
         { 'rawReviews': [] }
       ];
-      const testResponse = [{ 'rawReviews': [] }];
+      const testResponse: StatResponse = { 'rawReviews': [] };
 
       const expectedBody = JSON.stringify({
         appIdStore: appIdStore,
