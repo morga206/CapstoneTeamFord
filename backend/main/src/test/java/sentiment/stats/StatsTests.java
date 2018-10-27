@@ -26,14 +26,14 @@ public class StatsTests {
     rawReviews.setData("rawReviews", null);
     IncomingStat[] stats = new IncomingStat[] { rawReviews };
 
-    OutgoingStat<?>[] result = request.calculateStats(reviews, stats);
+    OutgoingStat<?, ?>[] result = request.calculateStats(reviews, stats);
 
-    String[] reviewsJson = new String[2];
-    reviewsJson[0] = "{\"date\":\"2018-05-21T00:00:00.000Z\",\"reviewHash\":\"abcdef\",\"version\":\"1.0.0\",\"appIdStore\":\"test store*test id\"}";
-    reviewsJson[1] = "{\"date\":\"2018-05-24T00:00:00.000Z\",\"reviewHash\":\"123456\",\"version\":\"1.0.0\",\"appIdStore\":\"test store*test id\"}";
+    Map<String, String> reviewsJson = new HashMap<String, String>();
+    reviewsJson.put("abcdef", "{\"date\":\"2018-05-21T00:00:00.000Z\",\"reviewHash\":\"abcdef\",\"version\":\"1.0.0\",\"appIdStore\":\"test store*test id\"}");
+    reviewsJson.put("123456", "{\"date\":\"2018-05-24T00:00:00.000Z\",\"reviewHash\":\"123456\",\"version\":\"1.0.0\",\"appIdStore\":\"test store*test id\"}");
     
-    OutgoingStat<String> rawReviewsResults = new OutgoingStat<String>("rawReviews", reviewsJson);
-    OutgoingStat<?>[] expected = new OutgoingStat<?>[] { rawReviewsResults };
+    OutgoingStat<String, String> rawReviewsResults = new OutgoingStat<String, String>("rawReviews", reviewsJson);
+    OutgoingStat<?, ?>[] expected = new OutgoingStat<?, ?>[] { rawReviewsResults };
 
     for (int i = 0; i < result.length; i++) {
       assertThat(result[i].getName()).isEqualTo(expected[i].getName());
@@ -52,20 +52,18 @@ public class StatsTests {
   }
 
 	@Test
-	public void testProcessRawReviews() throws Exception {
-    StatsRequest request = new StatsRequest("", "", "2001-01-01T00:00:00.000Z", "2001-01-01T00:00:00.000Z", new IncomingStat[]{});
-
+	public void testRawReviewsCalculation() throws Exception {
     List<Map<String, AttributeValue>> reviews = new ArrayList<Map<String, AttributeValue>>();
     reviews.add(populateReview("test store*test id", "2018-05-21T00:00:00.000Z", "1.0.0", "abcdef"));
     reviews.add(populateReview("test store2*test id2", "2001-04-04T00:00:00.000Z", "0.0.1", "a1b2c3"));
 
-    OutgoingStat<String> result = request.processRawReviews(reviews);
+    OutgoingStat<?, ?> result = new RawReviewsCalculation(reviews).calculate();
 
-    String[] reviewsJson = new String[2];
-    reviewsJson[0] = "{\"date\":\"2018-05-21T00:00:00.000Z\",\"reviewHash\":\"abcdef\",\"version\":\"1.0.0\",\"appIdStore\":\"test store*test id\"}";
-    reviewsJson[1] = "{\"date\":\"2001-04-04T00:00:00.000Z\",\"reviewHash\":\"a1b2c3\",\"version\":\"0.0.1\",\"appIdStore\":\"test store2*test id2\"}";
+    Map<String, String> reviewsJson = new HashMap<String, String>();
+    reviewsJson.put("abcdef", "{\"date\":\"2018-05-21T00:00:00.000Z\",\"reviewHash\":\"abcdef\",\"version\":\"1.0.0\",\"appIdStore\":\"test store*test id\"}");
+    reviewsJson.put("a1b2c3", "{\"date\":\"2001-04-04T00:00:00.000Z\",\"reviewHash\":\"a1b2c3\",\"version\":\"0.0.1\",\"appIdStore\":\"test store2*test id2\"}");
     
-    OutgoingStat<String> expected = new OutgoingStat<String>("rawReviews", reviewsJson);
+    OutgoingStat<String, String> expected = new OutgoingStat<String, String>("rawReviews", reviewsJson);
 
     assertThat(result.getName()).isEqualTo(expected.getName());
     assertThat(result.getValues()).isEqualTo(expected.getValues());

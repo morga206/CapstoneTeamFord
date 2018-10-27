@@ -54,7 +54,7 @@ functions:
     memorySize: 2048
     handler: sentiment.Handler
     package:
-      artifact: main/target/sentiment-ALPHA-aws.jar
+      artifact: main/target/sentiment-BETA-aws.jar
     environment:
       FUNCTION_NAME: stats
       TABLE_NAME: ${self:custom.tableName}
