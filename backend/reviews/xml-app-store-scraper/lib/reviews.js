@@ -26,7 +26,6 @@ function validate (opts) {
 }
 
 function parseXML (string) {
-  console.log(string);
   return new Promise(function (resolve, reject) {
     return parseString(string, (err, res) => {
       if (err) {
@@ -53,17 +52,13 @@ function extractReviews (xml) {
     };
   };
 
+  // create empty list so blank pages don't throw an error on slicing
+  let list = [];
+  // entry is the property that distinguishes non-blank pages
   if(xml.feed.hasOwnProperty('entry')) {
-    const list = xml.feed.entry;
-    console.log(xml);
-    console.log(list);
-    try {
-      return list.slice(1).map(toJSON);
-    } catch (error) {
-      console.log('error in xml-app-store-scraper');
-      throw error;
-    }
+    list = xml.feed.entry;
   }
+  return list.slice(1).map(toJSON);
 }
 
 const reviews = (opts) => new Promise((resolve) => {
@@ -81,7 +76,6 @@ const reviews = (opts) => new Promise((resolve) => {
     opts.page = opts.page || 1;
     opts.country = opts.country || 'us';
     const url = `https://itunes.apple.com/${opts.country}/rss/customerreviews/id=${id}/sortby=${opts.sort}/page=${opts.page}/xml`;
-    console.log(`URL of XML feed: ${url}`);
     return common.request(url);
   })
   .then(parseXML)
