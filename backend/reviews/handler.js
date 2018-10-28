@@ -117,11 +117,10 @@ async function scrape(appId, scraper, store) {
     }
     // no need to throttle Apple App Store
     else{
-      let review_page = scraper.reviews({
+      promises.push(scraper.reviews({
         appId: appId,
         page: i
-      });
-      promises.push(review_page);
+      }));
     }
   }
 
