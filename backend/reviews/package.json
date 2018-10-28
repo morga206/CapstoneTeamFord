@@ -5,7 +5,8 @@
   "main": "handler.js",
   "dependencies": {
     "aws-sdk": "^2.327.0",
-    "google-play-scraper": "^6.2.0"
+    "google-play-scraper": "^6.2.0",
+    "memoizee": "^0.4.14"
   },
   "devDependencies": {
     "eslint": "^5.6.0",
