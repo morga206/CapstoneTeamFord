@@ -10,10 +10,19 @@ import java.util.Map;
  */
 public class StatsResponse extends Response {
 
-  private OutgoingStat<?>[] stats;
+  private Status status;
+  private String message;
 
-  public StatsResponse(OutgoingStat<?>[] stats) {
+  private OutgoingStat<?, ?>[] stats;
+
+  public StatsResponse(OutgoingStat<?, ?>[] stats) {
+    this.status = Status.SUCCESS;
     this.stats = stats;
+  }
+
+  public StatsResponse(String message) {
+    this.status = Status.ERROR;
+    this.message = message;
   }
 
   /**
@@ -21,7 +30,15 @@ public class StatsResponse extends Response {
    */
   public Map<String, Object> getData() {
     Map<String, Object> data = new HashMap<String, Object>();
-    data.put("stats", stats);
+
+    data.put("status", this.status);
+    if (this.stats != null) {
+      for (OutgoingStat<?, ?> stat : stats) {
+        data.put(stat.getName(), stat.getValues());
+      }
+    } else {
+      data.put("message", this.message);
+    }
     return data;
   }
 }
