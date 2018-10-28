@@ -141,19 +141,13 @@ async function getFordStatistics(fordApps){
 }
 
 /**
- *
+ * @param statistics list of statistics to output to slack
  */
 async function sendStats(statistics){
+    let message = 'Hello World';
 
-    /**
-     * params = {
-     *     text: "text that will output to slack"
-     * }
-     * axios.post(hook, params);
-     */
-    let message = ''
     let params = {
-        text: "Hello World"
+        text: message
     }
 
     axios.post(hook, params);
