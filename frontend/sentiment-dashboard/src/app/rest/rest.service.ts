@@ -32,7 +32,7 @@ export class RestService {
       endDate: endDate.toISOString(),
       stats: stats
     });
-    return this.http.post<StatResponse[]>(this.API_URL + 'stats', body, options);
+    return this.http.post<StatResponse>(this.API_URL + 'stats', body, options);
   }
 
   getSettings(names: string[]): Observable<SettingResponse> {

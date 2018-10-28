@@ -15,9 +15,16 @@ import sentiment.Response;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
 
 /**
  * Request format for the sentiment stats function.
@@ -87,9 +94,13 @@ public class StatsRequest extends Request {
                          version, 
                          startDate, 
                          endDate);
-    OutgoingStat<?>[] stats = calculateStats(items, this.stats);
-
-    return new StatsResponse(stats);
+    
+    if (items != null) {
+      OutgoingStat<?, ?>[] stats = calculateStats(items, this.stats);
+      return new StatsResponse(stats);
+    } else {
+      return new StatsResponse("Error retrieving reviews from DynamoDB");
+    }
   }
 
   /**
@@ -144,47 +155,33 @@ public class StatsRequest extends Request {
    * @param stats The array of stats to calculate
    * @return An array of OutgoingStats to be place in the response
    */
-  protected OutgoingStat<?>[] calculateStats(List<Map<String, AttributeValue>> items, 
+  protected OutgoingStat<?, ?>[] calculateStats(List<Map<String, AttributeValue>> items, 
       IncomingStat[] stats) {
-    OutgoingStat<?>[] results = new OutgoingStat<?>[stats.length];
+    OutgoingStat<?, ?>[] results = new OutgoingStat<?, ?>[stats.length];
     int nextIndex = 0;
     for (IncomingStat stat : stats) {
       switch (stat.getName()) {
         case "rawReviews":
-          results[nextIndex] = processRawReviews(items);
+          results[nextIndex] = new RawReviewsCalculation(items).calculate();
+          nextIndex++;
+          break;
+        case "overallSentiment":
+          results[nextIndex] =  new OverallSentimentCalculation(items).calculate();
+          nextIndex++;
+          break;
+        case "keywords":
+          results[nextIndex] = new KeywordsCalculation(items).calculate();
+          nextIndex++;
+          break;
+        case "sentimentOverTime":
+          results[nextIndex] = 
+            new SentimentOverTimeCalculation(items, startDate, endDate).calculate();
           nextIndex++;
           break;
         default:
-          System.out.println("No method found to processs statistic " + stat.getName());
+          System.err.println("No method found to processs statistic " + stat.getName());
       }
     }
     return results;
-  }
-
-  protected OutgoingStat<String> processRawReviews(List<Map<String, AttributeValue>> items) {
-    String[] result = new String[items.size()];
-    int nextIndex = 0;
-
-    for (Map<String, AttributeValue> item : items) {
-      Map<String, String> review = new HashMap<String, String>();
-      item.forEach((key, val) -> {
-        if (val.getS() != null) {
-          review.put(key, val.getS());
-        } else if (val.getN() != null) {
-          review.put(key, val.getN());
-        }
-      });
-
-      try {
-        String json = new ObjectMapper().writeValueAsString(review);
-        result[nextIndex] = json;
-        nextIndex++;
-      } catch (JsonProcessingException exp) {
-        System.out.println("Error converting rawReviews to JSON");
-        System.out.println(exp.getMessage());
-      }
-    }
-
-    return new OutgoingStat<String>("rawReviews", result);
   }
 }
