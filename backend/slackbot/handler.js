@@ -123,14 +123,14 @@ async function getStatistics(applications){
  * @param statistics list of statistics to output to slack
  */
 async function sendStats(statistics){
-  let message = ""
+  let message = '';
 
   for (let report in statistics) {
     let statsList = statistics[report].stats;
 
     for (let stat in statsList) {
       message += statsList[stat].rawReviews;
-      message += "\n";
+      message += '\n';
     }
 
     message += '\n\n';
