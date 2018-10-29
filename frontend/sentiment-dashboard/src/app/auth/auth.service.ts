@@ -49,9 +49,9 @@ export class AuthService {
   }
 
   public async getIdToken() : Promise<string> {
-    let user = await Auth.currentAuthenticatedUser();
-    let credentials = user.signInUserSession;
-    let idToken = credentials.idToken;
+    const user = await Auth.currentAuthenticatedUser();
+    const credentials = user.signInUserSession;
+    const idToken = credentials.idToken;
     return idToken;
   }
 }
