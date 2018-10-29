@@ -4,11 +4,16 @@
   "description": "",
   "main": "handler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cd tests && ../node_modules/.bin/mocha --reporter spec",
+    "lint": "./node_modules/.bin/eslint ./*.js; ./node_modules/.bin/eslint ./tests/*.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "eslint": "^5.8.0"
   }
 }

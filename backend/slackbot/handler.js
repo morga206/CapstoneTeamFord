@@ -1,58 +1,56 @@
 'use strict';
-const hook = "https://hooks.slack.com/services/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"
+const hook = 'https://hooks.slack.com/services/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';
 
-const region = process.env.DEPLOY_REGION;
-const stage = process.env.STAGE;
 const gatewayURL = process.env.GW_URL;
 
 const axios = require('axios');
 
 module.exports = {
-    handler,
-    getFordApps,
-    getFordStatistics,
-    sendStats
-}
+  handler,
+  getApps,
+  getStatistics,
+  sendStats
+};
 
 async function handler () {
-    let fordApps = {};
-    let statistics = [];
+  let apps = {};
+  let statistics = [];
 
-    // Get list of apps we want statistics for
-    try {
-        fordApps = await getFordApps();
-    } catch (error) {
-        return {
-            statusCode: 500, // Internal Server Error
-            error: `Error getting ford apps: ${error}`
-        };
-    }
-
-    // Get the statistics for those apps
-    try {
-        statistics = await getFordStatistics(fordApps);
-    } catch (error) {
-        return {
-            statusCode: 500,
-            error: `Error getting ford stats: ${error}`
-        };
-    }
-
-    try {
-        await sendStats(statistics);
-    } catch (error) {
-        return {
-            statusCode: 500,
-            error: `Error sending to slack: ${error}`
-        };
-    }
-
+  // Get list of apps we want statistics for
+  try {
+    apps = await getApps();
+  } catch (error) {
     return {
-        statusCode: 200, // OK
-        body: JSON.stringify({
-            apps: statistics
-        })
+      statusCode: 500, // Internal Server Error
+      error: `Error getting ford apps: ${error}`
     };
+  }
+
+  // Get the statistics for those apps
+  try {
+    statistics = await getStatistics(apps);
+  } catch (error) {
+    return {
+      statusCode: 500,
+      error: `Error getting ford stats: ${error}`
+    };
+  }
+
+  try {
+    await sendStats(statistics);
+  } catch (error) {
+    return {
+      statusCode: 500,
+      error: `Error sending to slack: ${error}`
+    };
+  }
+
+  return {
+    statusCode: 200, // OK
+    body: JSON.stringify({
+      response: statistics
+    })
+  };
 }
 
 /**
@@ -60,9 +58,9 @@ async function handler () {
  * @param gatewayURL the gateway url for aws lambda endpoint
  * @returns returns list of ford apps
  */
-async function getFordApps() {
-    let endpoint = gatewayURL + '/apps';
-    return axios.get(endpoint);
+async function getApps() {
+  const endpoint = gatewayURL + '/apps';
+  return axios.get(endpoint);
 
 }
 
@@ -71,86 +69,76 @@ async function getFordApps() {
  * @param fordApps the list of apps we want statistics from
  * @returns appStats a list of statistics for each specified version of an app
  */
-async function getFordStatistics(fordApps){
-    let promises = [];  // Array for promises
-    let appStats = [];  // Array for App Statistics for each version of each app we want
+async function getStatistics(applications){
+  let promises = [];  // Array for promises
+  let statsList = [];
 
-    let apps = fordApps.data;
-    let endpoint = gatewayURL + '/stats';
+  const apps = applications.data;
+  const endpoint = gatewayURL + '/stats';
 
-    for (let i in apps){
-        let app = apps[i];
+  for (let app in apps){
+    let appData = apps[app];
 
-        // Parsing out dates right now, needs to be changed and cleaned
-        let endDate = app.maxDate + "T00:00:00.000Z";
-        let dates = endDate.split('-');
-        let day = parseInt(dates[2]);
-        let month = dates[1];
-        let startDay = day - 7;
-        if (day < 7) {
-            startDay = 31 - day;
-            if (month == '01') {
-                month = '12';
-            }
-        }
-        let startDate = dates[0] + '-' + month + '-' + startDay + 'T00:00:00.000Z';
+    // Using last 7 days
+    let endDate = new Date();
+    let startDate = new Date();
+    startDate.setDate(endDate.getDate() - 7);
 
-        // Currently sorting the list of app versions assuming latest
-        let sortedVersions = app.versions;
-        sortedVersions.sort();
-        let latestVersion = sortedVersions[sortedVersions.length-1];
+    // Use the latest version currently
+    let latestVersion = appData.versions[appData.versions.length - 1];
 
-        // Parameters to make request to stats endpoint
-        let params = {
-            "appIdStore": i,
-            "version": latestVersion,
-            "startDate": startDate,
-            "endDate": endDate,
-            "stats": [{
-                "rawReviews": null
-            }]
-        };
+    // Parameters to make request to stats endpoint
+    let params = {
+      'appIdStore': app,
+      'version': latestVersion,
+      'startDate': startDate,
+      'endDate': endDate,
+      'stats': [{
+        'rawReviews': null
+      }]
+    };
 
-        // Push promise to array of promises
-        promises.push(axios.post(endpoint, params));
-        // Create the dictionary for this specific version of either app
-        appStats.push({
-            "appIdStore": i,
-            "version": latestVersion,
-            "statistics": []
-        })
-    }
+    // Push promise to array of promises
+    promises.push(axios.post(endpoint, params));
+  }
 
-    // Await all promises
-    let allAppsPromises = Promise.all(promises);
-    let allApps = [];
+  // Await all promises
+  let allAppsPromises = Promise.all(promises);
+  let allApps = [];
 
-    try {
-        allApps = await allAppsPromises;
-    } catch (error) {
-        throw error;
-    }
+  try {
+    allApps = await allAppsPromises;
+  } catch (error) {
+    throw error;
+  }
 
-    // Add statistics to the list of apps
-    let appStatistics = [].concat(allApps);
-    for (let i = 0; i < appStatistics.length; i++) {
-        appStats[i].statistics = appStatistics[i].data.stats;
-    }
+  for (let i= 0; i < allApps.length; i++) {
+    statsList.push(allApps[i].data);
+  }
 
-    return appStats;
+  return statsList;
 }
 
 /**
  * @param statistics list of statistics to output to slack
  */
 async function sendStats(statistics){
-    let message = 'Hello World';
+  let message = ""
 
-    let params = {
-        text: message
+  for (let report in statistics) {
+    let statsList = statistics[report].stats;
+
+    for (let stat in statsList) {
+      message += statsList[stat].rawReviews;
+      message += "\n";
     }
 
-    axios.post(hook, params);
+    message += '\n\n';
+  }
 
+  let params = {
+    text: message
+  };
 
+  axios.post(hook, params);
 }
