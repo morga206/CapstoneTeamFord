@@ -5,7 +5,7 @@
 
 	<groupId>edu.msu.cse.capstone</groupId>
 	<artifactId>sentiment</artifactId>
-	<version>ALPHA</version>
+	<version>BETA</version>
 	<packaging>jar</packaging>
 
 	<name>ford-sentiment-api</name>
