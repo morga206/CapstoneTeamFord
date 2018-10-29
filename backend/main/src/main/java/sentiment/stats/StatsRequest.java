@@ -89,7 +89,7 @@ public class StatsRequest extends Request {
                          endDate);
     OutgoingStat<?>[] stats = calculateStats(items, this.stats);
 
-    return new StatsResponse(stats);
+    return new StatsResponse(appIdStore, version, stats);
   }
 
   /**

@@ -10,9 +10,19 @@ import java.util.Map;
  */
 public class StatsResponse extends Response {
 
+  private String appIdStore;
+  private String version;
   private OutgoingStat<?>[] stats;
 
-  public StatsResponse(OutgoingStat<?>[] stats) {
+  /**
+   *
+   * @param appIdStore the Id of app and it's app store.
+   * @param version the version number for this stats.
+   * @param stats the stats we are using to send.
+   */
+  public StatsResponse(String appIdStore, String version, OutgoingStat<?>[] stats) {
+    this.appIdStore = appIdStore;
+    this.version = version;
     this.stats = stats;
   }
 
@@ -21,6 +31,8 @@ public class StatsResponse extends Response {
    */
   public Map<String, Object> getData() {
     Map<String, Object> data = new HashMap<String, Object>();
+    data.put("appIdStore", appIdStore);
+    data.put("version", version);
     data.put("stats", stats);
     return data;
   }
