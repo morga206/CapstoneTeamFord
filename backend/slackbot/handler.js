@@ -22,7 +22,7 @@ async function handler () {
   } catch (error) {
     return {
       statusCode: 500, // Internal Server Error
-      error: `Error getting ford apps: ${error}`
+      error: `Error getting apps: ${error}`
     };
   }
 
@@ -32,7 +32,7 @@ async function handler () {
   } catch (error) {
     return {
       statusCode: 500,
-      error: `Error getting ford stats: ${error}`
+      error: `Error getting stats: ${error}`
     };
   }
 
@@ -56,7 +56,7 @@ async function handler () {
 /**
  *
  * @param gatewayURL the gateway url for aws lambda endpoint
- * @returns returns list of ford apps
+ * @returns returns list of apps
  */
 async function getApps() {
   const endpoint = gatewayURL + '/apps';
@@ -66,8 +66,8 @@ async function getApps() {
 
 /**
  *
- * @param fordApps the list of apps we want statistics from
- * @returns appStats a list of statistics for each specified version of an app
+ * @param applications the list of apps we want statistics from
+ * @returns statsList a list of statistics for each specified version of an app
  */
 async function getStatistics(applications){
   let promises = [];  // Array for promises
