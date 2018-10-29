@@ -1,7 +1,7 @@
 service: sentiment-dashboard
 provider:
   name: aws
-  stage: jordan
+  stage: ${opt:stage}
   region: us-east-2
   iamRoleStatements:
     - Effect: Allow
