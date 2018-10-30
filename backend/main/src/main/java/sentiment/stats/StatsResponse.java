@@ -15,7 +15,7 @@ public class StatsResponse extends Response {
   
   private String appIdStore;
   private String version;
-  private OutgoingStat<?>[] stats;
+  private OutgoingStat<?, ?>[] stats;
 
   /**
    *
@@ -23,7 +23,7 @@ public class StatsResponse extends Response {
    * @param version the version number for this stats.
    * @param stats the stats we are using to send.
    */
-  public StatsResponse(String appIdStore, String version, OutgoingStat<?>[] stats) {
+  public StatsResponse(String appIdStore, String version, OutgoingStat<?, ?>[] stats) {
     this.appIdStore = appIdStore;
     this.version = version;
     this.stats = stats;
