@@ -13,7 +13,7 @@ import { environment } from './../../environments/environment';
 export class AuthService {
   public loggedIn: BehaviorSubject<boolean>;
 
-  constructor(private router: Router) {
+  constructor() {
     Amplify.configure(environment.amplify);
     this.loggedIn = new BehaviorSubject<boolean>(false);
   }
@@ -48,10 +48,12 @@ export class AuthService {
       );
   }
 
-  public async getIdToken() : Promise<string> {
-    const user = await Auth.currentAuthenticatedUser();
-    const credentials = user.signInUserSession;
-    const idToken = credentials.idToken;
-    return idToken;
+  public getIdToken(): Observable<string> {
+    return from(Auth.currentSession()).pipe(
+      map(session => {
+        const idToken = session.getIdToken().getJwtToken();
+        return idToken;
+      })
+    );
   }
 }

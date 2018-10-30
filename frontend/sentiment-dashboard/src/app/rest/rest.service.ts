@@ -11,12 +11,17 @@ import { AuthService } from '../auth/auth.service';
 })
 export class RestService {
 
+  private apiKey: string;
   private API_URL = environment.backendUrl;
 
-  constructor(private http: HttpClient, private auth: AuthService) { }
-
-  private apiKey = this.auth.getIdToken().
-    then(userCredentials => this.apiKey = userCredentials['jwtToken']);
+  constructor(private http: HttpClient, private auth: AuthService) {
+    this.auth.getIdToken().subscribe(result => {
+      this.apiKey = result;
+      console.log('Your API key: ' + this.apiKey);
+    }, error => {
+      console.log(error);
+    });
+  }
 
   getFilterApps(): Observable<{ [id: string]: AppInfo }> {
     const options = {

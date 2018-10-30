@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { environment } from 'src/environments/environment';
 import { SettingResponse, App, AppListResponse } from '../rest/domain';
+import { AuthService } from '../auth/auth.service';
 
 describe('SettingsComponent', () => {
   const API_URL = environment.backendUrl;
@@ -18,7 +19,8 @@ describe('SettingsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ SettingsComponent ],
-      imports: [ ReactiveFormsModule, HttpClientModule, HttpClientTestingModule ]
+      imports: [ ReactiveFormsModule, HttpClientModule, HttpClientTestingModule ],
+      providers: [AuthService]
     })
     .compileComponents();
   }));
