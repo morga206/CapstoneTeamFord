@@ -97,7 +97,7 @@ public class StatsRequest extends Request {
     
     if (items != null) {
       OutgoingStat<?, ?>[] stats = calculateStats(items, this.stats);
-      return new StatsResponse(stats);
+      return new StatsResponse(appIdStore, version, stats);
     } else {
       return new StatsResponse("Error retrieving reviews from DynamoDB");
     }
