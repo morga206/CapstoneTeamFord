@@ -17,7 +17,6 @@ export class RestService {
   constructor(private http: HttpClient, private auth: AuthService) {
     this.auth.getIdToken().subscribe(result => {
       this.apiKey = result;
-      console.log('Your API key: ' + this.apiKey);
     }, error => {
       console.log(error);
     });
