@@ -46,20 +46,36 @@ describe('FormComponent', () => {
   it('should emit form values on filter change', () => {
     const testAppIdStore = 'testApp';
     const testVersion = '1.0.0';
-    const testStartDate = '01-01-2018';
-    const testEndDate = '12-31-2018';
+    const testStartDate = new Date('01-01-2018');
+    const testEndDate = new Date('12-31-2018');
 
     component.setAppList(testAppList);
     component.appIdStore.setValue(testAppIdStore);
     component.onAppSelect(testAppIdStore);
 
     component.version.setValue(testVersion);
-    component.startDate.setValue(testStartDate);
-    component.endDate.setValue(testEndDate);
+
+    component.statsFilterForm.get('dateRange').patchValue({myDateRange: {
+        beginDate: {
+          year: testStartDate.getFullYear(),
+          month: testStartDate.getMonth() + 1,
+          day: testStartDate.getDate()
+        },
+        endDate: {
+          year: testEndDate.getFullYear(),
+          month: testEndDate.getMonth() + 1,
+          day: testEndDate.getDate()
+        }
+      }});
+
 
     component.statsFilterForm.updateValueAndValidity();
 
     spyOn(component.filterChange, 'emit');
+    component.onDateChange({
+      beginJsDate: testStartDate,
+      endJsDate: testEndDate
+    });
     component.onFilterChange();
 
     const expectedValues: StatsFilterValues = {

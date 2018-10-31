@@ -24,9 +24,16 @@ describe('DashboardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DashboardComponent, DatepickerComponent, CardComponent, FormComponent, StatsComponent ],
+      declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent ],
       providers: [AuthService],
-      imports: [NgbModule, ReactiveFormsModule, FormsModule, ChartsModule, HttpClientModule, HttpClientTestingModule]
+      imports: [
+        NgbModule,
+        ReactiveFormsModule,
+        FormsModule,
+        ChartsModule,
+        HttpClientModule,
+        HttpClientTestingModule,
+        MyDateRangePickerModule]
     })
     .compileComponents();
   }));
