@@ -8,7 +8,7 @@ export interface DataSet {
   labels: Array<string>;
 }
 
-export interface ToolTip {
+export interface Tooltip {
   index: number;
   datasetIndex: number;
 }
