@@ -98,6 +98,30 @@ functions:
       - http:
           method: any
           path: reviews
+  slackbot:
+    runtime: nodejs8.10
+    timeout: 20
+    handler: slackbot/handler.handler
+    package:
+      include:
+        - slackbot/**
+    environment:
+      DEPLOY_REGION: ${self:provider.region}
+      STAGE: ${self:provider.stage}
+      GW_URL:
+        Fn::Join:
+          - ""
+          -
+            - "https://"
+            - Ref: "ApiGatewayRestApi"
+            - ".execute-api."
+            - ${self:provider.region}
+            - ".amazonaws.com/"
+            - ${self:provider.stage}
+    events:
+      - http:
+          method: get
+          path: slackbot
 
 resources:
   Resources:
