@@ -73,14 +73,17 @@ functions:
           method: post
           path: settings/apps
           cors: true
+          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
       - http:
           method: post
           path: settings/get
           cors: true
+          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
       - http:
           method: post
           path: settings/set
           cors: true
+          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
   reviews:
     runtime: nodejs8.10
     timeout: 60
@@ -175,3 +178,4 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 5
               WriteCapacityUnits: 5
+
