@@ -1,9 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { StatRequest, StatResponse, AppInfo } from '../rest/domain';
-import {Observable, Subscription, timer } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
-import { DatepickerComponent } from '../shared/datepicker/datepicker.component';
+import { StatRequest, AppInfo } from '../rest/domain';
+import { Subscription, timer } from 'rxjs';
 import { FormComponent, StatsFilterValues } from './form/form.component';
 import { StatsComponent } from './stats/stats.component';
 import { RestService } from '../rest/rest.service';
@@ -26,7 +23,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private appsSubscription: Subscription;
   private statsSubscription?: Subscription;
 
-  constructor(private rest: RestService, private fb: FormBuilder) { }
+  constructor(private rest: RestService) { }
 
   ngOnInit() {
     this.appsSubscription = this.rest.getFilterApps().subscribe((apps: { [id: string]: AppInfo }) => {
@@ -70,9 +67,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   public updateStatsSubscription(event: StatsFilterValues) {
-    const statsToGet: StatRequest[] = [{
-      rawReviews: null
-    }];
+    const statsToGet: StatRequest[] = [
+      { overallSentiment: null },
+      { keywords: null },
+      { sentimentOverTime: null }
+    ];
 
     this.statsSubscription = this.rest.getSentimentStats(
             event.appIdStore,
@@ -85,9 +84,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   public updateCompareStatsSubscription(event: StatsFilterValues) {
-    const statsToGet: StatRequest[] = [{
-      rawReviews: null
-    }];
+    const statsToGet: StatRequest[] = [
+      { overallSentiment: null },
+      { keywords: null },
+      { sentimentOverTime: null }
+    ];
 
     this.statsSubscription = this.rest.getSentimentStats(
       event.appIdStore,
@@ -95,9 +96,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       event.startDate,
       event.endDate,
       statsToGet).subscribe((response) => {
-      this.statsCompare.setStats(response);
+      if (this.statsCompare !== undefined) {
+        this.statsCompare.setStats(response);
+      }
     });
-
   }
 
   public setCurrentlyComparing(event: boolean) {

@@ -60,14 +60,20 @@ jobs:
         - npm install
       script:
         - npm test
-    - name: "Python Lint"
+    - name: "Node.js (Slack API) Lint"
       before_install:
-        - sudo apt-get update
-        - sudo apt-get install python3-pip
-        - sudo pip3 install --upgrade setuptools
-        - sudo pip3 install pylint
+      - nvm install 8.9
       install:
-        - cd backend/nlp
-        - sudo pip install nltk
+      - cd backend/slackbot
+      - npm install
       script:
-        - pylint handler.py
+      - npm run-script lint
+    - name: "Node.js (Slack API) Test"
+      before_install:
+      - nvm install 8.9
+      install:
+      - cd backend/slackbot
+      - npm install
+      script:
+      - npm test
+

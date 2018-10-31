@@ -13,7 +13,7 @@ provider:
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:GetItem
-        - dynamodb:PutItem
+        - dynamodb:BatchWriteItem
       Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}*"
     - Effect: Allow
       Action:
@@ -54,7 +54,7 @@ functions:
     memorySize: 2048
     handler: sentiment.Handler
     package:
-      artifact: main/target/sentiment-ALPHA-aws.jar
+      artifact: main/target/sentiment-BETA-aws.jar
     environment:
       FUNCTION_NAME: stats
       TABLE_NAME: ${self:custom.tableName}
@@ -73,17 +73,20 @@ functions:
           method: post
           path: settings/apps
           cors: true
+          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
       - http:
           method: post
           path: settings/get
           cors: true
+          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
       - http:
           method: post
           path: settings/set
           cors: true
+          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
   reviews:
     runtime: nodejs8.10
-    timeout: 30
+    timeout: 60
     handler: reviews/handler.handler
     package:
       include:
@@ -95,6 +98,30 @@ functions:
       - http:
           method: any
           path: reviews
+  slackbot:
+    runtime: nodejs8.10
+    timeout: 20
+    handler: slackbot/handler.handler
+    package:
+      include:
+        - slackbot/**
+    environment:
+      DEPLOY_REGION: ${self:provider.region}
+      STAGE: ${self:provider.stage}
+      GW_URL:
+        Fn::Join:
+          - ""
+          -
+            - "https://"
+            - Ref: "ApiGatewayRestApi"
+            - ".execute-api."
+            - ${self:provider.region}
+            - ".amazonaws.com/"
+            - ${self:provider.stage}
+    events:
+      - http:
+          method: get
+          path: slackbot
 
 resources:
   Resources:
@@ -151,3 +178,4 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 5
               WriteCapacityUnits: 5
+

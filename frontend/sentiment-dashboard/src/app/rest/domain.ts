@@ -3,7 +3,16 @@ export interface StatRequest {
 }
 
 export interface StatResponse {
-  [statName: string]: string[] | number[] | { [keyword: string]: number } | any; // TODO Remove "any," just for testing"
+  overallSentiment?: { [label: string]: number };
+  keywords?: {
+    positive: Keyword[],
+    negative: Keyword[]
+  };
+  sentimentOverTime?: {
+    labels: string[],
+    data: number[]
+  };
+  rawReviews?: any[];
 }
 
 export interface SettingResponse {
@@ -33,4 +42,9 @@ export interface AppInfo {
   minDate: string;
   maxDate: string;
   versions: string[];
+}
+
+export interface Keyword {
+  keyword: string;
+  percentage: number;
 }
