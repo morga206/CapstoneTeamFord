@@ -114,12 +114,10 @@ async function scrape(appId, scraper, store) {
         page: i,
         throttle: 1
       }));
-    }
-    // no need to throttle Apple App Store
-    else{
+    } else if (store === 'App Store') {
       promises.push(scraper.reviews({
         appId: appId,
-        page: i
+        page: i + 1
       }));
     }
   }
@@ -156,7 +154,7 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
     try {
       reviewHash.update(review.text + review.id);
     } catch(error){
-      console.log(error);
+      console.log(`Error creating review hash: ${error}`);
       throw error;
     }
 
@@ -345,17 +343,12 @@ async function writeReviewsToDB(reviews){
  */
 function createDynamoBatchRequest(items) {
   let putItems = [];
-  let putHashes = [];
   for (let i = 0; i < items.length; i++) {
-    //due to the way empty pages are handled, have to check for duplicate keys created for empty reviews
-    if(!putHashes.includes(items[i].reviewHash)) {
-      putHashes.push(items[i].reviewHash);
-      putItems.push({
-        PutRequest: {
-          Item: items[i]
-        }
-      });
-    }
+    putItems.push({
+      PutRequest: {
+        Item: items[i]
+      }
+    });
   }
 
   let dynamoRequest = {

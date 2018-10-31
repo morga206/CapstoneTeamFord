@@ -16,11 +16,11 @@ function validate (opts) {
     throw new Error('Invalid sort ' + opts.sort);
   }
 
-  if (opts.page && opts.page < 1) {
+  if (opts.page !== undefined && opts.page !== null && opts.page < 1) {
     throw new Error('Page cannot be lower than 1');
   }
 
-  if (opts.page && opts.page > 10) {
+  if (opts.page !== undefined && opts.page !== null && opts.page > 10) {
     throw new Error('Page cannot be greater than 10');
   }
 }
