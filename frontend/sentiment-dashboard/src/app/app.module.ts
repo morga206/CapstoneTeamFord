@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChartsModule } from 'ng2-charts';
 import { HttpClientModule } from '@angular/common/http';
+import { MyDateRangePickerModule } from 'mydaterangepicker';
+
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -41,7 +43,8 @@ import { AddAppComponent } from './settings/add-app/add-app.component';
     ReactiveFormsModule,
     NgbModule,
     ChartsModule,
-    HttpClientModule
+    HttpClientModule,
+    MyDateRangePickerModule
   ],
   providers: [AmplifyService, AuthGuardService, AuthService],
   bootstrap: [AppComponent],

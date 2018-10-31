@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { MyDateRangePickerModule } from 'mydaterangepicker';
 import { FormComponent } from './form.component';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -10,7 +10,7 @@ describe('FormComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ FormComponent ],
-      imports: [ReactiveFormsModule]
+      imports: [ ReactiveFormsModule, MyDateRangePickerModule ]
     })
     .compileComponents();
   }));
