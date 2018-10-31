@@ -60,3 +60,20 @@ jobs:
         - npm install
       script:
         - npm test
+    - name: "Node.js (Slack API) Lint"
+      before_install:
+      - nvm install 8.9
+      install:
+      - cd backend/slackbot
+      - npm install
+      script:
+      - npm run-script lint
+    - name: "Node.js (Slack API) Test"
+      before_install:
+      - nvm install 8.9
+      install:
+      - cd backend/slackbot
+      - npm install
+      script:
+      - npm test
+

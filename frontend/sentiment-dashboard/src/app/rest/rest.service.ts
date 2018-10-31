@@ -4,15 +4,23 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {environment} from '../../environments/environment';
 import { AppInfo, StatResponse, StatRequest, Setting, SettingResponse, App, AppListResponse } from './domain';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RestService {
 
+  private apiKey: string;
   private API_URL = environment.backendUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private auth: AuthService) {
+    this.auth.getIdToken().subscribe(result => {
+      this.apiKey = result;
+    }, error => {
+      console.log(error);
+    });
+  }
 
   getFilterApps(): Observable<{ [id: string]: AppInfo }> {
     const options = {
@@ -37,18 +45,25 @@ export class RestService {
 
   getSettings(names: string[]): Observable<SettingResponse> {
     const options = {
-      headers: new HttpHeaders({'Content-Type' : 'application/json'})
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
     };
     const body = JSON.stringify({
       names: names
     });
-
     return this.http.post<SettingResponse>(this.API_URL + 'settings/get', body, options);
   }
 
   setSettings(settings: Setting[]): Observable<SettingResponse> {
     const options = {
-      headers: new HttpHeaders({'Content-Type' : 'application/json'})
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
     };
     const body = JSON.stringify({
       settings: settings
@@ -58,7 +73,11 @@ export class RestService {
 
   getAppList(): Observable<AppListResponse> {
     const options = {
-      headers: new HttpHeaders({'Content-Type' : 'application/json'})
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
     };
     const body = JSON.stringify({
       command: 'GET'
@@ -68,7 +87,11 @@ export class RestService {
 
   addApp(app: App): Observable<AppListResponse> {
     const options = {
-      headers: new HttpHeaders({'Content-Type' : 'application/json'})
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
     };
     const body = JSON.stringify({
       command: 'ADD',
@@ -79,7 +102,11 @@ export class RestService {
 
   deleteApp(app: App): Observable<AppListResponse> {
     const options = {
-      headers: new HttpHeaders({'Content-Type' : 'application/json'})
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
     };
     const body = JSON.stringify({
       command: 'DELETE',

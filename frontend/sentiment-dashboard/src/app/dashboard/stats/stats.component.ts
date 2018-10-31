@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { StatResponse, Keyword } from 'src/app/rest/domain';
 import { BaseChartDirective } from 'ng2-charts';
-import { ToolTip, ChartData } from './chartjs.types';
+import { Tooltip, ChartData } from './chartjs.types';
 
 @Component({
   selector: 'app-stats',
@@ -65,7 +65,6 @@ export class StatsComponent implements OnInit {
     this.negativeKeywords = stats['keywords']['negative'];
 
     // Cannot change reference to labels array or chart won't update
-    console.log(stats['sentimentOverTime']);
     this.lineChartLabels.length = 0;
     this.lineChartLabels.push(...stats['sentimentOverTime']['labels']);
     this.lineChartData = [
@@ -73,10 +72,10 @@ export class StatsComponent implements OnInit {
     ];
   }
 
-  public getPercentTooltip(toolTipItem: ToolTip, data: ChartData) {
-    const allData = data.datasets[toolTipItem.datasetIndex].data;
-    const toolTipData = allData[toolTipItem.index];
-    return Math.round(toolTipData) + '%';
+  public getPercentTooltip(tooltipItem: Tooltip, data: ChartData) {
+    const allData = data.datasets[tooltipItem.datasetIndex].data;
+    const tooltipData = allData[tooltipItem.index];
+    return Math.round(tooltipData) + '%';
   }
 
 }

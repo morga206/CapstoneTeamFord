@@ -6,13 +6,14 @@ import { HttpClient } from 'selenium-webdriver/http';
 import { HttpClientModule } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { StatResponse } from './domain';
+import { AuthService } from '../auth/auth.service';
 
 describe('RestService', () => {
   const API_URL = environment.backendUrl;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RestService],
+      providers: [AuthService, RestService],
       imports: [HttpClientModule, HttpClientTestingModule]
     });
   });
