@@ -31,15 +31,15 @@ describe('handler', function() {
       }
     };
     it('should scrape all pages of an app\'s reviews', async () => {
-      let reviews = await handler.scrape('test app id', mockScraper, 'test store');
+      let reviews = await handler.scrape('test app id', mockScraper, 'App Store');
       for (let i = 0; i <= 9; i++) {
-        assert.equal(reviews[i].review.page, i);
+        assert.equal(reviews[i].review.page, i + 1);
       }
     });
     it('should add an appStoreId field to each review', async () => {
-      let reviews = await handler.scrape('test app id', mockScraper, 'test store');
+      let reviews = await handler.scrape('test app id', mockScraper, 'App Store');
       for (let i = 0; i <= 9; i++) {
-        assert.equal(reviews[i].appIdStore, 'test app id*test store');
+        assert.equal(reviews[i].appIdStore, 'test app id*App Store');
       }
     });
   });
