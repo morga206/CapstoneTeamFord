@@ -16,11 +16,11 @@ function validate (opts) {
     throw new Error('Invalid sort ' + opts.sort);
   }
 
-  if (opts.page && opts.page < 1) {
+  if (opts.page !== undefined && opts.page !== null && opts.page < 1) {
     throw new Error('Page cannot be lower than 1');
   }
 
-  if (opts.page && opts.page > 10) {
+  if (opts.page !== undefined && opts.page !== null && opts.page > 10) {
     throw new Error('Page cannot be greater than 10');
   }
 }
@@ -52,7 +52,12 @@ function extractReviews (xml) {
     };
   };
 
-  const list = xml.feed.entry;
+  // create empty list so blank pages don't throw an error on slicing
+  let list = [];
+  // entry is the property that distinguishes non-blank pages
+  if(xml.feed.hasOwnProperty('entry')) {
+    list = xml.feed.entry;
+  }
   return list.slice(1).map(toJSON);
 }
 

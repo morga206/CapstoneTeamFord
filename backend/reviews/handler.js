@@ -11,8 +11,8 @@ const gPlayScraper = require('google-play-scraper');
 const START_PAGE = 0;
 const MAX_PAGE = 9;
 
-const APP_STORE_IDS = ['com.ford.fordpass']; // TODO get this from config DB
-const GPLAY_IDS = ['com.ford.fordpass']; // TODO get this from config DB
+const APP_STORE_IDS = ['com.ford.fordpass', 'com.ford.vr', 'com.ford.fordplay']; // TODO get this from config DB
+const GPLAY_IDS = ['com.ford.fordplay']; // TODO get this from config DB
 
 module.exports = {
   handler,
@@ -114,12 +114,10 @@ async function scrape(appId, scraper, store) {
         page: i,
         throttle: 1
       }));
-    }
-    // no need to throttle Apple App Store
-    else{
+    } else if (store === 'App Store') {
       promises.push(scraper.reviews({
         appId: appId,
-        page: i
+        page: i + 1
       }));
     }
   }
@@ -153,7 +151,12 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
     let appIdStore = id + '*' + store;
 
     let reviewHash = crypto.createHash('sha256');
-    reviewHash.update(review.text + review.id);
+    try {
+      reviewHash.update(review.text + review.id);
+    } catch(error){
+      console.log(`Error creating review hash: ${error}`);
+      throw error;
+    }
 
     let date = new Date(review.date).toISOString();
     let version = review.version === undefined ? alternateVersion : review.version;
