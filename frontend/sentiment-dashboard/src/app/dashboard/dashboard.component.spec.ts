@@ -8,6 +8,7 @@ import { CardComponent } from './card/card.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormComponent } from './form/form.component';
 import { StatsComponent } from './stats/stats.component';
+import {MyDateRangePickerModule} from 'mydaterangepicker';
 import { AuthService } from '../auth/auth.service';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { environment } from 'src/environments/environment';
@@ -23,9 +24,16 @@ describe('DashboardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DashboardComponent, DatepickerComponent, CardComponent, FormComponent, StatsComponent ],
+      declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent ],
       providers: [AuthService],
-      imports: [NgbModule, ReactiveFormsModule, FormsModule, ChartsModule, HttpClientModule, HttpClientTestingModule]
+      imports: [
+        NgbModule,
+        ReactiveFormsModule,
+        FormsModule,
+        ChartsModule,
+        HttpClientModule,
+        HttpClientTestingModule,
+        MyDateRangePickerModule]
     })
     .compileComponents();
   }));
