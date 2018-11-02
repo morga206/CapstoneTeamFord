@@ -139,7 +139,6 @@ public class AppListRequest extends Request {
    * Runs the scraper Lambda.
    */
   private void runScraper() {
-    System.out.println("Running scraper");
     AWSLambda client = AWSLambdaClientBuilder.standard()
         .withRegion(REGION)
         .build();
@@ -148,7 +147,6 @@ public class AppListRequest extends Request {
     InvokeRequest req = new InvokeRequest()
         .withInvocationType(InvocationType.Event) // Asynchronous - don't wait for return
         .withFunctionName(functionName);
-    System.out.println("Invoked function " + functionName);
 
     try {
       client.invoke(req);
