@@ -3,8 +3,8 @@ const crypto = require('crypto');
 
 const aws = require('aws-sdk');
 const region = process.env.DEPLOY_REGION;
+const stage = process.env.STAGE;
 const table = process.env.TABLE_NAME;
-const appList = process.env.APP_LIST;
 
 const appStoreScraper = require('./xml-app-store-scraper');
 const gPlayScraper = require('google-play-scraper');
@@ -24,9 +24,19 @@ module.exports = {
 };
 
 async function handler () {
+  let appList = '';
+  try {
+    appList = await getAppList();
+  } catch (error) {
+    return {
+      statusCode: 500, // Internal Server Error
+      error: `Error getting app list: ${error}`
+    };
+  }
+
   let reviews = [];
   try {
-    reviews = await getReviews();
+    reviews = await getReviews(appList);
   } catch (error) {
     return {
       statusCode: 500, // Internal Server Error
@@ -65,9 +75,32 @@ async function handler () {
 }
 
 /**
- * Scrapes all available reviews for the configured apps from Google Play and the App Store 
+ * Sets the app list from SSM
  */
-async function getReviews() {
+async function getAppList() {
+  const ssm = new aws.SSM();
+  const params = {
+    Name: `appList-${stage}`
+  };
+
+  let appListResponse;
+
+  try {
+    appListResponse = await ssm.getParameter(params).promise();
+  } catch (error) {
+    console.log(`Error getting app list: ${error}`);
+    throw error;
+  }
+
+  return appListResponse.Parameter.Value;
+  
+}
+
+/**
+ * Scrapes all available reviews for the configured apps from Google Play and the App Store 
+ * @param appList The list of apps to scrape
+ */
+async function getReviews(appList) {
   let allReviews = [];
 
   let appListObject;

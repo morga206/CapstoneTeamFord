@@ -42,6 +42,7 @@ custom:
     bucketName: ${self:service}-client-${self:provider.stage}
     distributionFolder: ../frontend/sentiment-dashboard/dist/sentiment-dashboard
 
+
 package:
   individually: true
   exclude:
@@ -94,7 +95,7 @@ functions:
     environment:
       TABLE_NAME: ${self:custom.tableName}
       DEPLOY_REGION: ${self:provider.region}
-      APP_LIST: ${ssm:appList-${self:provider.stage}}
+      STAGE: ${self:provider.stage}
     events:
       - http:
           method: any
