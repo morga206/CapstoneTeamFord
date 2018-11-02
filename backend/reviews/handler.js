@@ -4,15 +4,13 @@ const crypto = require('crypto');
 const aws = require('aws-sdk');
 const region = process.env.DEPLOY_REGION;
 const table = process.env.TABLE_NAME;
+const appList = process.env.APP_LIST;
 
 const appStoreScraper = require('./xml-app-store-scraper');
 const gPlayScraper = require('google-play-scraper');
 
 const START_PAGE = 0;
 const MAX_PAGE = 9;
-
-const APP_STORE_IDS = ['com.ford.fordpass', 'com.ford.vr', 'com.ford.fordplay']; // TODO get this from config DB
-const GPLAY_IDS = ['com.ford.fordplay']; // TODO get this from config DB
 
 module.exports = {
   handler,
@@ -72,10 +70,26 @@ async function handler () {
 async function getReviews() {
   let allReviews = [];
 
-  for (let i = 0; i < APP_STORE_IDS.length; i++) {
+  let appListObject;
+  try {
+    appListObject = JSON.parse(appList);
+  } catch (error) {
+    console.log(`Error parsing appList: ${error}`);
+    throw error;
+  }
+  
+  const appStoreIds = appListObject
+    .filter((app) => app.store === 'App Store')
+    .map((app) => app.appId);
+
+  const gPlayIds = appListObject
+    .filter((app) => app.store === 'Google Play')
+    .map((app) => app.appId);
+
+  for (let i = 0; i < appStoreIds.length; i++) {
     try {
-      let appStoreReviews = await scrape(APP_STORE_IDS[i], appStoreScraper, 'App Store', true);
-      appStoreReviews = await removeDuplicates(APP_STORE_IDS[i], 'App Store', appStoreReviews);
+      let appStoreReviews = await scrape(appStoreIds[i], appStoreScraper, 'App Store', true);
+      appStoreReviews = await removeDuplicates(appStoreIds[i], 'App Store', appStoreReviews);
       allReviews = allReviews.concat(appStoreReviews);
     } catch (error) {
       console.log(`Error processing App Store reviews: ${error}`);
@@ -83,10 +97,10 @@ async function getReviews() {
     }
   }
 
-  for (let i = 0; i < GPLAY_IDS.length; i++) {
+  for (let i = 0; i < gPlayIds.length; i++) {
     try {
-      let gPlayReviews = await scrape(GPLAY_IDS[i], gPlayScraper, 'Google Play', false);
-      gPlayReviews = await removeDuplicates(GPLAY_IDS[i], 'Google Play', gPlayReviews);
+      let gPlayReviews = await scrape(gPlayIds[i], gPlayScraper, 'Google Play', false);
+      gPlayReviews = await removeDuplicates(gPlayIds[i], 'Google Play', gPlayReviews);
       allReviews = allReviews.concat(gPlayReviews);
     } catch (error) {
       console.log(`Error processing Google Play reviews: ${error}`);
@@ -153,7 +167,7 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
     let reviewHash = crypto.createHash('sha256');
     try {
       reviewHash.update(review.text + review.id);
-    } catch(error){
+    } catch(error) {
       console.log(`Error creating review hash: ${error}`);
       throw error;
     }

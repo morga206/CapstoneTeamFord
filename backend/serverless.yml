@@ -94,6 +94,7 @@ functions:
     environment:
       TABLE_NAME: ${self:custom.tableName}
       DEPLOY_REGION: ${self:provider.region}
+      APP_LIST: ${ssm:appList-${self:provider.stage}}
     events:
       - http:
           method: any
