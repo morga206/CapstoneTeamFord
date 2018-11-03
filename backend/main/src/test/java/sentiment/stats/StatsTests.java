@@ -122,7 +122,7 @@ public class StatsTests {
     reviews.add(populateReview("test store*test id", "2001-05-21T00:00:00.000Z", "1.0.0", "a1b2c3", "NEGATIVE", new String[0]));
     reviews.add(populateReview("test store*test id", "2001-05-21T00:00:00.000Z", "1.0.0", "123456", "NEGATIVE", new String[0]));
     reviews.add(populateReview("test store*test id", "2001-05-22T00:00:00.000Z", "1.0.0", "alsdkj", "MIXED", new String[0]));
-    reviews.add(populateReview("test store*test id", "2001-05-22T00:00:00.000Z", "1.0.0", "34895f", "POSITIVE", new String[0]));
+    reviews.add(populateReview("test store*test id", "2001-05-22T00:00:00.000Z", "1.0.0", "34895f", "NEGATIVE", new String[0]));
     reviews.add(populateReview("test store*test id", "2001-05-23T00:00:00.000Z", "1.0.0", "asldf4", "NEUTRAL", new String[0]));
     reviews.add(populateReview("test store*test id", "2001-05-23T00:00:00.000Z", "1.0.0", "234i42", "NEUTRAL", new String[0]));
     reviews.add(populateReview("test store*test id", "2001-05-23T00:00:00.000Z", "1.0.0", "asdl23", "NEUTRAL", new String[0]));
@@ -133,7 +133,8 @@ public class StatsTests {
 
     Map<String, Object[]> sentimentOverTime = new HashMap<String, Object[]>();
     sentimentOverTime.put("labels", new String[]{"May 21", "May 22", "May 23"});
-    sentimentOverTime.put("data", new Double[]{ 1.0 / 3 * 100, 1.0 / 2 * 100, 0.0 });
+    sentimentOverTime.put("data", new Double[]{ 2.0 / 3 * 100, 1.0 / 2 * 100, 0.0 });
+    sentimentOverTime.put("totals", new Integer[]{3, 2, 3});
 
     OutgoingStat<String, Object[]> expected = new OutgoingStat<String, Object[]>("sentimentOverTime", sentimentOverTime);
 

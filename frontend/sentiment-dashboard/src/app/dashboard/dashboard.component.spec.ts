@@ -78,7 +78,8 @@ describe('DashboardComponent', () => {
       },
       sentimentOverTime: {
         labels: ['May 1', 'May 2'],
-        data: [50, 20]
+        data: [50, 20],
+        totals: [23, 42]
       }
     };
 

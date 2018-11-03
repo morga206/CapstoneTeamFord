@@ -71,6 +71,7 @@ describe('StatsComponent', () => {
 
     const expectedLineChartLabels: string[] = ['May 1', 'May 2'];
     const expectedLineChartData: number[] = [50, 20];
+    const expectedReviewTotals: number[] = [23, 42];
 
     const statResponse: StatResponse = {
       overallSentiment: {
@@ -85,7 +86,8 @@ describe('StatsComponent', () => {
       },
       sentimentOverTime: {
         labels: expectedLineChartLabels,
-        data: expectedLineChartData
+        data: expectedLineChartData,
+        totals: expectedReviewTotals
       }
     };
 
@@ -99,6 +101,7 @@ describe('StatsComponent', () => {
 
     expect(component.lineChartData[0].data).toEqual(expectedLineChartData);
     expect(component.lineChartLabels).toEqual(expectedLineChartLabels);
+    expect(component.reviewTotals).toEqual(expectedReviewTotals);
   });
 
   it('should correctly format chart tooltips', () => {
@@ -113,8 +116,14 @@ describe('StatsComponent', () => {
       }]
     };
 
-    const tooltip = component.getPercentTooltip(tooltipItem, chartData);
-    const expected = '1%';
+    let tooltip = component.getPercentTooltip()(tooltipItem, chartData);
+    let expected = '1%';
+
+    expect(tooltip).toEqual(expected);
+
+    component.reviewTotals = [24];
+    tooltip = component.getPercentWithTotalTooltip()(tooltipItem, chartData);
+    expected = '1% of 24 reviews';
 
     expect(tooltip).toEqual(expected);
   });

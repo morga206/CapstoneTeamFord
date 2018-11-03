@@ -20,12 +20,13 @@ export class StatsComponent implements OnInit {
     responsive: true,
     tooltips: {
       callbacks: {
-        label: this.getPercentTooltip
+        label: this.getPercentTooltip()
       }
     }
   };
 
   public lineChartData: Array<any> = [];
+  public reviewTotals: Array<number> = [];
   public lineChartLabels: Array<any> = [];
   public lineChartType = 'line';
   public lineChartOptions: any = {
@@ -33,18 +34,18 @@ export class StatsComponent implements OnInit {
     spanGaps: false,
     tooltips: {
       callbacks: {
-        label: this.getPercentTooltip
+        label: this.getPercentWithTotalTooltip()
       }
     }
   };
   public lineChartColors: Array<any> = [
     { // green
-      backgroundColor: 'rgba(83,204,65,0.5)',
-      borderColor: 'rgba(83,204,65,1)',
-      pointBackgroundColor: 'rgba(83,204,65,1)',
+      backgroundColor: 'rgba(204,65,65,0.5)',
+      borderColor: 'rgba(204,65,65,1)',
+      pointBackgroundColor: 'rgba(204,65,65,1)',
       pointBorderColor: '#fff',
       pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(83,204,65,1)'
+      pointHoverBorderColor: 'rgba(204,65,65,1)'
     }];
 
     public positiveKeywords: Keyword[] = [];
@@ -65,17 +66,27 @@ export class StatsComponent implements OnInit {
     this.negativeKeywords = stats['keywords']['negative'];
 
     // Cannot change reference to labels array or chart won't update
+    this.reviewTotals = stats['sentimentOverTime']['totals'];
     this.lineChartLabels.length = 0;
     this.lineChartLabels.push(...stats['sentimentOverTime']['labels']);
     this.lineChartData = [
-      { data: stats['sentimentOverTime']['data'], label: '% Positive Reviews'},
+      { data: stats['sentimentOverTime']['data'], label: '% Negative Reviews'},
     ];
   }
 
-  public getPercentTooltip(tooltipItem: Tooltip, data: ChartData) {
-    const allData = data.datasets[tooltipItem.datasetIndex].data;
-    const tooltipData = allData[tooltipItem.index];
-    return Math.round(tooltipData) + '%';
+  public getPercentTooltip() {
+    return (tooltipItem: Tooltip, data: ChartData) => {
+      const allData = data.datasets[tooltipItem.datasetIndex].data;
+      const tooltipData = allData[tooltipItem.index];
+      return Math.round(tooltipData) + '%';
+    };
   }
 
+  public getPercentWithTotalTooltip() {
+    return (tooltipItem: Tooltip, data: ChartData) => {
+      const allData = data.datasets[tooltipItem.datasetIndex].data;
+      const tooltipData = allData[tooltipItem.index];
+      return  Math.round(tooltipData) + '%' + ' of ' + this.reviewTotals[tooltipItem.index] + ' reviews';
+    };
+  }
 }
