@@ -28,9 +28,9 @@ public class SentimentOverTimeCalculation extends StatCalculation {
   private LocalDate endDate;
 
   /**
-   * The number of positive reviews per day (Using LinkedHashMap to maintain order).
+   * The number of negative reviews per day (Using LinkedHashMap to maintain order).
    */
-  private Map<LocalDate, Integer> positiveCountsByDate = new LinkedHashMap<LocalDate, Integer>();
+  private Map<LocalDate, Integer> negativeCountsByDate = new LinkedHashMap<LocalDate, Integer>();
 
   /**
    * The number of total reviews per day (Using LinkedHashMap to maintain order).
@@ -63,15 +63,16 @@ public class SentimentOverTimeCalculation extends StatCalculation {
   public OutgoingStat<?, ?> calculate() {
     // Mapping Step: DB Items -> Sentiment Counts (per Date)
     initializeLabelsAndCounts();
-    countPositiveReviewsByDate();
+    countNegativeReviewsByDate();
 
 
     // Reduce Step: Lists of Sentiment Values -> Sentiment Percentages
-    List<Double> positivePercentagesByDate = calculatePositiveReviewPercentages();
+    List<Double> negativePercentagesByDate = calculateNegativeReviewPercentages();
 
     Map<String, Object[]> result = new HashMap<String, Object[]>();
     result.put("labels", chartLabels.toArray());
-    result.put("data", positivePercentagesByDate.toArray());
+    result.put("data", negativePercentagesByDate.toArray());
+    result.put("totals", totalCountsByDate.values().toArray());
 
     return new OutgoingStat<String, Object[]>("sentimentOverTime", result);
   }
@@ -93,15 +94,15 @@ public class SentimentOverTimeCalculation extends StatCalculation {
           chartLabels.add(date.format(labelFormatter));
 
           // Initialize review counts for this date
-          positiveCountsByDate.put(date, 0);
+          negativeCountsByDate.put(date, 0);
           totalCountsByDate.put(date, 0);
         });
   }
 
   /**
-   * Iterates through the review list to generate total and positive review counts.
+   * Iterates through the review list to generate total and negative review counts.
    */
-  private void countPositiveReviewsByDate() {
+  private void countNegativeReviewsByDate() {
     // DB items use ISO format
     DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_DATE_TIME; 
     for (Map<String, AttributeValue> review : items) {
@@ -109,19 +110,19 @@ public class SentimentOverTimeCalculation extends StatCalculation {
       String sentiment = review.get("sentiment").getS();
 
       totalCountsByDate.put(date, totalCountsByDate.get(date) + 1);
-      if (sentiment.equals("POSITIVE")) {
-        positiveCountsByDate.put(date, positiveCountsByDate.get(date) + 1);
+      if (sentiment.equals("NEGATIVE")) {
+        negativeCountsByDate.put(date, negativeCountsByDate.get(date) + 1);
       }
     }
   }
 
   /**
-   * Using the total and positive counts, calculate the % Positive Reviews per day.
-   * @return An chronological list of the % Positive Reviews each day
+   * Using the total and negative counts, calculate the % Negative Reviews per day.
+   * @return An chronological list of the % Negative Reviews each day
    */
-  private List<Double> calculatePositiveReviewPercentages() {
+  private List<Double> calculateNegativeReviewPercentages() {
     List<Double> result = new ArrayList<Double>();
-    for (Map.Entry<LocalDate, Integer> count : positiveCountsByDate.entrySet()) {
+    for (Map.Entry<LocalDate, Integer> count : negativeCountsByDate.entrySet()) {
       int total = totalCountsByDate.get(count.getKey());
       Double percentage = 
           total == 0 ? null : (double)count.getValue() / total * 100;
