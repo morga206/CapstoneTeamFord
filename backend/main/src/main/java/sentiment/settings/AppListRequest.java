@@ -1,5 +1,9 @@
 package sentiment.settings;
 
+import com.amazonaws.services.lambda.AWSLambda;
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
+import com.amazonaws.services.lambda.model.InvocationType;
+import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
 import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
@@ -10,16 +14,19 @@ import com.amazonaws.services.simplesystemsmanagement.model.PutParameterRequest;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import sentiment.Request;
 import sentiment.Response;
 
 import java.util.Arrays;
 
+
 /**
  * A query to get or update the list of apps to scrape.
  */
 public class AppListRequest extends Request {
+
+  private static final String REGION = System.getenv("DEPLOY_REGION");
+  private static final String STAGE = System.getenv("STAGE");
 
   private enum Command {
     ADD,
@@ -59,7 +66,9 @@ public class AppListRequest extends Request {
 
     switch (this.command) {
       case ADD:
-        return addApp(client, this.appList);
+        AppListResponse addResponse = addApp(client, this.appList);
+        runScraper();
+        return addResponse;
       case DELETE:
         return deleteApp(client, this.appList);
       case GET:
@@ -124,6 +133,26 @@ public class AppListRequest extends Request {
     }
 
     return new AppListResponse(newList);
+  }
+
+  /**
+   * Runs the scraper Lambda.
+   */
+  private void runScraper() {
+    AWSLambda client = AWSLambdaClientBuilder.standard()
+        .withRegion(REGION)
+        .build();
+    
+    String functionName = "sentiment-dashboard-" + STAGE + "-reviews";
+    InvokeRequest req = new InvokeRequest()
+        .withInvocationType(InvocationType.Event) // Asynchronous - don't wait for return
+        .withFunctionName(functionName);
+
+    try {
+      client.invoke(req);
+    } catch (Exception exp) {
+      System.err.println("Error invoking Scraping Lambda: " + exp.getMessage());
+    }
   }
 
   /**
