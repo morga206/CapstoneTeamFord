@@ -10,7 +10,8 @@ export interface StatResponse {
   };
   sentimentOverTime?: {
     labels: string[],
-    data: number[]
+    data: number[],
+    totals: number[]
   };
   rawReviews?: any[];
 }

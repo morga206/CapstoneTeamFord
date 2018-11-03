@@ -32,11 +32,12 @@ export class FormComponent implements OnInit {
   public statsFilterForm: FormGroup;
   public appIdStore: AbstractControl;
   public version: AbstractControl;
+  public dateRange: AbstractControl;
 
   public startDate?: Date;
   public endDate?: Date;
   public myDateRangePickerOptions: IMyDrpOptions = {
-    dateFormat: 'dd/mm/yyyy'
+    dateFormat: 'mm/dd/yyyy'
   };
 
   constructor(private fb: FormBuilder) { }
@@ -45,12 +46,13 @@ export class FormComponent implements OnInit {
     this.statsFilterForm = this.fb.group({
       'appName': ['', Validators.required],
       'appVersion': ['', Validators.required],
-      'dateRange': ['', Validators.required]
+      'dateRange': ['']
     });
 
 
     this.appIdStore = this.statsFilterForm.get('appName');
     this.version = this.statsFilterForm.get('appVersion');
+    this.dateRange = this.statsFilterForm.get('dateRange');
   }
 
 
@@ -71,10 +73,8 @@ export class FormComponent implements OnInit {
   }
 
   public onDateChange(event: { [key: string]: Date }) {
-    console.log(event);
     this.startDate = event.beginJsDate;
     this.endDate = event.endJsDate;
-    console.log(this.startDate);
     this.onFilterChange();
   }
 
