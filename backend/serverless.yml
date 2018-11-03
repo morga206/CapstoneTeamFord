@@ -31,12 +31,21 @@ provider:
             - 'arn:aws:ssm'
             - Ref: 'AWS::Region'
             - Ref: 'AWS::AccountId'
+    - Effect: Allow
+      Action:
+        - events:PutRule
+      Resource:
+        - arn:aws:events:${self:provider.region}:*:rule/${self:custom.reviewsEventName}
+        - arn:aws:events:${self:provider.region}:*:rule/${self:custom.slackbotEventName}
 
 plugins:
     - serverless-finch
 
 custom:
   tableName: 'appReviewsTable-${self:provider.stage}'
+
+  reviewsEventName: reviews-interval-${self:provider.stage}
+  slackbotEventName: slackbot-interval-${self:provider.stage}
   
   client:
     bucketName: ${self:service}-client-${self:provider.stage}
@@ -61,6 +70,10 @@ functions:
       TABLE_NAME: ${self:custom.tableName}
       DEPLOY_REGION: ${self:provider.region}
       STAGE: ${self:provider.stage}
+
+      # Flags for settings that require Lambda configuration updates
+      APPSTOREPOLLING_CLOUDWATCH_EVENT: ${self:custom.reviewsEventName}
+      POSTINGINTERVAL_CLOUDWATCH_EVENT: ${self:custom.slackbotEventName}
     events:
       - http:
           method: post
@@ -100,6 +113,9 @@ functions:
       - http:
           method: any
           path: reviews
+      - schedule:
+          name: ${self:custom.reviewsEventName}
+          rate: rate(30 minutes)
   slackbot:
     runtime: nodejs8.10
     timeout: 20
@@ -124,6 +140,9 @@ functions:
       - http:
           method: get
           path: slackbot
+      - schedule:
+          name: ${self:custom.slackbotEventName}
+          rate: rate(30 minutes)
 
 resources:
   Resources:
