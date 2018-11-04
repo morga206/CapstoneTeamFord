@@ -2,7 +2,6 @@ import { TestBed, async } from '@angular/core/testing';
 import {RouterTestingModule} from '@angular/router/testing';
 import { AppComponent } from './app.component';
 import { NavComponent } from './shared/nav/nav.component';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AuthService } from './auth/auth.service';
 
 describe('AppComponent', () => {
@@ -12,7 +11,7 @@ describe('AppComponent', () => {
         AppComponent,
         NavComponent
       ],
-      imports: [RouterTestingModule, NgbModule],
+      imports: [RouterTestingModule],
       providers: [AuthService]
     }).compileComponents();
   });

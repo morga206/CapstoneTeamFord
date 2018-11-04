@@ -1,7 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard.component';
-import { NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import { DatepickerComponent} from '../shared/datepicker/datepicker.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ChartsModule } from 'ng2-charts';
 import { CardComponent } from './card/card.component';
@@ -27,7 +25,6 @@ describe('DashboardComponent', () => {
       declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent ],
       providers: [AuthService],
       imports: [
-        NgbModule,
         ReactiveFormsModule,
         FormsModule,
         ChartsModule,
