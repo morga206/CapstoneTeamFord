@@ -116,7 +116,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     const modalRef = this.modalService.show(AddAppComponent);
     this.modalSubscription = modalRef.content.submit.subscribe((data) => {
       this.onAddApp(data);
-    })
+    });
   }
 
   onAddApp(app: App) {

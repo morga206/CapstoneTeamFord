@@ -83,7 +83,7 @@ export class FormComponent implements OnInit {
 
   public getCurrentValues(): StatsFilterValues | undefined {
     if (this.statsFilterForm.invalid
-      || this.startDate === undefined 
+      || this.startDate === undefined
       || this.endDate === undefined) {
       return undefined;
     }

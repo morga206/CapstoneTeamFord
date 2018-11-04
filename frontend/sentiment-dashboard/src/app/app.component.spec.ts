@@ -3,6 +3,7 @@ import {RouterTestingModule} from '@angular/router/testing';
 import { AppComponent } from './app.component';
 import { NavComponent } from './shared/nav/nav.component';
 import { AuthService } from './auth/auth.service';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
 
 describe('AppComponent', () => {
   beforeEach(() => {
@@ -11,7 +12,7 @@ describe('AppComponent', () => {
         AppComponent,
         NavComponent
       ],
-      imports: [RouterTestingModule],
+      imports: [RouterTestingModule, CollapseModule],
       providers: [AuthService]
     }).compileComponents();
   });

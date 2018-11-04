@@ -1,8 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MyDateRangePickerModule } from 'mydaterangepicker';
 import { FormComponent, StatsFilterValues } from './form.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AppInfo } from 'src/app/rest/domain';
+import { BsDatepickerModule, BsDaterangepickerConfig, BsLocaleService } from 'ngx-bootstrap/datepicker';
+import { ComponentLoaderFactory } from 'ngx-bootstrap/loader';
+import { PositioningService } from 'ngx-bootstrap/positioning';
 
 describe('FormComponent', () => {
   let component: FormComponent;
@@ -21,7 +23,8 @@ describe('FormComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ FormComponent ],
-      imports: [ ReactiveFormsModule, MyDateRangePickerModule ]
+      imports: [ ReactiveFormsModule, BsDatepickerModule ],
+      providers: [ BsDaterangepickerConfig, ComponentLoaderFactory, PositioningService, BsLocaleService ]
     })
     .compileComponents();
   }));
@@ -55,27 +58,13 @@ describe('FormComponent', () => {
 
     component.version.setValue(testVersion);
 
-    component.statsFilterForm.get('dateRange').patchValue({myDateRange: {
-        beginDate: {
-          year: testStartDate.getFullYear(),
-          month: testStartDate.getMonth() + 1,
-          day: testStartDate.getDate()
-        },
-        endDate: {
-          year: testEndDate.getFullYear(),
-          month: testEndDate.getMonth() + 1,
-          day: testEndDate.getDate()
-        }
-      }});
-
-
     component.statsFilterForm.updateValueAndValidity();
 
     spyOn(component.filterChange, 'emit');
-    component.onDateChange({
-      beginJsDate: testStartDate,
-      endJsDate: testEndDate
-    });
+    component.onDateChange([
+      testStartDate,
+      testEndDate
+    ]);
     component.onFilterChange();
 
     const expectedValues: StatsFilterValues = {

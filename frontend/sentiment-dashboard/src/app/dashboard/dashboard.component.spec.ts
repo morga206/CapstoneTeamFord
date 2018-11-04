@@ -10,6 +10,9 @@ import { AuthService } from '../auth/auth.service';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { environment } from 'src/environments/environment';
 import { StatResponse, Keyword, AppInfo } from '../rest/domain';
+import { BsDatepickerModule, BsDaterangepickerConfig, BsLocaleService } from 'ngx-bootstrap/datepicker';
+import { ComponentLoaderFactory } from 'ngx-bootstrap/loader';
+import { PositioningService } from 'ngx-bootstrap/positioning';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -22,13 +25,14 @@ describe('DashboardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent ],
-      providers: [AuthService],
+      providers: [ AuthService, BsDaterangepickerConfig, ComponentLoaderFactory, PositioningService, BsLocaleService ],
       imports: [
         ReactiveFormsModule,
         FormsModule,
         ChartsModule,
         HttpClientModule,
-        HttpClientTestingModule]
+        HttpClientTestingModule,
+        BsDatepickerModule ]
     })
     .compileComponents();
   }));
