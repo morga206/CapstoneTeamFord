@@ -358,42 +358,77 @@ async function sendStats(statistics){
  * @param statistics list of statistics to output to slack
  */
 async function getSentimentOverTime(statistics){
-  let message ='';
+  let reports = [];
 
   // report represents the index in statistics list
   for (let report in statistics) {
-    message += '____________________________\n';
-    let statsList = statistics[report];
+    let message = '';
+    let attachments = [
+      {
+        'fallback': 'Sentiment Over Time',
+        'color': '#0066ff',
+        'title': 'Percentage of positive reviews by day',
+      }
+    ];
 
+    // Get the fields we want to use in our message to slack
+    let statsList = statistics[report];
     let sentimentOverTime = statsList.sentimentOverTime;
+    let overallSentiment = statsList.overallSentiment;
     let data = sentimentOverTime.data;
     let labels = sentimentOverTime.labels;
     let rawReviews = statsList.rawReviews;
     let version = statsList.version;
     let name = statsList.name;
+    let startDate = statsList.sentimentOverTime.labels[0];
+    let endDate = statsList.sentimentOverTime.labels[statsList.sentimentOverTime.labels.length-1];
 
-    message += `For app Version: ${version}\nApp: ${name}\n\n`;
-    message += `Between 10/25/2018 and 11/01/2018, we saw ${Object.keys(rawReviews).length} new reviews\n`;
-    message += '\t\tBroken up in to days where reviews were written:\n';
+    // Determine the actual sentiment values as percentages
+    let sentiment = [Math.round(overallSentiment.POSITIVE), Math.round(overallSentiment.NEGATIVE), Math.round(overallSentiment.MIXED), Math.round(overallSentiment.NEUTRAL)];
+    let max = Math.max(sentiment[0], sentiment[1], sentiment[2], sentiment[3]);
+
+    // Find the maximum sentiment value of(Pos, Neg, Neutral, Mixed)
+    let attitude = '';
+    if (max == sentiment[0]) {
+      attitude = 'Positive';
+    } else if (max == sentiment[1]) {
+      attitude = 'Negative';
+    } else if (max == sentiment[2]) {
+      attitude = 'Mixed';
+    } else {
+      attitude = 'Neutral';
+    }
+
+    // Build the slack message to send back with attachments
+    message += `Report for:\nApp: ${name}\nVersion: ${version}\n`;
+    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(rawReviews).length} reviews`;
+
+    let text = '';
 
     for (let i in data) {
       let date =  labels[i];
-      let percent = Math.round(data[i]);
+      let percent = Math.round(data[i]*100)/100;
 
       if (data[i] != null) {
-        message += `\t\t\t\tOn ${date}, ${percent}% of reviews were positive!\n`;
+        text += `On ${date}, ${percent}% of reviews were positive!\n`;
       }
     }
-    message += '\n\n\nEnd Report\n\n\n';
+
+    attachments[0].text = text;
+    let params = {
+      text: message,
+      attachments: attachments
+    };
+
+    reports.push(params);
+
   }
 
+  for (let report in reports) {
+    axios.post(hook, reports[report]);
+  }
 
-  let params = {
-    text: message
-  };
-
-  axios.post(hook, params);
-  return message;
+  return reports;
 }
 
 async function helpMessage(text='') {
