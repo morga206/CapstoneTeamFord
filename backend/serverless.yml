@@ -121,7 +121,13 @@ functions:
     events:
       - http:
           method: get
-          path: slackbot
+          path: slackbot/report
+      - http:
+          method: post
+          path: slackbot/command
+      - schedule:
+          rate: rate(24 hours)
+
 
 resources:
   Resources:
