@@ -1,4 +1,4 @@
-<form class="form-inline flex-nowrap" [formGroup]="statsFilterForm">
+<form class="form-inline flex-nowrap" [formGroup]="statsFilterForm" novalidate>
   <div class="form-group">
     <label for="app-name" class="mr-2">App name</label>
     <select class="form-control mr-2" id="app-name" formControlName="appName" (change)="onAppSelect($event.target.value)" [class.is-invalid]="appIdStore.invalid">
@@ -14,11 +14,12 @@
   </div>
 
   <div class="form-group">
-    <label for="start-date">Date</label>
-    <input type="date" class="form-control mx-2" placeholder="yyyy-mm-dd" id="start-date" formControlName="startDate" [class.is-invalid]="startDate.invalid" (change)="onFilterChange()">
-    <label for="end-date">to</label>
-    <input type="date" class="form-control mx-2" placeholder="yyyy-mm-dd" id="end-date" formControlName="endDate" [class.is-invalid]="endDate.invalid" (change)="onFilterChange()">
+    <my-date-range-picker class="mr-2" name="date-range" [options]="myDateRangePickerOptions"
+                          formControlName="dateRange" (dateRangeChanged)="onDateChange($event)">
+
+    </my-date-range-picker>
   </div>
+
 
   <div class="form-group" *ngIf="showCompare">
     <button type="button" class="btn btn-primary" (click)="toggleComparison()">{{ compareText }}</button>

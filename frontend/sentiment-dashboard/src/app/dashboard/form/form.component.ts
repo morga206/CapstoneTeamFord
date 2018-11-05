@@ -1,6 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, AbstractControl, Validators, FormBuilder } from '@angular/forms';
 import { AppInfo } from 'src/app/rest/domain';
+import {IMyDrpOptions} from 'mydaterangepicker';
+
 
 export interface StatsFilterValues {
   appIdStore: string;
@@ -30,8 +32,13 @@ export class FormComponent implements OnInit {
   public statsFilterForm: FormGroup;
   public appIdStore: AbstractControl;
   public version: AbstractControl;
-  public startDate: AbstractControl;
-  public endDate: AbstractControl;
+  public dateRange: AbstractControl;
+
+  public startDate?: Date;
+  public endDate?: Date;
+  public myDateRangePickerOptions: IMyDrpOptions = {
+    dateFormat: 'mm/dd/yyyy'
+  };
 
   constructor(private fb: FormBuilder) { }
 
@@ -39,15 +46,15 @@ export class FormComponent implements OnInit {
     this.statsFilterForm = this.fb.group({
       'appName': ['', Validators.required],
       'appVersion': ['', Validators.required],
-      'startDate': ['', Validators.required],
-      'endDate': ['', Validators.required]
+      'dateRange': ['']
     });
+
 
     this.appIdStore = this.statsFilterForm.get('appName');
     this.version = this.statsFilterForm.get('appVersion');
-    this.startDate = this.statsFilterForm.get('startDate');
-    this.endDate = this.statsFilterForm.get('endDate');
+    this.dateRange = this.statsFilterForm.get('dateRange');
   }
+
 
   public onAppSelect(appIdStore: string) {
     this.selectedApp = this.appList[appIdStore];
@@ -65,19 +72,31 @@ export class FormComponent implements OnInit {
     }
   }
 
+  public onDateChange(event: { [key: string]: Date }) {
+    this.startDate = event.beginJsDate;
+    this.endDate = event.endJsDate;
+    this.onFilterChange();
+  }
+
   public getCurrentValues(): StatsFilterValues | undefined {
     if (this.statsFilterForm.invalid) {
       return undefined;
     }
 
+
     const values: StatsFilterValues = {
       appIdStore: this.appIdStore.value,
       version: this.version.value,
-      startDate: new Date(this.startDate.value),
-      endDate: new Date(this.endDate.value)
+      startDate: this.startDate,
+      endDate: this.endDate
     };
 
     return values;
+  }
+
+  clearDateRange(): void {
+    // Clear the date range using the patchValue function
+    this.statsFilterForm.patchValue({dateRange: ''});
   }
 
   public toggleComparison() {
@@ -85,9 +104,7 @@ export class FormComponent implements OnInit {
     this.compareText = this.currentlyComparing ? 'Stop Comparing' : 'Compare Apps';
     this.compare.emit(this.currentlyComparing);
   }
-
   public setAppList(apps: { [id: string]: AppInfo }) {
     this.appList = apps;
   }
-
 }

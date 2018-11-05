@@ -4,9 +4,9 @@
   "description": "Review Scraping API for Ford Customer App Review Dashboard",
   "main": "handler.js",
   "dependencies": {
-    "app-store-scraper": "^0.13.0",
     "aws-sdk": "^2.327.0",
-    "google-play-scraper": "^6.2.0"
+    "google-play-scraper": "^6.2.0",
+    "memoizee": "^0.4.14"
   },
   "devDependencies": {
     "eslint": "^5.6.0",

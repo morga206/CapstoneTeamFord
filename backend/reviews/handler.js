@@ -3,6 +3,7 @@ const crypto = require('crypto');
 
 const aws = require('aws-sdk');
 const region = process.env.DEPLOY_REGION;
+const stage = process.env.STAGE;
 const table = process.env.TABLE_NAME;
 
 const appStoreScraper = require('./xml-app-store-scraper');
@@ -10,9 +11,6 @@ const gPlayScraper = require('google-play-scraper');
 
 const START_PAGE = 0;
 const MAX_PAGE = 9;
-
-const APP_STORE_IDS = ['com.ford.fordpass']; // TODO get this from config DB
-const GPLAY_IDS = ['com.ford.fordpass']; // TODO get this from config DB
 
 module.exports = {
   handler,
@@ -26,9 +24,19 @@ module.exports = {
 };
 
 async function handler () {
+  let appList = '';
+  try {
+    appList = await getAppList();
+  } catch (error) {
+    return {
+      statusCode: 500, // Internal Server Error
+      error: `Error getting app list: ${error}`
+    };
+  }
+
   let reviews = [];
   try {
-    reviews = await getReviews();
+    reviews = await getReviews(appList);
   } catch (error) {
     return {
       statusCode: 500, // Internal Server Error
@@ -67,15 +75,54 @@ async function handler () {
 }
 
 /**
- * Scrapes all available reviews for the configured apps from Google Play and the App Store 
+ * Sets the app list from SSM
  */
-async function getReviews() {
+async function getAppList() {
+  const ssm = new aws.SSM();
+  const params = {
+    Name: `appList-${stage}`
+  };
+
+  let appListResponse;
+
+  try {
+    appListResponse = await ssm.getParameter(params).promise();
+  } catch (error) {
+    console.log(`Error getting app list: ${error}`);
+    throw error;
+  }
+
+  return appListResponse.Parameter.Value;
+  
+}
+
+/**
+ * Scrapes all available reviews for the configured apps from Google Play and the App Store 
+ * @param appList The list of apps to scrape
+ */
+async function getReviews(appList) {
   let allReviews = [];
 
-  for (let i = 0; i < APP_STORE_IDS.length; i++) {
+  let appListObject;
+  try {
+    appListObject = JSON.parse(appList);
+  } catch (error) {
+    console.log(`Error parsing appList: ${error}`);
+    throw error;
+  }
+  
+  const appStoreIds = appListObject
+    .filter((app) => app.store === 'App Store')
+    .map((app) => app.appId);
+
+  const gPlayIds = appListObject
+    .filter((app) => app.store === 'Google Play')
+    .map((app) => app.appId);
+
+  for (let i = 0; i < appStoreIds.length; i++) {
     try {
-      let appStoreReviews = await scrape(APP_STORE_IDS[i], appStoreScraper, 'App Store', true);
-      appStoreReviews = await removeDuplicates(APP_STORE_IDS[i], 'App Store', appStoreReviews);
+      let appStoreReviews = await scrape(appStoreIds[i], appStoreScraper, 'App Store', true);
+      appStoreReviews = await removeDuplicates(appStoreIds[i], 'App Store', appStoreReviews);
       allReviews = allReviews.concat(appStoreReviews);
     } catch (error) {
       console.log(`Error processing App Store reviews: ${error}`);
@@ -83,10 +130,10 @@ async function getReviews() {
     }
   }
 
-  for (let i = 0; i < GPLAY_IDS.length; i++) {
+  for (let i = 0; i < gPlayIds.length; i++) {
     try {
-      let gPlayReviews = await scrape(GPLAY_IDS[i], gPlayScraper, 'Google Play', false);
-      gPlayReviews = await removeDuplicates(GPLAY_IDS[i], 'Google Play', gPlayReviews);
+      let gPlayReviews = await scrape(gPlayIds[i], gPlayScraper, 'Google Play', false);
+      gPlayReviews = await removeDuplicates(gPlayIds[i], 'Google Play', gPlayReviews);
       allReviews = allReviews.concat(gPlayReviews);
     } catch (error) {
       console.log(`Error processing Google Play reviews: ${error}`);
@@ -114,12 +161,10 @@ async function scrape(appId, scraper, store) {
         page: i,
         throttle: 1
       }));
-    }
-    // no need to throttle Apple App Store
-    else{
+    } else if (store === 'App Store') {
       promises.push(scraper.reviews({
         appId: appId,
-        page: i
+        page: i + 1
       }));
     }
   }
@@ -153,7 +198,12 @@ function convertReviewToDynamoRepresentation(id, store, alternateVersion) {
     let appIdStore = id + '*' + store;
 
     let reviewHash = crypto.createHash('sha256');
-    reviewHash.update(review.text + review.id);
+    try {
+      reviewHash.update(review.text + review.id);
+    } catch(error) {
+      console.log(`Error creating review hash: ${error}`);
+      throw error;
+    }
 
     let date = new Date(review.date).toISOString();
     let version = review.version === undefined ? alternateVersion : review.version;

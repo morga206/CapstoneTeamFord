@@ -1,5 +1,9 @@
 package sentiment.settings;
 
+import com.amazonaws.services.cloudwatchevents.AmazonCloudWatchEvents;
+import com.amazonaws.services.cloudwatchevents.AmazonCloudWatchEventsClient;
+import com.amazonaws.services.cloudwatchevents.model.PutRuleRequest;
+import com.amazonaws.services.cloudwatchevents.model.PutRuleResult;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
 import com.amazonaws.services.simplesystemsmanagement.model.ParameterType;
@@ -37,6 +41,11 @@ public class SetSettingsRequest extends Request {
       if (!response.isEmpty()) {
         return new SetSettingsResponse(response);
       }
+
+      response = updateLambdaInterval(setting.getName(), setting.getValue());
+      if (!response.isEmpty()) {
+        return new SetSettingsResponse(response);
+      }
     }
         
     return new SetSettingsResponse();
@@ -57,5 +66,39 @@ public class SetSettingsRequest extends Request {
     
     return "";
 
+  }
+
+  /**
+   * Updates the Lambda invocation interval for the given setting, if necessary.
+   * @param settingName The setting name
+   * @param settingValue The setting value
+   */
+  private String updateLambdaInterval(String settingName, String settingValue) {
+    // Query environment variables to check if this setting pertains to any Lambdas
+    String envVarName = settingName.toUpperCase() + "_CLOUDWATCH_EVENT";
+    String cloudWatchEventName = System.getenv(envVarName);
+
+    if (cloudWatchEventName == null) {
+      // No Cloud Watch rules to update for this setting
+      return "";
+    }
+
+    // Update CloudWatch Event to set new Lambda interval, if necessary
+    AmazonCloudWatchEvents cwe = AmazonCloudWatchEventsClient.builder().build();
+
+    PutRuleRequest request = new PutRuleRequest()
+        .withName(cloudWatchEventName)
+        .withScheduleExpression("rate(" + settingValue + " minutes)");
+
+    try {
+      cwe.putRule(request);
+    } catch (Exception exp) {
+      System.err.println(
+          "Error updating CloudWatch event "
+          + cloudWatchEventName + ": " + exp.getMessage());
+      return exp.getMessage();
+    }
+
+    return "";
   }
 }
