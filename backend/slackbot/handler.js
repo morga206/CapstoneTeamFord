@@ -1,6 +1,6 @@
 'use strict';
-//const hook = 'https://hooks.slack.com/services/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';
-const hook = 'https://hooks.slack.com/services/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';
+//const hook = 'https://hooks.slack.com/services/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'; // testing slack
+const hook = 'https://hooks.slack.com/services/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'; // group slack
 
 const gatewayURL = process.env.GW_URL;
 const axios = require('axios');
@@ -13,8 +13,6 @@ module.exports = {
   getStatistics,
   sendStats,
   getSentimentOverTime,
-  getLatestReviews,
-  getReviews
 };
 
 async function handler (event) {
@@ -29,7 +27,7 @@ async function handler (event) {
       return {
         statusCode: 500,
         error: `Error handeling post request: ${error}`
-      }
+      };
     }
   } else {
     try {
@@ -38,16 +36,16 @@ async function handler (event) {
       return {
         statusCode: 500,
         error: `Error Generating Report: ${error}`
-      }
+      };
     }
   }
 
-  console.log("Response message sent to slack")
   console.log(responseMessage);
+  console.log('Message sent to slack');
 
   return {
     statusCode: 200
-  }
+  };
 
 }
 
@@ -99,7 +97,7 @@ async function handleCommand(body){
     } else if (parsed.command == '/getreviews') {
 
       // Check for required parameters
-      if (parameters.hasOwnProperty('startDate') & parameters.hasOwnProperty('endDate') & parameters.hasOwnProperty('version')) {
+      if (parameters.hasOwnProperty('startDate') && parameters.hasOwnProperty('endDate') && parameters.hasOwnProperty('version')) {
         message = await sendStats(stats);
       }
     } else if (parsed.command == '/sentimentovertime') {
@@ -173,12 +171,12 @@ async function getApps(store='both') {
 
     for (let key in apps) {
 
-      if (store.includes('google')) {
+      if (store.includes('google') || store.includes('android')) {
         if (key.includes('Google Play')) {
           filteredApps[key] = apps[key];
         }
       }
-      else if (store.includes('apple') | store.contains('ios') | store.contains('app')) {
+      else if (store.includes('apple') || store.includes('ios') || store.includes('app')) {
         if (key.includes('App Store')) {
           filteredApps[key] = apps[key];
         }
@@ -280,19 +278,21 @@ async function sendStats(statistics){
   for (let report in statistics) {
     let message = '';
     let slackAttachments = [
-        {"fallback": "Overall Sentiment",
-        "color": "#0066ff",
-        "title": "Overall Sentiment",
-        },
-        {"fallback": "Positive Keywords",
-        "color": "#36a64f",
-        "title": "Keywords in Positive Reviews"
-        },
-        {"fallback": "Negative Keywords",
-        "color": "#ff0000",
-        "title": "Keywords in Negative Reviews"
-        }];
+      {'fallback': 'Overall Sentiment',
+        'color': '#0066ff',
+        'title': 'Overall Sentiment',
+      },
+      {'fallback': 'Positive Keywords',
+        'color': '#36a64f',
+        'title': 'Keywords in Positive Reviews'
+      },
+      {'fallback': 'Negative Keywords',
+        'color': '#ff0000',
+        'title': 'Keywords in Negative Reviews'
+      }
+    ];
 
+    // Get fields from statsList to send in messages
     let statsList = statistics[report];
     let overallSentiment = statsList.overallSentiment;
     let rawReviews = statsList.rawReviews;
@@ -302,20 +302,23 @@ async function sendStats(statistics){
     let startDate = statsList.sentimentOverTime.labels[0];
     let endDate = statsList.sentimentOverTime.labels[statsList.sentimentOverTime.labels.length-1];
 
+    // Determine the actual sentiment values as percentages
     let sentiment = [Math.round(overallSentiment.POSITIVE), Math.round(overallSentiment.NEGATIVE), Math.round(overallSentiment.MIXED), Math.round(overallSentiment.NEUTRAL)];
     let max = Math.max(sentiment[0], sentiment[1], sentiment[2], sentiment[3]);
 
+    // Find the maximum sentiment value of(Pos, Neg, Neutral, Mixed)
     let attitude = '';
     if (max == sentiment[0]) {
-      attitude = "Positive";
+      attitude = 'Positive';
     } else if (max == sentiment[1]) {
-      attitude = "Negative";
+      attitude = 'Negative';
     } else if (max == sentiment[2]) {
       attitude = 'Mixed';
     } else {
       attitude = 'Neutral';
     }
 
+    // Build the slack message to send back with attachments
     message += `Report for:\nApp: ${name}\nVersion: ${version}\n`;
     message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(rawReviews).length} reviews`;
 
@@ -325,21 +328,21 @@ async function sendStats(statistics){
     text = '';
     for (let i in keywords.positive) {
       let word = keywords.positive[i];
-      text += `${word.keyword}: ${Math.round(word.percentage*100)/100}%\n`
+      text += `${word.keyword}: ${Math.round(word.percentage*100)/100}%\n`;
     }
     slackAttachments[1].text = text;
 
     text = '';
     for (let i in keywords.negative) {
       let word = keywords.negative[i];
-      text += `${word.keyword}: ${Math.round(word.percentage*100)/100}%\n`
+      text += `${word.keyword}: ${Math.round(word.percentage*100)/100}%\n`;
     }
     slackAttachments[2].text = text;
 
     let params = {
       text: message,
       attachments: slackAttachments
-    }
+    };
 
     reports.push(params);
   }
@@ -351,26 +354,11 @@ async function sendStats(statistics){
   return reports;
 }
 
-async function getLatestReviews(statistics) {
-  let message = "calling getLatestReviews";
-  console.log(message);
-  return message;
-
-}
-
-async function getReviews(statistics) {
-  let message = "calling getReviews";
-  console.log(message);
-  return message;
-}
-
 /**
  * @param statistics list of statistics to output to slack
  */
 async function getSentimentOverTime(statistics){
-  let message = 'calling getSentimentOverTime';
-  console.log(message);
-  return message;
+  let message ='';
 
   // report represents the index in statistics list
   for (let report in statistics) {
@@ -386,7 +374,7 @@ async function getSentimentOverTime(statistics){
 
     message += `For app Version: ${version}\nApp: ${name}\n\n`;
     message += `Between 10/25/2018 and 11/01/2018, we saw ${Object.keys(rawReviews).length} new reviews\n`;
-    message += `\t\tBroken up in to days where reviews were written:\n`;
+    message += '\t\tBroken up in to days where reviews were written:\n';
 
     for (let i in data) {
       let date =  labels[i];
@@ -409,7 +397,83 @@ async function getSentimentOverTime(statistics){
 }
 
 async function helpMessage(text='') {
-  let message = '';
+  let message = text + '\n';
+  message += 'Available Functions and how to use them are below';
 
-  return message;
+  let attachments = [{}, {}, {}];
+  attachments[0] = {
+    'fallback': 'getReviews Help',
+    'color': '#0066ff',
+    'title': '/getReviews',
+    'text':  'Description: Gets the review sentiment and common keywords for an app or list of apps\n',
+    'fields': [
+      {
+        'title': 'Optional Parameters',
+        'value': 'days (default 7)\nstore (defaults to both)',
+        'short': false
+      },
+      {
+        'title': 'Example use cases',
+        'value': '/getreviews\n/getreviews store=google\n/getreviews days=4 store=android',
+        'short': false
+      }
+    ]
+  };
+
+  attachments[1] = {
+    'fallback': 'getLatestReviews Help',
+    'color': '#ff6600',
+    'title': '/getLatestReviews',
+    'text':  'Description: Gets the most recent review sentiment and common keywords for an app or list of apps\n',
+    'fields': [
+      {
+        'title': 'Required Parameters',
+        'value': 'startDate: (mm/dd/yyyy)\nendDate: (mm/dd/yyyy)\nversion: (2.4.1)',
+        'short': false
+      },
+      {
+        'title': 'Optional Parameters',
+        'value': 'store (defaults to both)',
+        'short': false
+      },
+      {
+        'title': 'Example use cases',
+        'value': '/getlatestreviews startDate=10/30/2018 endDate=11/5/2018 version=2.4.1',
+        'short': false
+      }
+    ]
+  };
+
+  attachments[2] = {
+    'fallback': 'getSentimentOverTime Help',
+    'color': '#ff6600',
+    'title': '/getSentimentOverTime',
+    'text':  'Description: Gets the percentage of positive reviews per day given dates\n',
+    'fields': [
+      {
+        'title': 'Required Parameters',
+        'value': 'startDate: (mm/dd/yyyy)\nendDate: (mm/dd/yyyy)',
+        'short': false
+      },
+      {
+        'title': 'Optional Parameters',
+        'value': 'store (defaults to both)\nversion: (defaults to latest)',
+        'short': false
+      },
+      {
+        'title': 'Example use cases',
+        'value': '/getSentimentOverTime startDate=10/30/2018 endDate=11/5/2018 version=2.4.1 store=ios',
+        'short': false
+      }
+    ]
+  };
+
+  let params = {
+    text: message,
+    attachments: attachments
+  };
+
+  let response = await axios.post(hook, params);
+
+  return response;
 }
