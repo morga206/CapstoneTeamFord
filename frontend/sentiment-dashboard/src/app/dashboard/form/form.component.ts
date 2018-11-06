@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, AbstractControl, Validators, FormBuilder } from '@angular/forms';
 import { AppInfo } from 'src/app/rest/domain';
-import {IMyDrpOptions} from 'mydaterangepicker';
 
 
 export interface StatsFilterValues {
@@ -28,36 +27,34 @@ export class FormComponent implements OnInit {
 
   public appList: { [id: string]: AppInfo } = {};
   public selectedApp?: AppInfo;
+  public minDate?: Date;
+  public maxDate?: Date;
 
   public statsFilterForm: FormGroup;
   public appIdStore: AbstractControl;
   public version: AbstractControl;
-  public dateRange: AbstractControl;
 
   public startDate?: Date;
   public endDate?: Date;
-  public myDateRangePickerOptions: IMyDrpOptions = {
-    dateFormat: 'mm/dd/yyyy'
-  };
 
   constructor(private fb: FormBuilder) { }
 
   ngOnInit() {
     this.statsFilterForm = this.fb.group({
       'appName': ['', Validators.required],
-      'appVersion': ['', Validators.required],
-      'dateRange': ['']
+      'appVersion': ['', Validators.required]
     });
 
 
     this.appIdStore = this.statsFilterForm.get('appName');
     this.version = this.statsFilterForm.get('appVersion');
-    this.dateRange = this.statsFilterForm.get('dateRange');
   }
 
 
   public onAppSelect(appIdStore: string) {
     this.selectedApp = this.appList[appIdStore];
+    this.minDate = new Date(this.selectedApp.minDate);
+    this.maxDate = new Date(this.selectedApp.maxDate);
 
     if (this.selectedApp.versions.length > 0) {
       this.version.setValue(this.selectedApp.versions[0]);
@@ -72,17 +69,24 @@ export class FormComponent implements OnInit {
     }
   }
 
-  public onDateChange(event: { [key: string]: Date }) {
-    this.startDate = event.beginJsDate;
-    this.endDate = event.endJsDate;
+  public onDateChange(event: Date[]) {
+    if (event === null) {
+      this.startDate = undefined;
+      this.endDate = undefined;
+    } else {
+      this.startDate = event[0];
+      this.endDate = event[1];
+    }
+
     this.onFilterChange();
   }
 
   public getCurrentValues(): StatsFilterValues | undefined {
-    if (this.statsFilterForm.invalid) {
+    if (this.statsFilterForm.invalid
+      || this.startDate === undefined
+      || this.endDate === undefined) {
       return undefined;
     }
-
 
     const values: StatsFilterValues = {
       appIdStore: this.appIdStore.value,
@@ -92,11 +96,6 @@ export class FormComponent implements OnInit {
     };
 
     return values;
-  }
-
-  clearDateRange(): void {
-    // Clear the date range using the patchValue function
-    this.statsFilterForm.patchValue({dateRange: ''});
   }
 
   public toggleComparison() {

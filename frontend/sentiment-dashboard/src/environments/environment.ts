@@ -7,9 +7,9 @@ export const environment = {
   amplify: {
     Auth: {
       identityPoolId: '',
-      region: '',
-      userPoolId: '',
-      userPoolWebClientId: ''
+      region: 'us-east-2',
+      userPoolId: 'us-east-2_R99catdY3',
+      userPoolWebClientId: '4fcrkjsm80luke700taf5263l3'
     }
   },
   backendUrl: 'https://rmafxge20k.execute-api.us-east-2.amazonaws.com/noah/'

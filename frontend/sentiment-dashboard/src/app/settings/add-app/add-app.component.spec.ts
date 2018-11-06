@@ -2,9 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AddAppComponent } from './add-app.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NgbModule, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { By } from '@angular/platform-browser';
-import { App } from 'src/app/rest/domain';
+import { ModalModule, BsModalRef } from 'ngx-bootstrap/modal';
 
 describe('AddAppComponent', () => {
   let component: AddAppComponent;
@@ -13,8 +11,8 @@ describe('AddAppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ AddAppComponent ],
-      imports: [ ReactiveFormsModule, NgbModule ],
-      providers: [ NgbActiveModal ]
+      imports: [ ReactiveFormsModule, ModalModule ],
+      providers: [ BsModalRef ]
     })
     .compileComponents();
   }));
