@@ -82,9 +82,7 @@ export class FormComponent implements OnInit {
   }
 
   public getCurrentValues(): StatsFilterValues | undefined {
-    if (this.statsFilterForm.invalid
-      || this.startDate === undefined
-      || this.endDate === undefined) {
+    if (!this.isValid()) {
       return undefined;
     }
 
@@ -98,12 +96,25 @@ export class FormComponent implements OnInit {
     return values;
   }
 
+  private isValid() {
+    return this.statsFilterForm.valid && this.startDate !== undefined && this.endDate !== undefined;
+  }
+
   public toggleComparison() {
     this.currentlyComparing = !this.currentlyComparing;
     this.compareText = this.currentlyComparing ? 'Stop Comparing' : 'Compare Apps';
     this.compare.emit(this.currentlyComparing);
   }
+
   public setAppList(apps: { [id: string]: AppInfo }) {
     this.appList = apps;
+  }
+
+  public getCompareTitle() {
+    if (!this.isValid()) {
+      return '---';
+    }
+
+    return this.selectedApp.name + ' - ' + this.version.value;
   }
 }

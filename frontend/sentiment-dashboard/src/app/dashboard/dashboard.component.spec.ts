@@ -52,6 +52,7 @@ describe('DashboardComponent', () => {
   it('successfully queries for updated stats', () => {
     // Send mock app list to initialize component
     const testApp: AppInfo = {
+      name: '',
       minDate: new Date('01-01-2018').toISOString(),
       maxDate: new Date('12-31-2018').toISOString(),
       versions: ['1.0.0', '2.0.0', '3.0.0']
