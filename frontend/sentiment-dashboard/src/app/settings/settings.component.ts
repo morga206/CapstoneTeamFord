@@ -19,9 +19,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   private appListTimer: any;
 
   public scrapingForm: FormGroup;
-  public appStorePolling: AbstractControl;
-  public playStorePolling: AbstractControl;
-
+  public pollingInterval: AbstractControl;
   public scrapingFormError = '';
   public scrapingFormSuccess = false;
   private scrapingFormGetSubscription: Subscription;
@@ -44,11 +42,9 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.scrapingForm = this.fb.group({
-      'appStorePolling': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])],
-      'playStorePolling': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])]
+      'pollingInterval': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])]
     });
-    this.appStorePolling = this.scrapingForm.get('appStorePolling');
-    this.playStorePolling = this.scrapingForm.get('playStorePolling');
+    this.pollingInterval = this.scrapingForm.get('pollingInterval');
 
     this.slackForm = this.fb.group({
       'postingChannel': ['', Validators.compose([Validators.required, Validators.pattern('[a-zA-Z0-9-]+')])],
@@ -67,7 +63,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.appList = response.appList;
       }
     });
-    this.scrapingFormGetSubscription = this.rest.getSettings(['appStorePolling', 'playStorePolling'])
+    this.scrapingFormGetSubscription = this.rest.getSettings(['pollingInterval'])
     .subscribe((response) => {
       if (response.status === 'ERROR') {
         this.scrapingFormError = response.message;
@@ -160,8 +156,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onScrapingSubmit() {
     this.scrapingFormSetSubscription = this.rest.setSettings([
-      { name: 'appStorePolling', value: this.appStorePolling.value },
-      { name: 'playStorePolling', value: this.playStorePolling.value }
+      { name: 'pollingInterval', value: this.pollingInterval.value }
     ]).subscribe((response) => {
       if (response.status === 'ERROR') {
         this.scrapingFormError = response.message;
