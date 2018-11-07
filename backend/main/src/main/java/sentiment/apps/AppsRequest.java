@@ -5,9 +5,17 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterResult;
+import com.amazonaws.services.simplesystemsmanagement.model.ParameterNotFoundException;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import sentiment.Request;
 import sentiment.Response;
+import sentiment.settings.App;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +32,7 @@ import java.util.Set;
  */
 public class AppsRequest extends Request {
   private static final String REGION = System.getenv("DEPLOY_REGION");
+  private static final String STAGE = System.getenv("STAGE");
   private static final String TABLE = System.getenv("TABLE_NAME");
 
   @JsonCreator
@@ -33,18 +42,33 @@ public class AppsRequest extends Request {
    * Process the data for this request and return a response.
    */
   public Response process() {
-    // TODO get these from the settings DB
-    final String[] appIds = 
-      new String[] { "com.ford.fordpass*App Store", "com.ford.fordpass*Google Play" };
-    final String[] appNames = 
-      new String[] { "Fordpass (App Store)", "FordPass (Google Play)"};
+    // Get app list from SSM
+    AWSSimpleSystemsManagement ssmClient = AWSSimpleSystemsManagementClientBuilder.defaultClient();
+
+    GetParameterResult result = null;
+    String value = null;
+    try {
+      result = ssmClient.getParameter(new GetParameterRequest().withName("appList-" + STAGE));
+      value = result.getParameter().getValue();
+    } catch (ParameterNotFoundException exp) {
+      return new AppsResponse("Unable to get app list from SSM.");
+    }
+
+    App[] appList;
+    try {
+      appList = new ObjectMapper().readValue(value, App[].class);
+    } catch (Exception exp) {
+      return new AppsResponse("Unable to parse app list from JSON.");
+    }
 
     List<AppInfo> apps = new ArrayList<AppInfo>();
 
-    AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(REGION).build();
+    AmazonDynamoDB dynamoDbClient = AmazonDynamoDBClientBuilder.standard().withRegion(REGION).build();
 
-    for (int i = 0; i < appIds.length; i++) {
-      AppInfo info = getAppInfoFromDb(client, appIds[i], appNames[i]);
+    for (int i = 0; i < appList.length; i++) {
+      String appIdStore = appList[i].getAppId() + "*" + appList[i].getStore();
+      String appName = appList[i].getName() + " (" + appList[i].getStore() + ")";
+      AppInfo info = getAppInfoFromDb(dynamoDbClient, appIdStore, appName);
       if (info != null) {
         // We have reviews for this app
         apps.add(info);

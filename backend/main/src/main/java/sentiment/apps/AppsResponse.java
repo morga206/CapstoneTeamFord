@@ -14,8 +14,17 @@ import java.util.Map;
 public class AppsResponse extends Response {
   private AppInfo[] apps;
 
+  private Status status;
+  private String message;
+
   public AppsResponse(AppInfo[] apps) {
+    this.status = Status.SUCCESS;
     this.apps = apps;
+  }
+
+  public AppsResponse(String message) {
+    this.status = Status.ERROR;
+    this.message = message;
   }
 
   /**
@@ -25,8 +34,13 @@ public class AppsResponse extends Response {
   public Map<String, Object> getData() {
     Map<String, Object> data = new HashMap<String, Object>();
 
-    for (AppInfo app : apps) {
-      data.put(app.getAppIdStore(), app);
+    data.put("status", status);
+    if (status == Status.SUCCESS) {
+      for (AppInfo app : apps) {
+        data.put(app.getAppIdStore(), app);
+      }
+    } else {
+      data.put("message", message);
     }
 
     System.out.println(data.toString());
