@@ -63,7 +63,8 @@ public class AppsRequest extends Request {
 
     List<AppInfo> apps = new ArrayList<AppInfo>();
 
-    AmazonDynamoDB dynamoDbClient = AmazonDynamoDBClientBuilder.standard().withRegion(REGION).build();
+    AmazonDynamoDB dynamoDbClient = 
+        AmazonDynamoDBClientBuilder.standard().withRegion(REGION).build();
 
     for (int i = 0; i < appList.length; i++) {
       String appIdStore = appList[i].getAppId() + "*" + appList[i].getStore();
