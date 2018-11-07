@@ -3,9 +3,9 @@
     <button class="navbar-toggler" type="button" aria-controls="navbarText" [attr.aria-expanded]="!isCollapsed" aria-label="Toggle navigation" (click)="isCollapsed = !isCollapsed">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarText" [ngbCollapse]="isCollapsed">
+    <div class="collapse navbar-collapse" id="navbarText" [collapse]="isCollapsed">
       <ul class="navbar-nav ml-auto">
-        <li class="nav-item active">
+        <li class="nav-item">
           <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">Home</a>
         </li>
         <li class="nav-item">

@@ -1,18 +1,18 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard.component';
-import { NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import { DatepickerComponent} from '../shared/datepicker/datepicker.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ChartsModule } from 'ng2-charts';
 import { CardComponent } from './card/card.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormComponent } from './form/form.component';
 import { StatsComponent } from './stats/stats.component';
-import {MyDateRangePickerModule} from 'mydaterangepicker';
 import { AuthService } from '../auth/auth.service';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { environment } from 'src/environments/environment';
 import { StatResponse, Keyword, AppInfo } from '../rest/domain';
+import { BsDatepickerModule, BsDaterangepickerConfig, BsLocaleService } from 'ngx-bootstrap/datepicker';
+import { ComponentLoaderFactory } from 'ngx-bootstrap/loader';
+import { PositioningService } from 'ngx-bootstrap/positioning';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -25,15 +25,14 @@ describe('DashboardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent ],
-      providers: [AuthService],
+      providers: [ AuthService, BsDaterangepickerConfig, ComponentLoaderFactory, PositioningService, BsLocaleService ],
       imports: [
-        NgbModule,
         ReactiveFormsModule,
         FormsModule,
         ChartsModule,
         HttpClientModule,
         HttpClientTestingModule,
-        MyDateRangePickerModule]
+        BsDatepickerModule ]
     })
     .compileComponents();
   }));
@@ -53,6 +52,7 @@ describe('DashboardComponent', () => {
   it('successfully queries for updated stats', () => {
     // Send mock app list to initialize component
     const testApp: AppInfo = {
+      name: '',
       minDate: new Date('01-01-2018').toISOString(),
       maxDate: new Date('12-31-2018').toISOString(),
       versions: ['1.0.0', '2.0.0', '3.0.0']

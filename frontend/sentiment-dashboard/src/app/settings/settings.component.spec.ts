@@ -7,6 +7,9 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { environment } from 'src/environments/environment';
 import { SettingResponse, App, AppListResponse } from '../rest/domain';
 import { AuthService } from '../auth/auth.service';
+import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
+import { ComponentLoaderFactory } from 'ngx-bootstrap/loader';
+import { PositioningService } from 'ngx-bootstrap/positioning';
 
 describe('SettingsComponent', () => {
   const API_URL = environment.backendUrl;
@@ -19,8 +22,8 @@ describe('SettingsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ SettingsComponent ],
-      imports: [ ReactiveFormsModule, HttpClientModule, HttpClientTestingModule ],
-      providers: [AuthService]
+      imports: [ ReactiveFormsModule, HttpClientModule, HttpClientTestingModule, ModalModule ],
+      providers: [ AuthService, BsModalService, ComponentLoaderFactory, PositioningService ]
     })
     .compileComponents();
   }));
@@ -35,18 +38,13 @@ describe('SettingsComponent', () => {
 
   // Send inital setting values from the mock backend to populate the form
   function initializeSettings() {
-    const testAppStorePolling = '30';
-    const testPlayStorePolling = '25';
+    const testPollingInterval = '30';
 
     const testScrapingResponse: SettingResponse = {
       settings: [
         {
-          name: 'appStorePolling',
-          value: testAppStorePolling
-        },
-        {
-          name: 'playStorePolling',
-          value: testPlayStorePolling
+          name: 'pollingInterval',
+          value: testPollingInterval
         }
       ],
       message: null,
@@ -80,7 +78,7 @@ describe('SettingsComponent', () => {
 
     const reqs = httpMock.match(API_URL + 'settings/get');
     reqs.forEach((req) => {
-      if (req.request.body === JSON.stringify({names: ['appStorePolling', 'playStorePolling']})) {
+      if (req.request.body === JSON.stringify({names: ['pollingInterval']})) {
         req.flush(testScrapingResponse);
       } else {
         req.flush(testSlackResponse);
@@ -92,8 +90,7 @@ describe('SettingsComponent', () => {
 
     httpMock.verify();
 
-    expect(component.appStorePolling.value).toEqual(testAppStorePolling);
-    expect(component.playStorePolling.value).toEqual(testPlayStorePolling);
+    expect(component.pollingInterval.value).toEqual(testPollingInterval);
 
     expect(component.postingChannel.value).toEqual(testPostingChannel);
     expect(component.postingInterval.value).toEqual(testPostingInterval);
@@ -106,8 +103,7 @@ describe('SettingsComponent', () => {
   });
 
   it('should be valid when all fields are filled out', () => {
-    component.appStorePolling.setValue('30');
-    component.playStorePolling.setValue('30');
+    component.pollingInterval.setValue('30');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeTruthy();
 
@@ -118,18 +114,12 @@ describe('SettingsComponent', () => {
   });
 
   it('should not be valid when fields are blank', () => {
-    component.appStorePolling.setValue('30');
-    component.scrapingForm.updateValueAndValidity();
-    expect(component.scrapingForm.valid).toBeFalsy();
-
-    component.appStorePolling.setValue('');
-    component.playStorePolling.setValue('30');
-    component.scrapingForm.updateValueAndValidity();
-    expect(component.scrapingForm.valid).toBeFalsy();
-
-    component.appStorePolling.setValue('30');
+    component.pollingInterval.setValue('30');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeTruthy();
+
+    component.pollingInterval.setValue('');
+    expect(component.scrapingForm.valid).toBeFalsy();
 
     component.postingChannel.setValue('general');
     component.slackForm.updateValueAndValidity();
@@ -146,21 +136,11 @@ describe('SettingsComponent', () => {
   });
 
   it('should not be valid if fields are malformed', () => {
-    component.appStorePolling.setValue('abc');
-    component.playStorePolling.setValue('def');
+    component.pollingInterval.setValue('abc');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeFalsy();
 
-    component.appStorePolling.setValue('30');
-    component.scrapingForm.updateValueAndValidity();
-    expect(component.scrapingForm.valid).toBeFalsy();
-
-    component.appStorePolling.setValue('abc');
-    component.playStorePolling.setValue('30');
-    component.scrapingForm.updateValueAndValidity();
-    expect(component.scrapingForm.valid).toBeFalsy();
-
-    component.appStorePolling.setValue('30');
+    component.pollingInterval.setValue('30');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeTruthy();
 
@@ -206,8 +186,7 @@ describe('SettingsComponent', () => {
   it('should display a success message on save for a time interval', async() => {
     initializeSettings();
 
-    component.appStorePolling.setValue('30');
-    component.playStorePolling.setValue('30');
+    component.pollingInterval.setValue('30');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeTruthy();
 
@@ -265,10 +244,8 @@ describe('SettingsComponent', () => {
   it('should update setting values on save', async () => {
     initializeSettings();
 
-    const updatedAppStorePolling = '25';
-    const updatedPlayStorePolling = '20';
-    component.appStorePolling.setValue(updatedAppStorePolling);
-    component.playStorePolling.setValue(updatedPlayStorePolling);
+    const updatedPollingInterval = '25';
+    component.pollingInterval.setValue(updatedPollingInterval);
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeTruthy();
 
@@ -286,12 +263,8 @@ describe('SettingsComponent', () => {
     const expectedScrapingRequest = {
       settings: [
         {
-          name: 'appStorePolling',
-          value: updatedAppStorePolling
-        },
-        {
-          name: 'playStorePolling',
-          value: updatedPlayStorePolling
+          name: 'pollingInterval',
+          value: updatedPollingInterval
         }
       ]
     };

@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterTestingModule } from '@angular/router/testing';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
 
 import { NavComponent } from './nav.component';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -12,8 +12,8 @@ describe('NavComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ NavComponent ],
-      providers: [AuthService],
-      imports: [NgbModule, RouterTestingModule]
+      providers: [ AuthService ],
+      imports: [ RouterTestingModule, CollapseModule ]
     })
     .compileComponents();
   }));

@@ -40,6 +40,7 @@ export interface App {
 }
 
 export interface AppInfo {
+  name: string;
   minDate: string;
   maxDate: string;
   versions: string[];
