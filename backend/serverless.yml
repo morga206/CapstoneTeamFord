@@ -147,6 +147,7 @@ functions:
           name: ${self:custom.slackbotEventName}
           rate: rate(30 minutes)
 
+
 resources:
   Resources:
     appReviewsTable:

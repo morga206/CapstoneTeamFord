@@ -41,7 +41,6 @@ async function handler (event) {
   }
 
   console.log(responseMessage);
-  console.log('Message sent to slack');
 
   return {
     statusCode: 200
@@ -55,7 +54,7 @@ async function handler (event) {
  * @returns {Promise<string>}
  */
 async function handleCommand(body){
-  let message = helpMessage(); // Message sent to slack will also be returned
+  let message = '';     // Message sent to slack will also be returned
   let parsed = queryString.parse(body); // parse the body of slack post request (URL encoded)
   let parameters = {};  // Create a dictionary / JSON object for any parameters passed with slash command
   let apps = {};
@@ -100,7 +99,7 @@ async function handleCommand(body){
       if (parameters.hasOwnProperty('startDate') && parameters.hasOwnProperty('endDate') && parameters.hasOwnProperty('version')) {
         message = await sendStats(stats);
       }
-    } else if (parsed.command == '/sentimentovertime') {
+    } else if (parsed.command == '/getsentimentovertime') {
       message = await getSentimentOverTime(stats);
     } else if (parsed.command == '/sentimenthelp') {
       message = await helpMessage();
@@ -189,7 +188,8 @@ async function getApps(store='both') {
 }
 
 /**
- * @param applications the list of apps we want statistics from
+ * @param apps the list of apps we want statistics from
+ * @param parameters any optional or required parameters passed
  * @returns statsList a list of statistics for each specified version of an app
  */
 async function getStatistics(apps, parameters={}){
@@ -457,7 +457,7 @@ async function helpMessage(text='') {
 
   attachments[1] = {
     'fallback': 'getLatestReviews Help',
-    'color': '#ff6600',
+    'color': '#f3ff2b',
     'title': '/getLatestReviews',
     'text':  'Description: Gets the most recent review sentiment and common keywords for an app or list of apps\n',
     'fields': [
@@ -481,7 +481,7 @@ async function helpMessage(text='') {
 
   attachments[2] = {
     'fallback': 'getSentimentOverTime Help',
-    'color': '#ff6600',
+    'color': '#184d1d',
     'title': '/getSentimentOverTime',
     'text':  'Description: Gets the percentage of positive reviews per day given dates\n',
     'fields': [
@@ -492,7 +492,7 @@ async function helpMessage(text='') {
       },
       {
         'title': 'Optional Parameters',
-        'value': 'store (defaults to both)\nversion: (defaults to latest)',
+        'value': 'store (android/google or )\nversion: (defaults to latest)',
         'short': false
       },
       {
