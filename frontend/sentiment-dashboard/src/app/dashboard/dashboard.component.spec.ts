@@ -9,9 +9,9 @@ import { StatsComponent } from './stats/stats.component';
 import { AuthService } from '../auth/auth.service';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { environment } from 'src/environments/environment';
-import { StatResponse, Keyword, AppInfo } from '../rest/domain';
+import { StatResponse, FilterInfo } from '../rest/domain';
 import { BsDatepickerModule, BsDaterangepickerConfig, BsLocaleService } from 'ngx-bootstrap/datepicker';
-import { ComponentLoaderFactory } from 'ngx-bootstrap/loader';
+import { ComponentLoaderFactory } from 'ngx-bootstrap';
 import { PositioningService } from 'ngx-bootstrap/positioning';
 
 describe('DashboardComponent', () => {
@@ -51,14 +51,14 @@ describe('DashboardComponent', () => {
 
   it('successfully queries for updated stats', () => {
     // Send mock app list to initialize component
-    const testApp: AppInfo = {
+    const testApp: FilterInfo = {
       name: '',
       minDate: new Date('01-01-2018').toISOString(),
       maxDate: new Date('12-31-2018').toISOString(),
       versions: ['1.0.0', '2.0.0', '3.0.0']
     };
 
-    const testAppList: { [id: string]: AppInfo } = {
+    const testAppList: { [id: string]: FilterInfo } = {
       'testApp': testApp
     };
     const appsReq = httpMock.expectOne(API_URL + 'apps');

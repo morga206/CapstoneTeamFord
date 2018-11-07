@@ -47,9 +47,9 @@ export interface FilterInfo {
 }
 
 export interface FilterListResponse {
-  status: string,
-  message?: string,
-  apps?: {[id: string]: FilterInfo}
+  status: string;
+  message?: string;
+  apps?: {[id: string]: FilterInfo};
 }
 
 export interface Keyword {

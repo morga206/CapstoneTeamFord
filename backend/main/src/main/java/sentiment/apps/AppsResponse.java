@@ -1,7 +1,6 @@
 package sentiment.apps;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import sentiment.Response;
 
