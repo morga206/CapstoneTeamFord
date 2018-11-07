@@ -39,11 +39,17 @@ export interface App {
   appId: string;
 }
 
-export interface AppInfo {
+export interface FilterInfo {
   name: string;
   minDate: string;
   maxDate: string;
   versions: string[];
+}
+
+export interface FilterListResponse {
+  status: string,
+  message?: string,
+  apps?: {[id: string]: FilterInfo}
 }
 
 export interface Keyword {
