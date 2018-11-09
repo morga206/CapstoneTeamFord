@@ -3,8 +3,8 @@ import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/fo
 import { Subscription } from 'rxjs';
 import { RestService } from '../rest/rest.service';
 import { App } from '../rest/domain';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AddAppComponent } from './add-app/add-app.component';
+import { BsModalService } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-settings',
@@ -19,9 +19,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   private appListTimer: any;
 
   public scrapingForm: FormGroup;
-  public appStorePolling: AbstractControl;
-  public playStorePolling: AbstractControl;
-
+  public pollingInterval: AbstractControl;
   public scrapingFormError = '';
   public scrapingFormSuccess = false;
   private scrapingFormGetSubscription: Subscription;
@@ -38,15 +36,15 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   private slackFormSetSubscription: Subscription;
   private slackFormTimer: any;
 
-  constructor(private fb: FormBuilder, private rest: RestService, private modalService: NgbModal) { }
+  private modalSubscription?: Subscription;
+
+  constructor(private fb: FormBuilder, private rest: RestService, private modalService: BsModalService) { }
 
   ngOnInit() {
     this.scrapingForm = this.fb.group({
-      'appStorePolling': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])],
-      'playStorePolling': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])]
+      'pollingInterval': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])]
     });
-    this.appStorePolling = this.scrapingForm.get('appStorePolling');
-    this.playStorePolling = this.scrapingForm.get('playStorePolling');
+    this.pollingInterval = this.scrapingForm.get('pollingInterval');
 
     this.slackForm = this.fb.group({
       'postingChannel': ['', Validators.compose([Validators.required, Validators.pattern('[a-zA-Z0-9-]+')])],
@@ -65,7 +63,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.appList = response.appList;
       }
     });
-    this.scrapingFormGetSubscription = this.rest.getSettings(['appStorePolling', 'playStorePolling'])
+    this.scrapingFormGetSubscription = this.rest.getSettings(['pollingInterval'])
     .subscribe((response) => {
       if (response.status === 'ERROR') {
         this.scrapingFormError = response.message;
@@ -104,14 +102,16 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.slackFormSetSubscription !== undefined) {
       this.slackFormSetSubscription.unsubscribe();
     }
+
+    if (this.modalSubscription !== undefined) {
+      this.modalSubscription.unsubscribe();
+    }
   }
 
   openModal() {
-    const modalRef = this.modalService.open(AddAppComponent);
-    modalRef.result.then((result) => {
-      this.onAddApp(result);
-    }, (_) => {
-      // No-op: Occurs when modal is dismissed without submitting
+    const modalRef = this.modalService.show(AddAppComponent);
+    this.modalSubscription = modalRef.content.submit.subscribe((data) => {
+      this.onAddApp(data);
     });
   }
 
@@ -156,8 +156,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onScrapingSubmit() {
     this.scrapingFormSetSubscription = this.rest.setSettings([
-      { name: 'appStorePolling', value: this.appStorePolling.value },
-      { name: 'playStorePolling', value: this.playStorePolling.value }
+      { name: 'pollingInterval', value: this.pollingInterval.value }
     ]).subscribe((response) => {
       if (response.status === 'ERROR') {
         this.scrapingFormError = response.message;

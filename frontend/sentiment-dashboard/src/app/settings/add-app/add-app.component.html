@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h3>Add App</h3>
-  <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss()">
+  <button type="button" class="close" aria-label="Close" (click)="bsModalRef.hide()">
       <span aria-hidden="true">&times;</span>
   </button>
 </div>
@@ -21,6 +21,6 @@
   
   <div class="modal-footer">
     <button type="button" class="btn btn-primary" [disabled]="addAppForm.invalid" (click)="onSubmit()">Save</button>
-    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">Cancel</button>
+    <button type="button" class="btn btn-secondary" (click)="bsModalRef.hide()">Cancel</button>
   </div>
 </form>

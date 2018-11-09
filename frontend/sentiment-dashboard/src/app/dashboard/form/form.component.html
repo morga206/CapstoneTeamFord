@@ -14,15 +14,20 @@
   </div>
 
   <div class="form-group">
-    <my-date-range-picker class="mr-2" name="date-range" [options]="myDateRangePickerOptions"
-                          formControlName="dateRange" (dateRangeChanged)="onDateChange($event)">
-
-    </my-date-range-picker>
+    <label for="date-range" class="mr-2">Date Range</label>
+    <input type="text"
+           id="date-range"
+           class="form-control mr-2"
+           [class.is-invalid]="startDate === undefined || endDate === undefined"
+           [bsConfig]="{ containerClass: 'theme-default' }"
+           [minDate]="minDate"
+           [maxDate]="maxDate"
+           (bsValueChange)="onDateChange($event)"
+           bsDaterangepicker>
   </div>
 
 
   <div class="form-group" *ngIf="showCompare">
     <button type="button" class="btn btn-primary" (click)="toggleComparison()">{{ compareText }}</button>
-    <button type="button" class="btn btn-primary ml-2">Add Card</button>
   </div>
 </form>

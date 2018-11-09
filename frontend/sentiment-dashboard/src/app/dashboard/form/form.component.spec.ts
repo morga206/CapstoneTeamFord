@@ -1,27 +1,31 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MyDateRangePickerModule } from 'mydaterangepicker';
 import { FormComponent, StatsFilterValues } from './form.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AppInfo } from 'src/app/rest/domain';
+import { BsDatepickerModule, BsDaterangepickerConfig, BsLocaleService } from 'ngx-bootstrap/datepicker';
+import { ComponentLoaderFactory } from 'ngx-bootstrap';
+import { PositioningService } from 'ngx-bootstrap/positioning';
+import { FilterInfo } from 'src/app/rest/domain';
 
 describe('FormComponent', () => {
   let component: FormComponent;
   let fixture: ComponentFixture<FormComponent>;
 
-  const testApp: AppInfo = {
+  const testApp: FilterInfo = {
+    name: '',
     minDate: new Date('01-01-2018').toISOString(),
     maxDate: new Date('12-31-2018').toISOString(),
     versions: ['1.0.0', '2.0.0', '3.0.0']
   };
 
-  const testAppList: { [id: string]: AppInfo } = {
+  const testAppList: { [id: string]: FilterInfo } = {
     'testApp': testApp
   };
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ FormComponent ],
-      imports: [ ReactiveFormsModule, MyDateRangePickerModule ]
+      imports: [ ReactiveFormsModule, BsDatepickerModule ],
+      providers: [ BsDaterangepickerConfig, ComponentLoaderFactory, PositioningService, BsLocaleService ]
     })
     .compileComponents();
   }));
@@ -55,27 +59,13 @@ describe('FormComponent', () => {
 
     component.version.setValue(testVersion);
 
-    component.statsFilterForm.get('dateRange').patchValue({myDateRange: {
-        beginDate: {
-          year: testStartDate.getFullYear(),
-          month: testStartDate.getMonth() + 1,
-          day: testStartDate.getDate()
-        },
-        endDate: {
-          year: testEndDate.getFullYear(),
-          month: testEndDate.getMonth() + 1,
-          day: testEndDate.getDate()
-        }
-      }});
-
-
     component.statsFilterForm.updateValueAndValidity();
 
     spyOn(component.filterChange, 'emit');
-    component.onDateChange({
-      beginJsDate: testStartDate,
-      endJsDate: testEndDate
-    });
+    component.onDateChange([
+      testStartDate,
+      testEndDate
+    ]);
     component.onFilterChange();
 
     const expectedValues: StatsFilterValues = {

@@ -72,7 +72,7 @@ functions:
       STAGE: ${self:provider.stage}
 
       # Flags for settings that require Lambda configuration updates
-      APPSTOREPOLLING_CLOUDWATCH_EVENT: ${self:custom.reviewsEventName}
+      POLLINGINTERVAL_CLOUDWATCH_EVENT: ${self:custom.reviewsEventName}
       POSTINGINTERVAL_CLOUDWATCH_EVENT: ${self:custom.slackbotEventName}
     events:
       - http:

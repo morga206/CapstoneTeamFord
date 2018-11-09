@@ -89,4 +89,16 @@ export class StatsComponent implements OnInit {
       return  Math.round(tooltipData) + '%' + ' of ' + this.reviewTotals[tooltipItem.index] + ' reviews';
     };
   }
+
+  public pieChartIsEmpty() {
+    // If no data are present, or all data are 0, then chart is empty
+    return this.pieChartData.length === 0
+      || this.pieChartData.filter((element) => element !== 0).length === 0;
+  }
+
+  public lineChartIsEmpty() {
+    // If no data are present, or all data are null, then chart is empty
+    return this.lineChartData.length === 0
+      || this.lineChartData[0].data.filter((element) => element !== null).length === 0;
+  }
 }
