@@ -10,7 +10,7 @@ module.exports = {
 
 /** Handler function that determines if a http request was invoked by scheduled report
  *
- * @param event: the event or request
+ * @param event The event or request
  */
 async function handler (event) {
   if (event.hasOwnProperty('detail-type')) {
@@ -53,7 +53,7 @@ async function handler (event) {
  * Function takes in an httpEvent and determines
  * if it is a get request or slash command (post request)
  *
- * @param httpEvent the http JSON formatted event
+ * @param httpEvent The http JSON formatted event
  */
 async function handleHttpRequest(httpEvent) {
   if (httpEvent.httpMethod === 'POST') {
@@ -68,7 +68,7 @@ async function handleHttpRequest(httpEvent) {
 /**
  * Handles any slash commands and posts the message(s) to the response URL
  *
- * @param slackFields: The JSON object, body of the slack /command
+ * @param slackFields The JSON object, body of the slack /command
  */
 async function handleCommand(slackFields){
   let slackResponses = []; // List of messages sending to slack
@@ -120,8 +120,8 @@ async function handleScheduledReport() {
 
 /** Function gets list of statistics with any parameters passed
  *
- * @param parameters any optional or required parameters passed
- * @returns statsList a list of statistics for each specified version of an app
+ * @param parameters The JSON object with any optional or required parameters
+ * @returns statsList The list of statistics for each specified version of an app
  */
 async function getStatistics(parameters={}){;
   const endpoint = gatewayURL + '/stats'
@@ -164,8 +164,8 @@ async function getStatistics(parameters={}){;
 
 /** Gets the apps for specified store or defaults to both stores
  *
- * @param store: The app store to get apps for (defaults to both unless specified)
- * @returns returns filteredApps: JSON object with appIdStore as the key and name, dates and versions as values
+ * @param store The app store to get apps for (defaults to both unless specified)
+ * @returns filteredApps The JSON object with appIdStore as the key and name, dates and versions as values
  */
 async function getApps(store='both') {
   const endpoint = gatewayURL + '/apps';
@@ -194,9 +194,9 @@ async function getApps(store='both') {
 /**
  * Function takes the apps and slackInput and builds the parameters to request stats for
  *
- * @param apps: all of the apps already filtered by store we want statistics for
- * @param slackInput: potential user supplied arguments
- * @returns statsRequests: array of parameters to get stats for
+ * @param apps The JSON object of all of the apps already filtered by store
+ * @param slackInput The potential user supplied arguments
+ * @returns statsRequests The array of parameters to get stats for
  */
 function buildParameters(apps, slackInput) {
   let statsRequests = [];
@@ -253,8 +253,8 @@ function buildParameters(apps, slackInput) {
 
 /** Create a report of messages to send to slack for given statistics
  *
- * @param statistics: list of statistics to craft a slack message with
- * @return slackMessages: list of slack messages to post to slack channel
+ * @param statistics The list of statistics to craft a slack message with
+ * @return slackMessages The list of slack messages to post to a slack channel
  */
 async function report(statistics){
   let slackMessages = []; // List of reports to send to slack as messages (One report per app)
@@ -311,8 +311,8 @@ async function report(statistics){
 
 /** Creates a report of messages to send to slack for sentiment by day
  *
- * @param statistics list of statistics to output to slack
- * @return
+ * @param statistics The list of statistics to output to slack
+ * @return slackMessages The list of slack messages to send to a slack channel
  */
 async function getSentimentOverTime(statistics){
   let slackMessages = [];
@@ -382,8 +382,8 @@ async function sentimentOverTimeText(data, labels) {
 
 /** Builds the text string for sentiment scores
  *
- * @param overallSentiment: the overall sentiment scores for pos, neg, neutral, mixed
- * @returns text: string that will display the actual sentiment scores
+ * @param overallSentiment The overall sentiment scores for pos, neg, neutral, mixed
+ * @returns text The string for the sentiment scores
  */
 async function sentimentText(overallSentiment) {
   const sentiment = [Math.round(overallSentiment.POSITIVE),
@@ -398,8 +398,8 @@ async function sentimentText(overallSentiment) {
 
 /** Builds the text string for the keywords to display in a slack message
  *
- * @param keywords: keyword objects with words and percentage of reviews word appears in
- * @returns text: text string for the kwywords
+ * @param keywords The JSON object of keywords with words and percentage of reviews word appears in
+ * @returns text The text string for the keywords
  */
 async function keywordText(keywords) {
   let text = '';
@@ -413,8 +413,8 @@ async function keywordText(keywords) {
 
 /** Gets attitude using overallSentiment to find max attitude
  *
- * @param overallSentiment: the scores for each sentiment rating
- * @returns attitude: string of attitude as positive, negative, neutral or mixed
+ * @param overallSentiment The scores for each sentiment rating
+ * @returns attitude The most common sentiment score
  */
 async function getAttitude(overallSentiment) {
   // Determine the actual sentiment values as percentages
@@ -440,7 +440,7 @@ async function getAttitude(overallSentiment) {
 
 /** Crafts a help message describing function use and optional / required parameters
  *
- * @returns messageList: list with one item, the help message to post to slack
+ * @returns messageList The list with one item, the help message to post to slack
  */
 async function getSentimentHelp() {
   let message = 'Available Functions and how to use them are below';
