@@ -162,7 +162,6 @@ async function scrape(appId, scraper, store) {
         throttle: 1
       }));
     } else if (store === 'App Store') {
-      console.log(`Scraping app store ${appId}`);
       promises.push(scraper.reviews({
         id: appId,
         page: i + 1
