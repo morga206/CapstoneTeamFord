@@ -146,7 +146,7 @@ async function getReviews(appList) {
 
 /**
  * Pull all pages of an app's reviews from the given store
- * @param appId The app ID string to use (NOT a numerical App Store id)
+ * @param appId The app ID string to use (either a numerical App Store ID or a GPlay package ID)
  * @param scraper The scraping module to use 
  * @param store The app store name
  */
@@ -162,8 +162,9 @@ async function scrape(appId, scraper, store) {
         throttle: 1
       }));
     } else if (store === 'App Store') {
+      console.log(`Scraping app store ${appId}`);
       promises.push(scraper.reviews({
-        appId: appId,
+        id: appId,
         page: i + 1
       }));
     }
@@ -179,9 +180,16 @@ async function scrape(appId, scraper, store) {
     throw error;
   }
 
-  let appInfo = await scraper.app({
-    appId: appId
-  });
+  let appInfo;
+  if (store === 'Google Play') {
+    appInfo = await scraper.app({
+      appId: appId
+    });
+  } else if (store === 'App Store') {
+    appInfo = await scraper.app({
+      id: appId
+    });
+  }
   let reviews = [].concat(...allPages).map(await convertReviewToDynamoRepresentation(appId, store, appInfo.version));
 
   return reviews;
