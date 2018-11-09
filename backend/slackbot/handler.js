@@ -1,46 +1,47 @@
 'use strict';
-//const hook = 'https://hooks.slack.com/services/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'; // testing slack
 const hook = 'https://hooks.slack.com/services/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'; // group slack
-
 const gatewayURL = process.env.GW_URL;
 const axios = require('axios');
 const queryString = require('query-string');
 
 module.exports = {
   handler,
-  handleCommand,
-  getApps,
-  getStatistics,
-  sendStats,
-  getSentimentOverTime,
 };
 
+/** Handler function that determines if a http request was invoked by scheduled report
+ *
+ * @param event: the event or request
+ */
 async function handler (event) {
-  let body = event.body;
-  let responseMessage = '';
+  if (event.hasOwnProperty('detail-type')) {
 
-  // Generate report or slash command
-  if (event.httpMethod == 'POST') {
     try {
-      responseMessage = await handleCommand(body);
+      await handleScheduledReport();
     } catch (error) {
       return {
         statusCode: 500,
-        error: `Error handeling post request: ${error}`
+        error: `Error handling scheduled report: ${error}`
       };
     }
+
+  } else if (event.hasOwnProperty('httpMethod')) {
+
+    try {
+      await handleHttpRequest(event);
+    } catch (error) {
+      return {
+        statusCode: 500,
+        error: `Error handling httpRequest: ${error}`
+      };
+    }
+
   } else {
-    try {
-      responseMessage = await report();
-    } catch (error) {
-      return {
-        statusCode: 500,
-        error: `Error Generating Report: ${error}`
-      };
-    }
-  }
 
-  console.log(responseMessage);
+    return {
+      statusCode: 500,
+      error: 'Error, Unrecognized event type'
+    };
+  }
 
   return {
     statusCode: 200
@@ -49,188 +50,188 @@ async function handler (event) {
 }
 
 /**
+ * Function takes in an httpEvent and determines
+ * if it is a get request or slash command (post request)
  *
- * @param body
- * @returns {Promise<string>}
+ * @param httpEvent the http JSON formatted event
  */
-async function handleCommand(body){
-  let message = '';     // Message sent to slack will also be returned
-  let parsed = queryString.parse(body); // parse the body of slack post request (URL encoded)
-  let parameters = {};  // Create a dictionary / JSON object for any parameters passed with slash command
-  let apps = {};
-  let stats = {};
+async function handleHttpRequest(httpEvent) {
+  if (httpEvent.httpMethod === 'POST') {
+    const requestBody = queryString.parse(httpEvent.body);
+    await handleCommand(requestBody);
+  } else {
+    await handleScheduledReport();
+  }
 
-  // Extract Parameters from text sent with slash command
-  let messagePairs = parsed.text.split(' ');
-  for(let i in messagePairs) {
-    let pair = messagePairs[i].split('=');
+}
+
+/**
+ * Handles any slash commands and posts the message(s) to the response URL
+ *
+ * @param slackFields: The JSON object, body of the slack /command
+ */
+async function handleCommand(slackFields){
+  let slackResponses = []; // List of messages sending to slack
+  let parameters = {};
+
+  // Parse the slack message text for optional or required parameters from user input
+  const userInput = slackFields.text.split(' ');
+  for (let parameter in userInput) {
+    let pair = userInput[parameter].split('=');
     parameters[pair[0]] = pair[1];
   }
 
-  // Determine if a store was specified for getting apps
+  const statsList = getStatistics(parameters);
+
+  // Determine which command should be invoked
+  switch (slackFields.command) {
+    case 'getlatestreviews':
+      slackResponses = await report(statsList);
+    case 'getreviews':
+      slackResponses = await report(statsList);
+    case 'getsentimentovertime':
+      slackResponses = await getSentimentOverTime(statsList);
+    case 'sentimenthelp':
+      slackResponses = await getSentimentHelp();
+  }
+
+  // Post messages to slack
+  for (let message in slackResponses) {
+    await axios.post(hook, slackResponses[message]);
+  }
+
+}
+
+/**
+ * Function gets the statistics for both app stores
+ * over the last 7 days, for the latest version
+ * and builds formatted messages to post to slack
+ */
+async function handleScheduledReport() {
+  const statsList = getStatistics();  // Get the statistics with default values
+
+  const slackResponse = report(statsList);  // Create the message to post to slack
+
+  // Post all of the reports to slack
+  for (let message in slackResponse) {
+    await axios.post(hook, slackResponse[message]);
+  }
+}
+
+/** Function gets list of statistics with any parameters passed
+ *
+ * @param parameters any optional or required parameters passed
+ * @returns statsList a list of statistics for each specified version of an app
+ */
+async function getStatistics(parameters={}){;
+  const endpoint = gatewayURL + '/stats'
+  let statisticsList = [];
+
+  // Apple, Google or both app stores
   let store = 'both';
   if (parameters.hasOwnProperty('store')) {
-    store = parameters.store;
+    store = parameters['store'].toLowerCase();
   }
 
-  // Get list of apps we want statistics for
-  try {
-    apps = await getApps(store);
-  } catch (error) {
-    console.log(`Error getting apps: ${error}`);
-    throw error;
+  // Get the apps for specified stores
+  const apps = await getApps(store);
+  const statsRequests = buildParameters(apps, parameters); // Get list of parameters to post a report for each app
+
+  // Create a list of promises to await the statistics response
+  let promises = [];
+  for (let request in statsRequests) {
+    promises.push(axios.post(endpoint, statsRequests[request]))
   }
 
-  // Get the statistics for specified apps
-  try {
-    stats = await getStatistics(apps, parameters);
-  } catch (error) {
-    console.log(`Error generating statistics for slash command: ${error}`);
-    throw error;
-  }
-
-  // Call the functions to match the slash commands
-  try {
-    if (parsed.command == '/getlatestreviews') {
-      message = await sendStats(stats);
-    } else if (parsed.command == '/getreviews') {
-
-      // Check for required parameters
-      if (parameters.hasOwnProperty('startDate') && parameters.hasOwnProperty('endDate') && parameters.hasOwnProperty('version')) {
-        message = await sendStats(stats);
-      }
-    } else if (parsed.command == '/getsentimentovertime') {
-      message = await getSentimentOverTime(stats);
-    } else if (parsed.command == '/sentimenthelp') {
-      message = await helpMessage();
-    }
-  } catch (error) {
-    console.log(`Error generating correct message for slash command: ${error}`);
-    message = await helpMessage('There was an error handling this slash command');
-    throw error;
-  }
-
-  return message;
-
-}
-
-/**
- * report sends a scheduled report to slack for all apps available
- * defaulting to the last version, last 7 days and using const webhook
- * @returns slackMessage the scheduled message sent to slack
- */
-async function report () {
-  let apps = {};
+  let allPromises = Promise.all(promises);
   let statistics = [];
-  let slackMessage = '';
 
-  // Get list of apps we want statistics for
   try {
-    apps = await getApps();
-  } catch (error) {
-    console.log(`Error getting apps: ${error}`);
+    statistics = await allPromises;
+  } catch(error) {
     throw error;
   }
 
-  // Get the statistics for those apps
-  try {
-    statistics = await getStatistics(apps);
-  } catch (error) {
-    console.log(`Error getting stats: ${error}`);
-    throw error;
+  // Add in app names to statistics
+  for (let i = 0; i < statistics.length; i++) {
+    statistics[i].data.name = apps[statistics[i].data.appIdStore].name;
+    statisticsList.push(statistics[i].data)
   }
 
-  // Send the stats to slack
-  try {
-    slackMessage = await sendStats(statistics);
-  } catch (error) {
-    console.log(`Error sending to slack: ${error}`);
-    throw error;
-  }
+  return statisticsList;
 
-  return slackMessage;
 }
 
-/**
- * @param store the store (defaults to both unless specified)
- * @returns returns list of apps (filtered by store if specified)
+/** Gets the apps for specified store or defaults to both stores
+ *
+ * @param store: The app store to get apps for (defaults to both unless specified)
+ * @returns returns filteredApps: JSON object with appIdStore as the key and name, dates and versions as values
  */
 async function getApps(store='both') {
   const endpoint = gatewayURL + '/apps';
   let filteredApps = {};  // apps we want to return depending on store specified
-  store = store.toLowerCase();
 
   const appsRequest = await axios.get(endpoint); // Get list of available apps
   const apps = appsRequest.data;
 
-  // Filter apps based on if a store is specified
   if (store == 'both') {
     return apps;
   } else {
-
-    for (let key in apps) {
-
-      if (store.includes('google') || store.includes('android')) {
-        if (key.includes('Google Play')) {
-          filteredApps[key] = apps[key];
-        }
+    // Filter apps based on appStoreId and user provided store
+    for (let appIdStore in apps) {
+      if ( (store.includes('google') || store.includes('android')) && appIdStore.includes('Google Play') ) {
+        filteredApps[appIdStore] = apps[appIdStore];
       }
-      else if (store.includes('apple') || store.includes('ios') || store.includes('app')) {
-        if (key.includes('App Store')) {
-          filteredApps[key] = apps[key];
-        }
+      else if ( (store.includes('apple') || store.includes('ios')) && appIdStore.includes('App Store') ) {
+        filteredApps[appIdStore] = apps[appIdStore];
       }
     }
-
   }
 
   return filteredApps;
 }
 
 /**
- * @param apps the list of apps we want statistics from
- * @param parameters any optional or required parameters passed
- * @returns statsList a list of statistics for each specified version of an app
+ * Function takes the apps and slackInput and builds the parameters to request stats for
+ *
+ * @param apps: all of the apps already filtered by store we want statistics for
+ * @param slackInput: potential user supplied arguments
+ * @returns statsRequests: array of parameters to get stats for
  */
-async function getStatistics(apps, parameters={}){
-  let promises = [];  // Array for promises
-  let statsList = [];
+function buildParameters(apps, slackInput) {
+  let statsRequests = [];
 
-  const endpoint = gatewayURL + '/stats';
+  for (let app in apps) {
+    let params = {};
 
-  for (let app in apps){
-    let appData = apps[app];
-
-    // Using last 7 days
     let days = 7;
-    if (parameters.hasOwnProperty('days')) {
-      days = parameters.days;
+    if (slackInput.hasOwnProperty('days')) {
+      days = slackInput.days;
     }
 
     // Calculate date range using days or defaulting to 7 days back from latest available
     let endDate = new Date();
     let startDate = new Date();
-
     startDate.setDate(endDate.getDate() - days);
-    if (parameters.hasOwnProperty('startDate')) {
-      startDate = new Date(parameters.startDate);
-      startDate = startDate.toISOString();
+
+    if (slackInput.hasOwnProperty('startDate')) {
+      startDate = slackInput.startDate;
     }
-    if (parameters.hasOwnProperty('endDate')) {
-      endDate = new Date(parameters.endDate);
-      endDate = endDate.toISOString();
+
+    if (slackInput.hasOwnProperty('endDate')) {
+      endDate = slackInput.endDate;
     }
 
     // Either use specified version or default to latest version
-    let latestVersion = appData.versions[appData.versions.length - 1];
-    if (parameters.hasOwnProperty('version')) {
-      latestVersion = parameters.version;
+    let version = apps[app].versions[apps[app].versions.length - 1];
+    if (slackInput.hasOwnProperty('version')) {
+      version = slackInput.version;
     }
 
     // Parameters to make request to stats endpoint
-    let params = {
+    params = {
       'appIdStore': app,
-      'version': latestVersion,
+      'version': version,
       'startDate': startDate,
       'endDate': endDate,
       'stats': [{
@@ -244,35 +245,19 @@ async function getStatistics(apps, parameters={}){
       }]
     };
 
-    // Push promise to array of promises
-    promises.push(axios.post(endpoint, params));
+    statsRequests.push(params);
   }
 
-  // Await all promises
-  let allAppsPromises = Promise.all(promises);
-  let allApps = [];
-
-  try {
-    allApps = await allAppsPromises;
-  } catch (error) {
-    throw error;
-  }
-
-  let keys = Object.keys(apps);
-  for (let i= 0; i < allApps.length; i++) {
-    let appName = apps[keys[i]].name;
-    allApps[i].data.name = appName;
-    statsList.push(allApps[i].data);
-  }
-
-  return statsList;
+  return statsRequests;
 }
 
-/** sendStats is the function called on schedule to send a report scheduled report to slack
- * @param statistics list of statistics to output to slack
+/** Create a report of messages to send to slack for given statistics
+ *
+ * @param statistics: list of statistics to craft a slack message with
+ * @return slackMessages: list of slack messages to post to slack channel
  */
-async function sendStats(statistics){
-  let reports = []; // List of reports to send to slack as messages (One report per app)
+async function report(statistics){
+  let slackMessages = []; // List of reports to send to slack as messages (One report per app)
 
   // report represents the index in statistics list
   for (let report in statistics) {
@@ -294,6 +279,7 @@ async function sendStats(statistics){
 
     // Get fields from statsList to send in messages
     let statsList = statistics[report];
+
     let overallSentiment = statsList.overallSentiment;
     let rawReviews = statsList.rawReviews;
     let keywords = statsList.keywords;
@@ -302,63 +288,34 @@ async function sendStats(statistics){
     let startDate = statsList.sentimentOverTime.labels[0];
     let endDate = statsList.sentimentOverTime.labels[statsList.sentimentOverTime.labels.length-1];
 
-    // Determine the actual sentiment values as percentages
-    let sentiment = [Math.round(overallSentiment.POSITIVE), Math.round(overallSentiment.NEGATIVE), Math.round(overallSentiment.MIXED), Math.round(overallSentiment.NEUTRAL)];
-    let max = Math.max(sentiment[0], sentiment[1], sentiment[2], sentiment[3]);
-
-    // Find the maximum sentiment value of(Pos, Neg, Neutral, Mixed)
-    let attitude = '';
-    if (max == sentiment[0]) {
-      attitude = 'Positive';
-    } else if (max == sentiment[1]) {
-      attitude = 'Negative';
-    } else if (max == sentiment[2]) {
-      attitude = 'Mixed';
-    } else {
-      attitude = 'Neutral';
-    }
+    const attitude = getAttitude(overallSentiment);
 
     // Build the slack message to send back with attachments
     message += `Report for:\nApp: ${name}\nVersion: ${version}\n`;
     message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(rawReviews).length} reviews`;
 
-    let text = `Positive: ${sentiment[0]}%\nNegative: ${sentiment[1]}%\nNeutral: ${sentiment[2]}%\nMixed: ${sentiment[3]}%`;
-    slackAttachments[0].text = text;
-
-    text = '';
-    for (let i in keywords.positive) {
-      let word = keywords.positive[i];
-      text += `${word.keyword}: ${Math.round(word.percentage*100)/100}%\n`;
-    }
-    slackAttachments[1].text = text;
-
-    text = '';
-    for (let i in keywords.negative) {
-      let word = keywords.negative[i];
-      text += `${word.keyword}: ${Math.round(word.percentage*100)/100}%\n`;
-    }
-    slackAttachments[2].text = text;
+    slackAttachments[0].text = sentimentText(overallSentiment);
+    slackAttachments[1].text = keywordText(keywords.positive);
+    slackAttachments[2].text = keywordText(keywords.negative);
 
     let params = {
       text: message,
       attachments: slackAttachments
     };
 
-    reports.push(params);
+    slackMessages.push(params);
   }
 
-  for (let report in reports) {
-    axios.post(hook, reports[report]);
-  }
-
-  return reports;
+  return slackMessages;
 }
 
-/**
+/** Creates a report of messages to send to slack for sentiment by day
+ *
  * @param statistics list of statistics to output to slack
+ * @return
  */
 async function getSentimentOverTime(statistics){
-  let reports = [];
+  let slackMessages = [];
 
   // report represents the index in statistics list
   for (let report in statistics) {
@@ -372,69 +329,123 @@ async function getSentimentOverTime(statistics){
     ];
 
     // Get the fields we want to use in our message to slack
-    let statsList = statistics[report];
-    let sentimentOverTime = statsList.sentimentOverTime;
-    let overallSentiment = statsList.overallSentiment;
+    let stats = statistics[report];
+    let sentimentOverTime = stats.sentimentOverTime;
+    let overallSentiment = stats.overallSentiment;
+
     let data = sentimentOverTime.data;
     let labels = sentimentOverTime.labels;
-    let rawReviews = statsList.rawReviews;
-    let version = statsList.version;
-    let name = statsList.name;
-    let startDate = statsList.sentimentOverTime.labels[0];
-    let endDate = statsList.sentimentOverTime.labels[statsList.sentimentOverTime.labels.length-1];
 
-    // Determine the actual sentiment values as percentages
-    let sentiment = [Math.round(overallSentiment.POSITIVE), Math.round(overallSentiment.NEGATIVE), Math.round(overallSentiment.MIXED), Math.round(overallSentiment.NEUTRAL)];
-    let max = Math.max(sentiment[0], sentiment[1], sentiment[2], sentiment[3]);
+    let startDate = stats.sentimentOverTime.labels[0];
+    let endDate = stats.sentimentOverTime.labels[stats.sentimentOverTime.labels.length-1];
 
-    // Find the maximum sentiment value of(Pos, Neg, Neutral, Mixed)
-    let attitude = '';
-    if (max == sentiment[0]) {
-      attitude = 'Positive';
-    } else if (max == sentiment[1]) {
-      attitude = 'Negative';
-    } else if (max == sentiment[2]) {
-      attitude = 'Mixed';
-    } else {
-      attitude = 'Neutral';
-    }
+    const attitude = getAttitude(overallSentiment);
 
     // Build the slack message to send back with attachments
-    message += `Report for:\nApp: ${name}\nVersion: ${version}\n`;
-    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(rawReviews).length} reviews`;
+    message += `Report for:\nApp: ${stats.name}\nVersion: ${stats.version}\n`;
+    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(stats.rawReviews).length} reviews`;
 
-    let text = '';
+    attachments[0].text = sentimentOverTimeText(data, labels);
 
-    for (let i in data) {
-      let date =  labels[i];
-      let percent = Math.round(data[i]*100)/100;
-
-      if (data[i] != null) {
-        text += `On ${date}, ${percent}% of reviews were positive!\n`;
-      }
-    }
-
-    attachments[0].text = text;
     let params = {
       text: message,
       attachments: attachments
     };
 
-    reports.push(params);
+    slackMessages.push(params);
 
   }
 
-  for (let report in reports) {
-    axios.post(hook, reports[report]);
-  }
-
-  return reports;
+  return slackMessages;
 }
 
-async function helpMessage(text='') {
-  let message = text + '\n';
-  message += 'Available Functions and how to use them are below';
+/**
+ * Helper function to build the text that matches days to percentage of negative reviews
+ *
+ * @param data: the percentages of negative reviews
+ * @param labels: the month, day labels for the data
+ * @returns text: the text attachment for sentimentOverTime
+ */
+async function sentimentOverTimeText(data, labels) {
+  let text = '';
+  for (let day in data) {
+    let date =  labels[day];
+    let percent = Math.round(data[day]*100)/100;
 
+    if (data[day] != null) {
+      text += `On ${date}, ${percent}% of reviews were negative\n`;
+    }
+  }
+
+  return text;
+}
+
+/** Builds the text string for sentiment scores
+ *
+ * @param overallSentiment: the overall sentiment scores for pos, neg, neutral, mixed
+ * @returns text: string that will display the actual sentiment scores
+ */
+async function sentimentText(overallSentiment) {
+  const sentiment = [Math.round(overallSentiment.POSITIVE),
+    Math.round(overallSentiment.NEGATIVE),
+    Math.round(overallSentiment.MIXED),
+    Math.round(overallSentiment.NEUTRAL)];
+
+  let text = `Positive: ${sentiment[0]}%\nNegative: ${sentiment[1]}%\nNeutral: ${sentiment[2]}%\nMixed: ${sentiment[3]}%`;
+
+  return text;
+}
+
+/** Builds the text string for the keywords to display in a slack message
+ *
+ * @param keywords: keyword objects with words and percentage of reviews word appears in
+ * @returns text: text string for the kwywords
+ */
+async function keywordText(keywords) {
+  let text = '';
+
+  for (let word in keywords) {
+    text += `${keywords[word].keyword}: ${Math.round(keywords[word].percentage*100)/100}%\n`;
+  }
+
+  return text;
+}
+
+/** Gets attitude using overallSentiment to find max attitude
+ *
+ * @param overallSentiment: the scores for each sentiment rating
+ * @returns attitude: string of attitude as positive, negative, neutral or mixed
+ */
+async function getAttitude(overallSentiment) {
+  // Determine the actual sentiment values as percentages
+  const sentiment = [Math.round(overallSentiment.POSITIVE), Math.round(overallSentiment.NEGATIVE), Math.round(overallSentiment.MIXED), Math.round(overallSentiment.NEUTRAL)];
+  const max = Math.max(...sentiment);
+
+  // Determine the maximum attitude
+  let attitude = '';
+  switch (max) {
+    case sentiment[0]:
+      attitude = 'Positive';
+    case sentiment[1]:
+      attitude = 'Negative';
+    case sentiment[2]:
+      attitude = 'Mixed';
+    case sentiment[3]:
+      attitude = 'Neutral';
+  }
+
+  return attitude;
+}
+
+
+/** Crafts a help message describing function use and optional / required parameters
+ *
+ * @returns messageList: list with one item, the help message to post to slack
+ */
+async function getSentimentHelp() {
+  let message = 'Available Functions and how to use them are below';
+
+  // Use of slack attachments to format the message
   let attachments = [{}, {}, {}];
   attachments[0] = {
     'fallback': 'getReviews Help',
@@ -508,7 +519,7 @@ async function helpMessage(text='') {
     attachments: attachments
   };
 
-  let response = await axios.post(hook, params);
-
-  return response;
+  // create a list so that all /commands are handled the same
+  let messageList = [params];
+  return messageList;
 }
