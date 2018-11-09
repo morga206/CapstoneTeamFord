@@ -1,11 +1,14 @@
 import { TestBed, async, inject } from '@angular/core/testing';
 
 import { AdminGuard } from './admin.guard';
+import { AuthService } from './auth.service';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('AdminGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [AdminGuard]
+      imports: [RouterTestingModule],
+      providers: [AdminGuard, AuthService]
     });
   });
 
