@@ -26,6 +26,14 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   private scrapingFormSetSubscription: Subscription;
   private scrapingFormTimer: any;
 
+  public dashboardForm: FormGroup;
+  public refreshInterval: AbstractControl;
+  public dashboardFormError = '';
+  public dashboardFormSuccess = false;
+  private dashboardFormGetSubscription: Subscription;
+  private dashboardFormSetSubscription: Subscription;
+  private dashboardFormTimer: any;
+
   public slackForm: FormGroup;
   public postingChannel: AbstractControl;
   public postingInterval: AbstractControl;
@@ -41,6 +49,11 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private fb: FormBuilder, private rest: RestService, private modalService: BsModalService) { }
 
   ngOnInit() {
+    this.dashboardForm = this.fb.group({
+      'refreshInterval': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])]
+    });
+    this.refreshInterval = this.dashboardForm.get('refreshInterval');
+
     this.scrapingForm = this.fb.group({
       'pollingInterval': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])]
     });
@@ -55,6 +68,15 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    this.dashboardFormGetSubscription = this.rest.getSettings(['refreshInterval'])
+    .subscribe((response) => {
+      if (response.status === 'ERROR') {
+        this.dashboardFormError = response.message;
+      } else {
+        response.settings.forEach((setting) => this.dashboardForm.get(setting.name).setValue(setting.value));
+      }
+    });
+
     this.appListSubscription = this.rest.getAppList()
     .subscribe((response) => {
       if (response.status === 'ERROR') {
@@ -63,6 +85,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.appList = response.appList;
       }
     });
+
     this.scrapingFormGetSubscription = this.rest.getSettings(['pollingInterval'])
     .subscribe((response) => {
       if (response.status === 'ERROR') {
@@ -83,6 +106,14 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (this.dashboardFormGetSubscription !== undefined) {
+      this.dashboardFormGetSubscription.unsubscribe();
+    }
+
+    if (this.dashboardFormSetSubscription !== undefined) {
+      this.dashboardFormSetSubscription.unsubscribe();
+    }
+
     if (this.appListSubscription !== undefined) {
       this.appListSubscription.unsubscribe();
     }
@@ -149,6 +180,22 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.appList = response.appList;
         setTimeout(() => {
           this.appListSuccess = false;
+        }, 3000);
+      }
+    });
+  }
+
+  onDashboardSubmit() {
+    this.dashboardFormSetSubscription = this.rest.setSettings([
+      { name: 'refreshInterval', value: this.refreshInterval.value }
+    ]).subscribe((response) => {
+      if (response.status === 'ERROR') {
+        this.dashboardFormError = response.message;
+      } else {
+        this.dashboardFormSuccess = true;
+        clearTimeout(this.dashboardFormTimer);
+        this.dashboardFormTimer = setTimeout(() => {
+          this.dashboardFormSuccess = false;
         }, 3000);
       }
     });

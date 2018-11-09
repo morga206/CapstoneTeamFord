@@ -38,6 +38,19 @@ describe('SettingsComponent', () => {
 
   // Send inital setting values from the mock backend to populate the form
   function initializeSettings() {
+    const testRefreshInterval = '30';
+
+    const testDashboardResponse: SettingResponse = {
+      settings: [
+        {
+          name: 'refreshInterval',
+          value: testRefreshInterval
+        }
+      ],
+      message: null,
+      status: 'SUCCESS'
+    };
+
     const testPollingInterval = '30';
 
     const testScrapingResponse: SettingResponse = {
@@ -78,7 +91,9 @@ describe('SettingsComponent', () => {
 
     const reqs = httpMock.match(API_URL + 'settings/get');
     reqs.forEach((req) => {
-      if (req.request.body === JSON.stringify({names: ['pollingInterval']})) {
+      if (req.request.body === JSON.stringify({names: ['refreshInterval']})) {
+        req.flush(testDashboardResponse);
+      } else if (req.request.body === JSON.stringify({names: ['pollingInterval']})) {
         req.flush(testScrapingResponse);
       } else {
         req.flush(testSlackResponse);
@@ -89,6 +104,8 @@ describe('SettingsComponent', () => {
     appListReq.flush(testAppListResponse);
 
     httpMock.verify();
+
+    expect(component.refreshInterval.value).toEqual(testRefreshInterval);
 
     expect(component.pollingInterval.value).toEqual(testPollingInterval);
 
@@ -103,6 +120,10 @@ describe('SettingsComponent', () => {
   });
 
   it('should be valid when all fields are filled out', () => {
+    component.refreshInterval.setValue('25');
+    component.dashboardForm.updateValueAndValidity();
+    expect(component.dashboardForm.valid).toBeTruthy();
+
     component.pollingInterval.setValue('30');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeTruthy();
@@ -114,6 +135,13 @@ describe('SettingsComponent', () => {
   });
 
   it('should not be valid when fields are blank', () => {
+    component.refreshInterval.setValue('25');
+    component.dashboardForm.updateValueAndValidity();
+    expect(component.dashboardForm.valid).toBeTruthy();
+
+    component.refreshInterval.setValue('');
+    expect(component.dashboardForm.valid).toBeFalsy();
+
     component.pollingInterval.setValue('30');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeTruthy();
@@ -136,6 +164,14 @@ describe('SettingsComponent', () => {
   });
 
   it('should not be valid if fields are malformed', () => {
+    component.refreshInterval.setValue('abc');
+    component.dashboardForm.updateValueAndValidity();
+    expect(component.dashboardForm.valid).toBeFalsy();
+
+    component.refreshInterval.setValue('30');
+    component.dashboardForm.updateValueAndValidity();
+    expect(component.dashboardForm.valid).toBeTruthy();
+
     component.pollingInterval.setValue('abc');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeFalsy();
@@ -178,6 +214,7 @@ describe('SettingsComponent', () => {
 
     httpMock.verify();
 
+    expect(component.dashboardFormError).toEqual('Test Error Message');
     expect(component.scrapingFormError).toEqual('Test Error Message');
     expect(component.slackFormError).toEqual('Test Error Message');
     expect(component.appListError).toEqual('Test Error Message');
@@ -185,6 +222,15 @@ describe('SettingsComponent', () => {
 
   it('should display a success message on save for a time interval', async() => {
     initializeSettings();
+
+    component.refreshInterval.setValue('25');
+    component.scrapingForm.updateValueAndValidity();
+    expect(component.scrapingForm.valid).toBeTruthy();
+
+    component.postingChannel.setValue('general');
+    component.postingInterval.setValue('45');
+    component.slackForm.updateValueAndValidity();
+    expect(component.slackForm.valid).toBeTruthy();
 
     component.pollingInterval.setValue('30');
     component.scrapingForm.updateValueAndValidity();
@@ -213,8 +259,13 @@ describe('SettingsComponent', () => {
       ]
     };
 
-    component.onScrapingSubmit();
+    component.onDashboardSubmit();
     let req = httpMock.expectOne(API_URL + 'settings/set');
+    req.flush(testSuccessResponse);
+    expect(component.dashboardFormSuccess).toBeTruthy();
+
+    component.onScrapingSubmit();
+    req = httpMock.expectOne(API_URL + 'settings/set');
     req.flush(testSuccessResponse);
     expect(component.scrapingFormSuccess).toBeTruthy();
 
@@ -244,6 +295,11 @@ describe('SettingsComponent', () => {
   it('should update setting values on save', async () => {
     initializeSettings();
 
+    const updatedRefreshInterval = '15';
+    component.refreshInterval.setValue(updatedRefreshInterval);
+    component.dashboardForm.updateValueAndValidity();
+    expect(component.dashboardForm.valid).toBeTruthy();
+
     const updatedPollingInterval = '25';
     component.pollingInterval.setValue(updatedPollingInterval);
     component.scrapingForm.updateValueAndValidity();
@@ -256,8 +312,23 @@ describe('SettingsComponent', () => {
     component.slackForm.updateValueAndValidity();
     expect(component.slackForm.valid).toBeTruthy();
 
-    component.onScrapingSubmit();
+    component.onDashboardSubmit();
     let req = httpMock.expectOne(API_URL + 'settings/set');
+
+    const expectedDashboardRequest = {
+      settings: [
+        {
+          name: 'refreshInterval',
+          value: updatedRefreshInterval
+        }
+      ]
+    };
+    expect(req.request.method).toEqual('POST');
+    expect(req.request.body).toEqual(JSON.stringify(expectedDashboardRequest));
+
+
+    component.onScrapingSubmit();
+    req = httpMock.expectOne(API_URL + 'settings/set');
 
 
     const expectedScrapingRequest = {
