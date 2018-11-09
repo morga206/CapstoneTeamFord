@@ -8,7 +8,7 @@ import { environment } from 'src/environments/environment';
 import { SettingResponse, App, AppListResponse } from '../rest/domain';
 import { AuthService } from '../auth/auth.service';
 import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
-import { ComponentLoaderFactory } from 'ngx-bootstrap/loader';
+import { ComponentLoaderFactory } from 'ngx-bootstrap';
 import { PositioningService } from 'ngx-bootstrap/positioning';
 
 describe('SettingsComponent', () => {

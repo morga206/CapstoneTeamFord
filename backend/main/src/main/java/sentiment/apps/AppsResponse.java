@@ -1,7 +1,6 @@
 package sentiment.apps;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import sentiment.Response;
 
@@ -36,9 +35,11 @@ public class AppsResponse extends Response {
 
     data.put("status", status);
     if (status == Status.SUCCESS) {
+      Map<String, AppInfo> appList = new HashMap<String, AppInfo>();
       for (AppInfo app : apps) {
-        data.put(app.getAppIdStore(), app);
+        appList.put(app.getAppIdStore(), app);
       }
+      data.put("apps", appList);
     } else {
       data.put("message", message);
     }

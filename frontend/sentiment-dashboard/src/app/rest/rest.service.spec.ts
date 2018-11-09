@@ -25,17 +25,18 @@ describe('RestService', () => {
   it('should successfully query the backend for the filter app list',
     inject([HttpTestingController, RestService], async (httpMock: HttpTestingController, service: RestService) => {
     const testResponse = {
-      'com.ford.fordpass*Google Play': {
-        name: 'FordPass (Google Play)',
-        minDate: '2018-06-28',
-        maxDate: '2018-10-14',
-        versions: [
-            '2.4.1'
-        ]
+      status: 'SUCCESS',
+      apps: {
+        'com.ford.fordpass*Google Play': {
+          name: 'FordPass (Google Play)',
+          minDate: '2018-06-28',
+          maxDate: '2018-10-14',
+          versions: [ '2.4.1' ]
+        }
       }
     };
 
-    service.getFilterApps().subscribe((response) => {
+    service.getFilterList().subscribe((response) => {
       expect(response).toEqual(testResponse);
     });
     const req = httpMock.expectOne(API_URL + 'apps');

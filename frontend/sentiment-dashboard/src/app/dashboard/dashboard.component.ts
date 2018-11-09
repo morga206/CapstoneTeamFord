@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { StatRequest, AppInfo } from '../rest/domain';
+import { StatRequest, FilterListResponse } from '../rest/domain';
 import { Subscription, timer } from 'rxjs';
 import { FormComponent, StatsFilterValues } from './form/form.component';
 import { StatsComponent } from './stats/stats.component';
@@ -26,9 +26,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(private rest: RestService) { }
 
   ngOnInit() {
-    this.appsSubscription = this.rest.getFilterApps().subscribe((apps: { [id: string]: AppInfo }) => {
-      this.form.setAppList(apps);
-      this.formCompare.setAppList(apps);
+    this.appsSubscription = this.rest.getFilterList().subscribe((response: FilterListResponse) => {
+      this.form.setAppList(response.apps);
+      this.formCompare.setAppList(response.apps);
     });
 
     this.autoUpdate = timer(0, 100000).subscribe(() => {
