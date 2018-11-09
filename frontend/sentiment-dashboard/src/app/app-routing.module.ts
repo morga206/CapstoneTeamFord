@@ -4,6 +4,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { SettingsComponent } from './settings/settings.component';
 import { LoginComponent } from './login/login.component';
 import { AuthGuardService } from './auth/auth.guard';
+import { AdminGuard } from './auth/admin.guard';
+import { AuthService } from './auth/auth.service';
 
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -15,7 +17,7 @@ const routes: Routes = [
   {
     path: 'settings',
     component: SettingsComponent,
-    canActivate: [AuthGuardService]
+    canActivate: [AuthGuardService, AdminGuard]
   },
   { path: 'login', component: LoginComponent }
 ];
