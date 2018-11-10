@@ -19,42 +19,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('stats2') statsCompare: StatsComponent;
   public currentlyComparing = false;
 
-  private autoUpdate: Subscription;
+  public errorMessage = '';
+
+  private autoUpdateSettingSubscription: Subscription;
+  private autoUpdateSubscription: Subscription;
   private appsSubscription: Subscription;
   private statsSubscription?: Subscription;
 
   constructor(private rest: RestService) { }
 
   ngOnInit() {
+    this.autoUpdateSettingSubscription = this.rest.getSettings(['refreshInterval'])
+    .subscribe((response) => {
+      if (response.status === 'ERROR') {
+        this.errorMessage = response.message;
+      } else {
+        this.startAutoUpdate(response.settings[0].value);
+      }
+    });
+
     this.appsSubscription = this.rest.getFilterList().subscribe((response: FilterListResponse) => {
       this.form.setAppList(response.apps);
       this.formCompare.setAppList(response.apps);
-    });
-
-    this.autoUpdate = timer(0, 100000).subscribe(() => {
-      const values: StatsFilterValues | undefined = this.form.getCurrentValues();
-
-      if (values !== undefined) {
-        this.updateStatsSubscription(values);
-      }
-    });
-
-    this.autoUpdate = timer(0, 100000).subscribe(() => {
-      if (this.formCompare === undefined || this.statsCompare === undefined) {
-        return;
-      }
-      const values: StatsFilterValues | undefined = this.formCompare.getCurrentValues();
-
-      if (values !== undefined) {
-        this.updateCompareStatsSubscription(values);
-      }
     });
   }
 
   ngOnDestroy() {
 
-    if (this.autoUpdate !== undefined) {
-      this.autoUpdate.unsubscribe();
+    if (this.autoUpdateSettingSubscription !== undefined) {
+      this.autoUpdateSettingSubscription.unsubscribe();
+    }
+
+    if (this.autoUpdateSubscription !== undefined) {
+      this.autoUpdateSubscription.unsubscribe();
     }
 
     if (this.appsSubscription !== undefined) {
@@ -64,6 +61,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.statsSubscription !== undefined) {
       this.statsSubscription.unsubscribe();
     }
+  }
+
+  public startAutoUpdate(interval: string) {
+    // Interval is in minutes - convert to milliseconds
+    const timerInterval = parseInt(interval, 10) * 60000;
+
+    this.autoUpdateSubscription = timer(0, timerInterval).subscribe(() => {
+      const values: StatsFilterValues | undefined = this.form.getCurrentValues();
+
+      if (values !== undefined) {
+        this.updateStatsSubscription(values);
+      }
+
+      if (this.formCompare === undefined || this.statsCompare === undefined) {
+        return;
+      }
+
+      const compareValues: StatsFilterValues | undefined = this.formCompare.getCurrentValues();
+
+      if (compareValues !== undefined) {
+        this.updateCompareStatsSubscription(compareValues);
+      }
+    });
   }
 
   public updateStatsSubscription(event: StatsFilterValues) {
