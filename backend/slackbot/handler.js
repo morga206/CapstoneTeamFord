@@ -13,8 +13,6 @@ module.exports = {
  * @param event The event or request
  */
 async function handler (event) {
-  console.log("handler");
-  console.log(event);
   if (event.hasOwnProperty('detail-type')) {
 
     try {
@@ -70,33 +68,26 @@ async function handleHttpRequest(httpEvent) {
  * @param slackFields The JSON object, body of the slack /command
  */
 async function handleCommand(slackFields){
-  console.log("handleCommand");
-  console.log(slackFields);
   const responseURL = slackFields['response_url'];
   let slackResponses = []; // List of messages sending to slack
 
   const parameters = await extractSlackParameters(slackFields);
-  console.log("Parameters");
-  console.log(parameters);
   const statsList = await getStatistics(parameters);
 
   // Determine which command should be invoked
   switch (slackFields.command) {
-    case '/getlatestreviews':
-      slackResponses = await report(statsList);
-      break;
-    case '/getreviews':
-      slackResponses = await report(statsList);
-      break;
-    case '/getsentimentovertime':
-      slackResponses = await getSentimentOverTime(statsList);
-      break;
-    case '/sentimenthelp':
-      slackResponses = await getSentimentHelp();
+  case '/getlatestreviews':
+    slackResponses = await report(statsList);
+    break;
+  case '/getreviews':
+    slackResponses = await report(statsList);
+    break;
+  case '/getsentimentovertime':
+    slackResponses = await getSentimentOverTime(statsList);
+    break;
+  case '/sentimenthelp':
+    slackResponses = await getSentimentHelp();
   }
-
-  console.log("SLACK RESPONSE -- - - - - --");
-  console.log(slackResponses);
 
   // Post messages to slack
   for (let message in slackResponses) {
@@ -149,7 +140,7 @@ async function handleScheduledReport() {
  * @returns statsList The list of statistics for each specified version of an app
  */
 async function getStatistics(parameters={}){
-  const endpoint = gatewayURL + '/stats'
+  const endpoint = gatewayURL + '/stats';
   let statisticsList = [];
 
   // Apple, Google or both app stores
@@ -162,8 +153,6 @@ async function getStatistics(parameters={}){
   const apps = await getApps(store);
   const statsRequests = await buildParameters(apps, parameters); // Get list of parameters to post a report for each app
 
-  console.log("promises");
-  console.log(statsRequests);
   // Create a list of promises to await the statistics response
   let promises = [];
   for (let request in statsRequests) {
@@ -181,16 +170,12 @@ async function getStatistics(parameters={}){
     throw error;
   }
 
-  console.log('STATSTATSTASTASTSATSATSATSA');
-  console.log(statistics);
   // Add in app names to statistics
   for (let i = 0; i < statistics.length; i++) {
     statistics[i].data.name = apps[statistics[i].data.appIdStore].name;
-    statisticsList.push(statistics[i].data)
+    statisticsList.push(statistics[i].data);
   }
 
-  console.log("statisticsList");
-  console.log(statisticsList);
   return statisticsList;
 
 }
@@ -279,9 +264,6 @@ function buildParameters(apps, slackInput) {
 
     statsRequests.push(params);
   }
-
-  console.log("Build Parameters Return");
-  console.log(statsRequests);
 
   return statsRequests;
 }
@@ -458,17 +440,17 @@ async function getAttitude(overallSentiment) {
   // Determine the maximum attitude
   let attitude = '';
   switch (max) {
-    case sentiment[0]:
-      attitude = 'Positive';
-      break;
-    case sentiment[1]:
-      attitude = 'Negative';
-      break;
-    case sentiment[2]:
-      attitude = 'Mixed';
-      break;
-    case sentiment[3]:
-      attitude = 'Neutral';
+  case sentiment[0]:
+    attitude = 'Positive';
+    break;
+  case sentiment[1]:
+    attitude = 'Negative';
+    break;
+  case sentiment[2]:
+    attitude = 'Mixed';
+    break;
+  case sentiment[3]:
+    attitude = 'Neutral';
   }
 
   return attitude;
