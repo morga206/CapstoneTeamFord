@@ -7,6 +7,7 @@ import org.springframework.cloud.function.adapter.aws.SpringBootApiGatewayReques
 import sentiment.apps.AppsRequest;
 import sentiment.settings.AppListRequest;
 import sentiment.settings.GetSettingsRequest;
+import sentiment.settings.IgnoreListRequest;
 import sentiment.settings.SetSettingsRequest;
 import sentiment.stats.StatsRequest;
 
@@ -27,6 +28,8 @@ public class Handler extends SpringBootApiGatewayRequestHandler {
         return AppsRequest.class;
       case "/settings/apps":
         return AppListRequest.class;
+      case "/settings/keywords":
+        return IgnoreListRequest.class;
       case "/settings/get":
         return GetSettingsRequest.class;
       case "/settings/set":

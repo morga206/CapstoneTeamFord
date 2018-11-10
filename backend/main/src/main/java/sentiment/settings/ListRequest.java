@@ -25,22 +25,23 @@ public abstract class ListRequest<T> extends Request {
   }
 
   private Command command;
-  private String settingName;
+  private String paramName;
   private T item;
   private T[] list;
 
   /**
    * Creatse a new ListRequest.
    * @param command The command to perform - get, add, or delete
-   * @param settingName The name of the SSM value to set.
+   * @param paramName The name of the SSM value to set.
    * @param item The item to add or delete, if appropriate
    */
-  public ListRequest(String command, String settingName, T item) {
+  public ListRequest(String command, String paramName, T item) {
     try {
       this.command = Command.valueOf(command);
     } catch (Exception exp) {
       this.command = null; // We'll return an error during processing
     }
+    this.paramName = paramName;
     this.item = item;
   }
 
@@ -109,7 +110,7 @@ public abstract class ListRequest<T> extends Request {
     GetParameterResult result = null;
     String value = null;
     try {
-      result = client.getParameter(new GetParameterRequest().withName(settingName));
+      result = client.getParameter(new GetParameterRequest().withName(paramName));
       value = result.getParameter().getValue();
     } catch (ParameterNotFoundException exp) {
       value = "[]";
@@ -140,7 +141,7 @@ public abstract class ListRequest<T> extends Request {
 
     try {
       client.putParameter(new PutParameterRequest()
-          .withName(settingName)
+          .withName(paramName)
           .withValue(json)
           .withType(ParameterType.String)
           .withOverwrite(true));
