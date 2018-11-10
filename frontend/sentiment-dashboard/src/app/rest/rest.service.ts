@@ -3,7 +3,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {environment} from '../../environments/environment';
-import { StatResponse, StatRequest, Setting, SettingResponse, App, AppListResponse, FilterListResponse } from './domain';
+import { StatResponse,
+  StatRequest,
+  Setting,
+  SettingResponse,
+  App,
+  AppListResponse,
+  FilterListResponse,
+  IgnoreListResponse } from './domain';
 import { AuthService } from '../auth/auth.service';
 import { switchMap, map } from 'rxjs/operators';
 
@@ -110,5 +117,49 @@ export class RestService {
       })),
       switchMap((headers) => this.http.post<AppListResponse>(this.API_URL + 'settings/apps', body, { headers: headers }))
     );
+  }
+
+  getIgnoreList(): Observable<IgnoreListResponse> {
+    const options = {
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
+    };
+    const body = JSON.stringify({
+      command: 'GET'
+    });
+    return this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, options);
+  }
+
+  addKeyword(keyword: string): Observable<IgnoreListResponse> {
+    const options = {
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
+    };
+    const body = JSON.stringify({
+      command: 'ADD',
+      keyword: keyword
+    });
+    return this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, options);
+  }
+
+  deleteKeyword(keyword: string): Observable<IgnoreListResponse> {
+    const options = {
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
+    };
+    const body = JSON.stringify({
+      command: 'DELETE',
+      keyword: keyword
+    });
+    return this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, options);
   }
 }

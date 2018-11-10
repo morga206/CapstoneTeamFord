@@ -5,7 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { environment } from 'src/environments/environment';
-import { SettingResponse, App, AppListResponse } from '../rest/domain';
+import { SettingResponse, App, AppListResponse, IgnoreListResponse } from '../rest/domain';
 import { AuthService } from '../auth/auth.service';
 import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
 import { ComponentLoaderFactory } from 'ngx-bootstrap';
@@ -96,6 +96,13 @@ describe('SettingsComponent', () => {
       message: null
     };
 
+    const testIgnoreList: string[] = ['test', 'keyword', 'list'];
+    const testIgnoreListResponse: IgnoreListResponse = {
+      ignoreList: testIgnoreList,
+      status: 'SUCCESS',
+      message: null
+    };
+
     const reqs = httpMock.match(API_URL + 'settings/get');
     reqs.forEach((req) => {
       if (req.request.body === JSON.stringify({names: ['refreshInterval']})) {
@@ -110,6 +117,9 @@ describe('SettingsComponent', () => {
     const appListReq = httpMock.expectOne(API_URL + 'settings/apps');
     appListReq.flush(testAppListResponse);
 
+    const ignoreListReq = httpMock.expectOne(API_URL + 'settings/keywords');
+    ignoreListReq.flush(testIgnoreListResponse);
+
     httpMock.verify();
 
     expect(component.refreshInterval.value).toEqual(testRefreshInterval);
@@ -120,6 +130,7 @@ describe('SettingsComponent', () => {
     expect(component.postingInterval.value).toEqual(testPostingInterval);
 
     expect(component.appList).toEqual(testAppList);
+    expect(component.ignoreList).toEqual(testIgnoreList);
   }
 
   it('should create', () => {
@@ -219,12 +230,16 @@ describe('SettingsComponent', () => {
     const appListReq = httpMock.expectOne(API_URL + 'settings/apps');
     appListReq.flush(testResponse);
 
+    const ignoreListReq = httpMock.expectOne(API_URL + 'settings/keywords');
+    ignoreListReq.flush(testResponse);
+
     httpMock.verify();
 
     expect(component.dashboardFormError).toEqual('Test Error Message');
     expect(component.scrapingFormError).toEqual('Test Error Message');
     expect(component.slackFormError).toEqual('Test Error Message');
     expect(component.appListError).toEqual('Test Error Message');
+    expect(component.ignoreListError).toEqual('Test Error Message');
   });
 
   it('should display a success message on save for a time interval', async() => {
@@ -266,8 +281,19 @@ describe('SettingsComponent', () => {
       ]
     };
 
+    const testIgnoreListSuccessResponse: IgnoreListResponse = {
+      message: null,
+      status: 'SUCCESS',
+      ignoreList: ['test', 'keyword', 'list']
+    };
+
     component.onDashboardSubmit();
     let req = httpMock.expectOne(API_URL + 'settings/set');
+    req.flush(testSuccessResponse);
+    expect(component.dashboardFormSuccess).toBeTruthy();
+
+    component.onScrapingSubmit();
+    req = httpMock.expectOne(API_URL + 'settings/set');
     req.flush(testSuccessResponse);
     expect(component.dashboardFormSuccess).toBeTruthy();
 
@@ -291,6 +317,19 @@ describe('SettingsComponent', () => {
     req = httpMock.expectOne(API_URL + 'settings/apps');
     req.flush(testAppListSuccessResponse);
     expect(component.appListSuccess).toBeTruthy();
+
+    component.addKeyword.setValue('anotherKeyword');
+    component.addKeyword.updateValueAndValidity();
+    component.onAddKeyword();
+    req = httpMock.expectOne(API_URL + 'settings/keywords');
+    req.flush(testIgnoreListSuccessResponse);
+    expect(component.ignoreListSuccess).toBeTruthy();
+
+    const toDeleteKeyword = component.ignoreList[0];
+    component.onDeleteKeyword(toDeleteKeyword);
+    req = httpMock.expectOne(API_URL + 'settings/keywords');
+    req.flush(testIgnoreListSuccessResponse);
+    expect(component.ignoreListSuccess).toBeTruthy();
 
     httpMock.verify();
   });
@@ -386,6 +425,28 @@ describe('SettingsComponent', () => {
     };
     expect(req.request.method).toEqual('POST');
     expect(req.request.body).toEqual(JSON.stringify(expectedAppListDeleteRequest));
+
+    const toAddKeyword = 'add';
+    component.addKeyword.setValue(toAddKeyword);
+    component.addKeyword.updateValueAndValidity();
+    component.onAddKeyword();
+    req = httpMock.expectOne(API_URL + 'settings/keywords');
+    const expectedIgnoreListAddRequest = {
+      command: 'ADD',
+      keyword: toAddKeyword
+    };
+    expect(req.request.method).toEqual('POST');
+    expect(req.request.body).toEqual(JSON.stringify(expectedIgnoreListAddRequest));
+
+    const toDeleteKeyword: string = component.ignoreList[0];
+    component.onDeleteKeyword(toDeleteKeyword);
+    req = httpMock.expectOne(API_URL + 'settings/keywords');
+    const expectedIgnoreListDeleteRequest = {
+      command: 'DELETE',
+      keyword: toDeleteKeyword
+    };
+    expect(req.request.method).toEqual('POST');
+    expect(req.request.body).toEqual(JSON.stringify(expectedIgnoreListDeleteRequest));
 
     httpMock.verify();
   });

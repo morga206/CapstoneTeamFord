@@ -39,6 +39,12 @@ export interface App {
   appId: string;
 }
 
+export interface IgnoreListResponse {
+  ignoreList: string[];
+  status: string;
+  message: string;
+}
+
 export interface FilterInfo {
   name: string;
   minDate: string;

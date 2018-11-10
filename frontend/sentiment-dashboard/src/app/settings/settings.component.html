@@ -62,6 +62,26 @@
     </div>
 </form>
 
+<div class="row">
+  <h2 class="h4 mb-2">Ignored Keywords Management</h2>
+</div>
+<div class="alert alert-danger row" role="alert" *ngIf="ignoreListError !== ''">
+    Error: {{ ignoreListError }}
+  </div>
+<div class="alert alert-success row" role="alert" *ngIf="ignoreListSuccess">
+  Saved Successfully.
+</div>
+
+<div class="row mb-2">
+    <span *ngFor="let keyword of ignoreList" class="badge badge-primary mx-1" (click)="onDeleteKeyword(keyword)">{{ keyword }} &times;</span>
+</div>
+<form [formGroup]="ignoreListForm" (ngSubmit)="onAddKeyword()">
+  <div class="row mb-4">
+    <input type="text" class="form-control" id="add-keyword" formControlName="addKeyword" [class.is-invalid]="addKeyword.invalid">
+    <button type="submit" class="btn btn-primary my-2">Add Keyword</button>
+  </div>
+</form>
+
 <div class="row mb-4 border-bottom">
   <h2 class="h4">Scraper Settings</h2>
 </div>
