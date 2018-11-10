@@ -120,46 +120,46 @@ export class RestService {
   }
 
   getIgnoreList(): Observable<IgnoreListResponse> {
-    const options = {
-      headers: new HttpHeaders(
-        {
-          'Content-Type' : 'application/json',
-          'Authorization' : this.apiKey
-        })
-    };
     const body = JSON.stringify({
       command: 'GET'
     });
-    return this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, options);
+
+    return this.apiKey$.pipe(
+      map((key) => new HttpHeaders({
+        'Content-Type' : 'application/json',
+        'Authorization': key
+      })),
+      switchMap((headers) => this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, { headers: headers }))
+    );
   }
 
   addKeyword(keyword: string): Observable<IgnoreListResponse> {
-    const options = {
-      headers: new HttpHeaders(
-        {
-          'Content-Type' : 'application/json',
-          'Authorization' : this.apiKey
-        })
-    };
     const body = JSON.stringify({
       command: 'ADD',
       keyword: keyword
     });
-    return this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, options);
+
+    return this.apiKey$.pipe(
+      map((key) => new HttpHeaders({
+        'Content-Type' : 'application/json',
+        'Authorization': key
+      })),
+      switchMap((headers) => this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, { headers: headers }))
+    );
   }
 
   deleteKeyword(keyword: string): Observable<IgnoreListResponse> {
-    const options = {
-      headers: new HttpHeaders(
-        {
-          'Content-Type' : 'application/json',
-          'Authorization' : this.apiKey
-        })
-    };
     const body = JSON.stringify({
       command: 'DELETE',
       keyword: keyword
     });
-    return this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, options);
+
+    return this.apiKey$.pipe(
+      map((key) => new HttpHeaders({
+        'Content-Type' : 'application/json',
+        'Authorization': key
+      })),
+      switchMap((headers) => this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, { headers: headers }))
+    );
   }
 }

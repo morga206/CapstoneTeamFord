@@ -61,7 +61,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
       'refreshInterval': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])]
     });
     this.refreshInterval = this.dashboardForm.get('refreshInterval');
-    
+
     this.ignoreListForm = this.fb.group({
       'addKeyword': ['', Validators.required]
     });
@@ -226,7 +226,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   }
-  
+
   onAddKeyword() {
     if (this.addKeyword.invalid) {
       return;
