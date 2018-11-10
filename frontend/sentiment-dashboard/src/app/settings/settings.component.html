@@ -33,6 +33,54 @@
     </table>
 </div>
 
+<div class="row mb-4 border-bottom">
+  <h2 class="h4">Dashboard Settings</h2>
+</div>
+
+<div class="alert alert-danger" role="alert" *ngIf="dashboardFormError !== ''">
+  Error: {{ dashboardFormError }}
+</div>
+<div class="alert alert-success" role="alert" *ngIf="dashboardFormSuccess">
+  Saved Successfully.
+</div>
+
+<form [formGroup]="dashboardForm" (ngSubmit)="onDashboardSubmit()">
+  <div class="form-group mb-4">
+      <div class="row">
+        <label for="refresh-interval">Data Refresh Interval</label>
+        <div class="input-group mb-2">
+          <input type="text" class="form-control" id="refresh-interval" formControlName="refreshInterval" [class.is-invalid]="refreshInterval.invalid">
+          <div class="input-group-append">
+              <span class="input-group-text">minutes</span>
+          </div>
+        </div>
+      </div>
+    
+      <div class="row">
+        <button type="submit" class="btn btn-primary" [disabled]="dashboardForm.invalid">Save</button>
+      </div>
+    </div>
+</form>
+
+<div class="row">
+  <h2 class="h6 font-weight-normal mb-2">Ignored Keywords Management</h2>
+</div>
+<div class="alert alert-danger row" role="alert" *ngIf="ignoreListError !== ''">
+    Error: {{ ignoreListError }}
+</div>
+<div class="alert alert-success row" role="alert" *ngIf="ignoreListSuccess">
+  Saved Successfully.
+</div>
+
+<div class="row mb-2">
+    <span *ngFor="let keyword of ignoreList" class="badge badge-primary mx-1" (click)="onDeleteKeyword(keyword)">{{ keyword }} &times;</span>
+</div>
+<form [formGroup]="ignoreListForm" (ngSubmit)="onAddKeyword()">
+  <div class="row mb-4">
+    <input type="text" class="form-control" id="add-keyword" formControlName="addKeyword" [class.is-invalid]="addKeyword.invalid">
+    <button type="submit" class="btn btn-primary my-2">Add Keyword</button>
+  </div>
+</form>
 
 <div class="row mb-4 border-bottom">
   <h2 class="h4">Scraper Settings</h2>

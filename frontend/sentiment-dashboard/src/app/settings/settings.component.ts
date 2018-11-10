@@ -18,6 +18,14 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   private appListSubscription: Subscription;
   private appListTimer: any;
 
+  public ignoreList: string[];
+  public ignoreListForm: FormGroup;
+  public addKeyword: AbstractControl;
+  public ignoreListError = '';
+  public ignoreListSuccess = false;
+  private ignoreListSubscription: Subscription;
+  private ignoreListTimer: any;
+
   public scrapingForm: FormGroup;
   public pollingInterval: AbstractControl;
   public scrapingFormError = '';
@@ -25,6 +33,14 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   private scrapingFormGetSubscription: Subscription;
   private scrapingFormSetSubscription: Subscription;
   private scrapingFormTimer: any;
+
+  public dashboardForm: FormGroup;
+  public refreshInterval: AbstractControl;
+  public dashboardFormError = '';
+  public dashboardFormSuccess = false;
+  private dashboardFormGetSubscription: Subscription;
+  private dashboardFormSetSubscription: Subscription;
+  private dashboardFormTimer: any;
 
   public slackForm: FormGroup;
   public postingChannel: AbstractControl;
@@ -41,6 +57,16 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private fb: FormBuilder, private rest: RestService, private modalService: BsModalService) { }
 
   ngOnInit() {
+    this.dashboardForm = this.fb.group({
+      'refreshInterval': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])]
+    });
+    this.refreshInterval = this.dashboardForm.get('refreshInterval');
+
+    this.ignoreListForm = this.fb.group({
+      'addKeyword': ['', Validators.required]
+    });
+    this.addKeyword = this.ignoreListForm.get('addKeyword');
+
     this.scrapingForm = this.fb.group({
       'pollingInterval': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])]
     });
@@ -55,6 +81,15 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    this.dashboardFormGetSubscription = this.rest.getSettings(['refreshInterval'])
+    .subscribe((response) => {
+      if (response.status === 'ERROR') {
+        this.dashboardFormError = response.message;
+      } else {
+        response.settings.forEach((setting) => this.dashboardForm.get(setting.name).setValue(setting.value));
+      }
+    });
+
     this.appListSubscription = this.rest.getAppList()
     .subscribe((response) => {
       if (response.status === 'ERROR') {
@@ -63,6 +98,16 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.appList = response.appList;
       }
     });
+
+    this.ignoreListSubscription = this.rest.getIgnoreList()
+    .subscribe((response) => {
+      if (response.status === 'ERROR') {
+        this.ignoreListError = response.message;
+      } else {
+        this.ignoreList = response.ignoreList;
+      }
+    });
+
     this.scrapingFormGetSubscription = this.rest.getSettings(['pollingInterval'])
     .subscribe((response) => {
       if (response.status === 'ERROR') {
@@ -83,8 +128,20 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    if (this.dashboardFormGetSubscription !== undefined) {
+      this.dashboardFormGetSubscription.unsubscribe();
+    }
+
+    if (this.dashboardFormSetSubscription !== undefined) {
+      this.dashboardFormSetSubscription.unsubscribe();
+    }
+
     if (this.appListSubscription !== undefined) {
       this.appListSubscription.unsubscribe();
+    }
+
+    if (this.ignoreListSubscription !== undefined) {
+      this.ignoreListSubscription.unsubscribe();
     }
 
     if (this.scrapingFormGetSubscription !== undefined) {
@@ -149,6 +206,68 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.appList = response.appList;
         setTimeout(() => {
           this.appListSuccess = false;
+        }, 3000);
+      }
+    });
+  }
+
+  onDashboardSubmit() {
+    this.dashboardFormSetSubscription = this.rest.setSettings([
+      { name: 'refreshInterval', value: this.refreshInterval.value }
+    ]).subscribe((response) => {
+      if (response.status === 'ERROR') {
+        this.dashboardFormError = response.message;
+      } else {
+        this.dashboardFormSuccess = true;
+        clearTimeout(this.dashboardFormTimer);
+        this.dashboardFormTimer = setTimeout(() => {
+          this.dashboardFormSuccess = false;
+        }, 3000);
+      }
+    });
+  }
+
+  onAddKeyword() {
+    if (this.addKeyword.invalid) {
+      return;
+    }
+
+    if (this.ignoreListSubscription !== undefined) {
+      this.ignoreListSubscription.unsubscribe();
+    }
+
+    this.ignoreListSubscription = this.rest.addKeyword(this.addKeyword.value)
+    .subscribe((response) => {
+      if (response.status === 'ERROR') {
+        this.ignoreListError = response.message;
+      } else {
+        this.ignoreListSuccess = true;
+        this.ignoreList = response.ignoreList;
+        clearTimeout(this.ignoreListTimer);
+        this.ignoreListTimer = setTimeout(() => {
+          this.ignoreListSuccess = false;
+        }, 3000);
+      }
+    });
+
+    this.addKeyword.setValue('');
+    this.addKeyword.updateValueAndValidity();
+  }
+
+  onDeleteKeyword(keyword: string) {
+    if (this.ignoreListSubscription !== undefined) {
+      this.ignoreListSubscription.unsubscribe();
+    }
+
+    this.ignoreListSubscription = this.rest.deleteKeyword(keyword)
+    .subscribe((response) => {
+      if (response.status === 'ERROR') {
+        this.ignoreListError = response.message;
+      } else {
+        this.ignoreListSuccess = true;
+        this.ignoreList = response.ignoreList;
+        setTimeout(() => {
+          this.ignoreListSuccess = false;
         }, 3000);
       }
     });

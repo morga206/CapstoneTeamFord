@@ -10,7 +10,7 @@
     <input type="text" class="form-control" id="app-name" formControlName="appName" [class.is-invalid]="appName.invalid">
   
     <label for="app-store" class="mr-2">Store</label>
-    <select class="form-control" id="app-store" formControlName="appStore" [class.is-invalid]="appStore.invalid">
+    <select class="form-control" id="app-store" formControlName="appStore" [class.is-invalid]="appStore.invalid" (change)="onStoreChange()">
       <option>App Store</option>
       <option>Google Play</option>
     </select>

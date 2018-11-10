@@ -90,6 +90,11 @@ functions:
           authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
       - http:
           method: post
+          path: settings/keywords
+          cors: true
+          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
+      - http:
+          method: post
           path: settings/get
           cors: true
           authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3

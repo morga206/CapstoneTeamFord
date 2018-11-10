@@ -5,11 +5,18 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { environment } from 'src/environments/environment';
-import { SettingResponse, App, AppListResponse } from '../rest/domain';
+import { SettingResponse, App, AppListResponse, IgnoreListResponse } from '../rest/domain';
 import { AuthService } from '../auth/auth.service';
 import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
 import { ComponentLoaderFactory } from 'ngx-bootstrap';
 import { PositioningService } from 'ngx-bootstrap/positioning';
+import { of } from 'rxjs';
+
+class MockAuthService {
+  getIdToken() {
+    return of('12345');
+  }
+}
 
 describe('SettingsComponent', () => {
   const API_URL = environment.backendUrl;
@@ -23,7 +30,7 @@ describe('SettingsComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ SettingsComponent ],
       imports: [ ReactiveFormsModule, HttpClientModule, HttpClientTestingModule, ModalModule ],
-      providers: [ AuthService, BsModalService, ComponentLoaderFactory, PositioningService ]
+      providers: [ { provide: AuthService, useClass: MockAuthService }, BsModalService, ComponentLoaderFactory, PositioningService ]
     })
     .compileComponents();
   }));
@@ -38,6 +45,19 @@ describe('SettingsComponent', () => {
 
   // Send inital setting values from the mock backend to populate the form
   function initializeSettings() {
+    const testRefreshInterval = '30';
+
+    const testDashboardResponse: SettingResponse = {
+      settings: [
+        {
+          name: 'refreshInterval',
+          value: testRefreshInterval
+        }
+      ],
+      message: null,
+      status: 'SUCCESS'
+    };
+
     const testPollingInterval = '30';
 
     const testScrapingResponse: SettingResponse = {
@@ -76,9 +96,18 @@ describe('SettingsComponent', () => {
       message: null
     };
 
+    const testIgnoreList: string[] = ['test', 'keyword', 'list'];
+    const testIgnoreListResponse: IgnoreListResponse = {
+      ignoreList: testIgnoreList,
+      status: 'SUCCESS',
+      message: null
+    };
+
     const reqs = httpMock.match(API_URL + 'settings/get');
     reqs.forEach((req) => {
-      if (req.request.body === JSON.stringify({names: ['pollingInterval']})) {
+      if (req.request.body === JSON.stringify({names: ['refreshInterval']})) {
+        req.flush(testDashboardResponse);
+      } else if (req.request.body === JSON.stringify({names: ['pollingInterval']})) {
         req.flush(testScrapingResponse);
       } else {
         req.flush(testSlackResponse);
@@ -88,7 +117,12 @@ describe('SettingsComponent', () => {
     const appListReq = httpMock.expectOne(API_URL + 'settings/apps');
     appListReq.flush(testAppListResponse);
 
+    const ignoreListReq = httpMock.expectOne(API_URL + 'settings/keywords');
+    ignoreListReq.flush(testIgnoreListResponse);
+
     httpMock.verify();
+
+    expect(component.refreshInterval.value).toEqual(testRefreshInterval);
 
     expect(component.pollingInterval.value).toEqual(testPollingInterval);
 
@@ -96,6 +130,7 @@ describe('SettingsComponent', () => {
     expect(component.postingInterval.value).toEqual(testPostingInterval);
 
     expect(component.appList).toEqual(testAppList);
+    expect(component.ignoreList).toEqual(testIgnoreList);
   }
 
   it('should create', () => {
@@ -103,6 +138,10 @@ describe('SettingsComponent', () => {
   });
 
   it('should be valid when all fields are filled out', () => {
+    component.refreshInterval.setValue('25');
+    component.dashboardForm.updateValueAndValidity();
+    expect(component.dashboardForm.valid).toBeTruthy();
+
     component.pollingInterval.setValue('30');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeTruthy();
@@ -114,6 +153,13 @@ describe('SettingsComponent', () => {
   });
 
   it('should not be valid when fields are blank', () => {
+    component.refreshInterval.setValue('25');
+    component.dashboardForm.updateValueAndValidity();
+    expect(component.dashboardForm.valid).toBeTruthy();
+
+    component.refreshInterval.setValue('');
+    expect(component.dashboardForm.valid).toBeFalsy();
+
     component.pollingInterval.setValue('30');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeTruthy();
@@ -136,6 +182,14 @@ describe('SettingsComponent', () => {
   });
 
   it('should not be valid if fields are malformed', () => {
+    component.refreshInterval.setValue('abc');
+    component.dashboardForm.updateValueAndValidity();
+    expect(component.dashboardForm.valid).toBeFalsy();
+
+    component.refreshInterval.setValue('30');
+    component.dashboardForm.updateValueAndValidity();
+    expect(component.dashboardForm.valid).toBeTruthy();
+
     component.pollingInterval.setValue('abc');
     component.scrapingForm.updateValueAndValidity();
     expect(component.scrapingForm.valid).toBeFalsy();
@@ -176,15 +230,29 @@ describe('SettingsComponent', () => {
     const appListReq = httpMock.expectOne(API_URL + 'settings/apps');
     appListReq.flush(testResponse);
 
+    const ignoreListReq = httpMock.expectOne(API_URL + 'settings/keywords');
+    ignoreListReq.flush(testResponse);
+
     httpMock.verify();
 
+    expect(component.dashboardFormError).toEqual('Test Error Message');
     expect(component.scrapingFormError).toEqual('Test Error Message');
     expect(component.slackFormError).toEqual('Test Error Message');
     expect(component.appListError).toEqual('Test Error Message');
+    expect(component.ignoreListError).toEqual('Test Error Message');
   });
 
   it('should display a success message on save for a time interval', async() => {
     initializeSettings();
+
+    component.refreshInterval.setValue('25');
+    component.scrapingForm.updateValueAndValidity();
+    expect(component.scrapingForm.valid).toBeTruthy();
+
+    component.postingChannel.setValue('general');
+    component.postingInterval.setValue('45');
+    component.slackForm.updateValueAndValidity();
+    expect(component.slackForm.valid).toBeTruthy();
 
     component.pollingInterval.setValue('30');
     component.scrapingForm.updateValueAndValidity();
@@ -213,8 +281,24 @@ describe('SettingsComponent', () => {
       ]
     };
 
-    component.onScrapingSubmit();
+    const testIgnoreListSuccessResponse: IgnoreListResponse = {
+      message: null,
+      status: 'SUCCESS',
+      ignoreList: ['test', 'keyword', 'list']
+    };
+
+    component.onDashboardSubmit();
     let req = httpMock.expectOne(API_URL + 'settings/set');
+    req.flush(testSuccessResponse);
+    expect(component.dashboardFormSuccess).toBeTruthy();
+
+    component.onScrapingSubmit();
+    req = httpMock.expectOne(API_URL + 'settings/set');
+    req.flush(testSuccessResponse);
+    expect(component.dashboardFormSuccess).toBeTruthy();
+
+    component.onScrapingSubmit();
+    req = httpMock.expectOne(API_URL + 'settings/set');
     req.flush(testSuccessResponse);
     expect(component.scrapingFormSuccess).toBeTruthy();
 
@@ -234,6 +318,19 @@ describe('SettingsComponent', () => {
     req.flush(testAppListSuccessResponse);
     expect(component.appListSuccess).toBeTruthy();
 
+    component.addKeyword.setValue('anotherKeyword');
+    component.addKeyword.updateValueAndValidity();
+    component.onAddKeyword();
+    req = httpMock.expectOne(API_URL + 'settings/keywords');
+    req.flush(testIgnoreListSuccessResponse);
+    expect(component.ignoreListSuccess).toBeTruthy();
+
+    const toDeleteKeyword = component.ignoreList[0];
+    component.onDeleteKeyword(toDeleteKeyword);
+    req = httpMock.expectOne(API_URL + 'settings/keywords');
+    req.flush(testIgnoreListSuccessResponse);
+    expect(component.ignoreListSuccess).toBeTruthy();
+
     httpMock.verify();
   });
 
@@ -243,6 +340,11 @@ describe('SettingsComponent', () => {
 
   it('should update setting values on save', async () => {
     initializeSettings();
+
+    const updatedRefreshInterval = '15';
+    component.refreshInterval.setValue(updatedRefreshInterval);
+    component.dashboardForm.updateValueAndValidity();
+    expect(component.dashboardForm.valid).toBeTruthy();
 
     const updatedPollingInterval = '25';
     component.pollingInterval.setValue(updatedPollingInterval);
@@ -256,8 +358,23 @@ describe('SettingsComponent', () => {
     component.slackForm.updateValueAndValidity();
     expect(component.slackForm.valid).toBeTruthy();
 
-    component.onScrapingSubmit();
+    component.onDashboardSubmit();
     let req = httpMock.expectOne(API_URL + 'settings/set');
+
+    const expectedDashboardRequest = {
+      settings: [
+        {
+          name: 'refreshInterval',
+          value: updatedRefreshInterval
+        }
+      ]
+    };
+    expect(req.request.method).toEqual('POST');
+    expect(req.request.body).toEqual(JSON.stringify(expectedDashboardRequest));
+
+
+    component.onScrapingSubmit();
+    req = httpMock.expectOne(API_URL + 'settings/set');
 
 
     const expectedScrapingRequest = {
@@ -308,6 +425,28 @@ describe('SettingsComponent', () => {
     };
     expect(req.request.method).toEqual('POST');
     expect(req.request.body).toEqual(JSON.stringify(expectedAppListDeleteRequest));
+
+    const toAddKeyword = 'add';
+    component.addKeyword.setValue(toAddKeyword);
+    component.addKeyword.updateValueAndValidity();
+    component.onAddKeyword();
+    req = httpMock.expectOne(API_URL + 'settings/keywords');
+    const expectedIgnoreListAddRequest = {
+      command: 'ADD',
+      keyword: toAddKeyword
+    };
+    expect(req.request.method).toEqual('POST');
+    expect(req.request.body).toEqual(JSON.stringify(expectedIgnoreListAddRequest));
+
+    const toDeleteKeyword: string = component.ignoreList[0];
+    component.onDeleteKeyword(toDeleteKeyword);
+    req = httpMock.expectOne(API_URL + 'settings/keywords');
+    const expectedIgnoreListDeleteRequest = {
+      command: 'DELETE',
+      keyword: toDeleteKeyword
+    };
+    expect(req.request.method).toEqual('POST');
+    expect(req.request.body).toEqual(JSON.stringify(expectedIgnoreListDeleteRequest));
 
     httpMock.verify();
   });
