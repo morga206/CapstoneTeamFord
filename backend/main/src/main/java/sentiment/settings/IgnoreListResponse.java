@@ -9,24 +9,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A response to a request to get or update the app scraping list.
+ * A response to a request to get or update the keyword ignore list.
  */
-public class AppListResponse extends Response {
-  private App[] appList;
+public class IgnoreListResponse extends Response {
+  private String[] ignoreList;
 
   /**
-   * Create an AppListResponse (success condition).
-   * @param appList The updated list of apps to scrape.
+   * Create an IgnoreListResponse (success condition).
+   * @param ignoreList The updated list of keywords to ignore.
    */
-  public AppListResponse(App[] appList) {
-    this.appList = appList;
+  public IgnoreListResponse(String[] ignoreList) {
+    this.ignoreList = ignoreList;
   }
 
   /**
-   * Create an AppListResponse (error condition).
+   * Create an IgnoreListResponse (error condition).
    * @param message The error message.
    */
-  public AppListResponse(String message) {
+  public IgnoreListResponse(String message) {
     super(message);
   }
 
@@ -38,7 +38,7 @@ public class AppListResponse extends Response {
     Map<String, Object> data = super.getData();
 
     if (this.getStatus() == Status.SUCCESS) {
-      data.put("appList", this.appList);
+      data.put("ignoreList", this.ignoreList);
     }
 
     return data;

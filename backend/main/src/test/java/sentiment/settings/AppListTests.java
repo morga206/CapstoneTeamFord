@@ -43,21 +43,21 @@ public class AppListTests {
     // Invalid app data should return error
     App app = new App("Valid Name", "Made-up Store", "Valid.ID");
     AppListRequest request = new AppListRequest("ADD", app);
-    AppListResponse response = request.addApp(new MockSSM(), new App[1]);
+    AppListResponse response = request.add(new MockSSM(), new App[1], app);
     AppListResponse expectedResponse = new AppListResponse("Invalid store Made-up Store.");
     assertThat(response.getData()).isEqualTo(expectedResponse.getData());
 
     // Adding existing app should return error
     app = new App("Valid Name", "App Store", "Valid.ID");
     request = new AppListRequest("ADD", app);
-    response = request.addApp(new MockSSM(), new App[]{ app });
+    response = request.add(new MockSSM(), new App[]{ app }, app);
     expectedResponse = new AppListResponse("App with id Valid.ID already exists in the list.");
     assertThat(response.getData()).isEqualTo(expectedResponse.getData());
 
     // Successful case (store values differ)
     App anotherApp = new App("Valid Name", "Google Play", "Valid.ID");
     request = new AppListRequest("ADD", anotherApp);
-    response = request.addApp(new MockSSM(), new App[]{ app });
+    response = request.add(new MockSSM(), new App[]{ app }, anotherApp);
 
     expectedResponse = new AppListResponse(new App[]{ app, anotherApp });
     Map<String, Object> expectedData = expectedResponse.getData();
@@ -68,7 +68,7 @@ public class AppListTests {
      // Successful case (id values differ)
      anotherApp = new App("Valid Name", "App Store", "Valid.ID2");
      request = new AppListRequest("ADD", anotherApp);
-     response = request.addApp(new MockSSM(), new App[]{ app });
+     response = request.add(new MockSSM(), new App[]{ app }, anotherApp);
  
      expectedResponse = new AppListResponse(new App[]{ app, anotherApp });
      expectedData = expectedResponse.getData();
@@ -82,7 +82,7 @@ public class AppListTests {
     // Invalid app data should return error
     App app = new App("Valid Name", "Made-up Store", "Valid.ID");
     AppListRequest request = new AppListRequest("ADD", app);
-    AppListResponse response = request.deleteApp(new MockSSM(), new App[1]);
+    AppListResponse response = request.delete(new MockSSM(), new App[1], app);
     AppListResponse expectedResponse = new AppListResponse("Invalid store Made-up Store.");
     assertThat(response.getData()).isEqualTo(expectedResponse.getData());
 
@@ -90,13 +90,13 @@ public class AppListTests {
     app = new App("Valid Name", "App Store", "Valid.ID");
     App anotherApp = new App("Valid Name", "App Store", "Valid.ID2");
     request = new AppListRequest("ADD", app);
-    response = request.deleteApp(new MockSSM(), new App[]{ anotherApp });
+    response = request.delete(new MockSSM(), new App[]{ anotherApp }, app);
     expectedResponse = new AppListResponse("No app with id Valid.ID present in list.");
     assertThat(response.getData()).isEqualTo(expectedResponse.getData());
 
     // Successful case
     request = new AppListRequest("ADD", anotherApp);
-    response = request.deleteApp(new MockSSM(), new App[]{ app, anotherApp });
+    response = request.delete(new MockSSM(), new App[]{ app, anotherApp }, anotherApp);
     
     expectedResponse = new AppListResponse(new App[]{ app });
     Map<String, Object> expectedData = expectedResponse.getData();
