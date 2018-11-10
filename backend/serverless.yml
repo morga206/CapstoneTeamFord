@@ -144,10 +144,14 @@ functions:
     events:
       - http:
           method: get
-          path: slackbot
+          path: slackbot/report
+      - http:
+          method: post
+          path: slackbot/command
       - schedule:
           name: ${self:custom.slackbotEventName}
           rate: rate(30 minutes)
+
 
 resources:
   Resources:
