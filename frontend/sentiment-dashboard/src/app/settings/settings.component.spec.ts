@@ -10,6 +10,13 @@ import { AuthService } from '../auth/auth.service';
 import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
 import { ComponentLoaderFactory } from 'ngx-bootstrap';
 import { PositioningService } from 'ngx-bootstrap/positioning';
+import { of } from 'rxjs';
+
+class MockAuthService {
+  getIdToken() {
+    return of('12345');
+  }
+}
 
 describe('SettingsComponent', () => {
   const API_URL = environment.backendUrl;
@@ -23,7 +30,7 @@ describe('SettingsComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ SettingsComponent ],
       imports: [ ReactiveFormsModule, HttpClientModule, HttpClientTestingModule, ModalModule ],
-      providers: [ AuthService, BsModalService, ComponentLoaderFactory, PositioningService ]
+      providers: [ { provide: AuthService, useClass: MockAuthService }, BsModalService, ComponentLoaderFactory, PositioningService ]
     })
     .compileComponents();
   }));

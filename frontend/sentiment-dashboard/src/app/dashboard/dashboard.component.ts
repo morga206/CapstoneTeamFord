@@ -65,7 +65,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   public startAutoUpdate(interval: string) {
     // Interval is in minutes - convert to milliseconds
-    const timerInterval = parseInt(interval) * 60000;
+    const timerInterval = parseInt(interval, 10) * 60000;
 
     this.autoUpdateSubscription = timer(0, timerInterval).subscribe(() => {
       const values: StatsFilterValues | undefined = this.form.getCurrentValues();

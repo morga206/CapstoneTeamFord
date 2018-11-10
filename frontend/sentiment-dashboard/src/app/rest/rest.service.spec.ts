@@ -7,13 +7,20 @@ import { HttpClientModule } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { StatResponse } from './domain';
 import { AuthService } from '../auth/auth.service';
+import { of } from 'rxjs';
+
+class MockAuthService {
+  getIdToken() {
+    return of('12345');
+  }
+}
 
 describe('RestService', () => {
   const API_URL = environment.backendUrl;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [AuthService, RestService],
+      providers: [{ provide: AuthService, useClass: MockAuthService }, RestService],
       imports: [HttpClientModule, HttpClientTestingModule]
     });
   });
