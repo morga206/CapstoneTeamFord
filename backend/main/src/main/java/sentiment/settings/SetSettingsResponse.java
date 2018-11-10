@@ -11,29 +11,18 @@ import java.util.Map;
  */
 public class SetSettingsResponse extends Response {
 
-  private Status status;
-  private String message;
-
   public SetSettingsResponse(String message) {
-    this.status = Status.ERROR;
-    this.message = message;
+    super(message);
   }
 
-  public SetSettingsResponse() {
-    this.status = Status.SUCCESS;
-  }
+  public SetSettingsResponse() { }
 
   /**
    * Return a map of JSON keys and values for this object.
    */
   @JsonAnyGetter
   public Map<String, Object> getData() {
-    Map<String, Object> data = new HashMap<String, Object>();
-
-    data.put("status", this.status);
-    data.put("message", this.message);
-
-    return data;
+    return super.getData();
   }
   
 }

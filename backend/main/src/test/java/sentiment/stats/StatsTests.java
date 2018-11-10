@@ -11,8 +11,20 @@ import java.util.List;
 import java.util.Map;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.simplesystemsmanagement.AbstractAWSSimpleSystemsManagement;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterResult;
+import com.amazonaws.services.simplesystemsmanagement.model.Parameter;
 
 public class StatsTests {
+
+  private class MockSSM extends AbstractAWSSimpleSystemsManagement {
+    @Override
+    public GetParameterResult getParameter(GetParameterRequest request) {
+      return new GetParameterResult()
+      .withParameter(new Parameter().withName("ignoreList-test").withValue("[]")); // No-op
+    }
+  }
 
 	@Test
 	public void testCalculateStats() {
@@ -153,7 +165,7 @@ public class StatsTests {
     reviews.add(populateReview("test store*test id", "2001-05-22T00:00:00.000Z", "1.0.0", "34895f", "POSITIVE", new String[]{"present always"}));
     reviews.add(populateReview("test store*test id", "2001-05-23T00:00:00.000Z", "1.0.0", "asldf4", "NEUTRAL", new String[]{"won't include neutral"}));
 
-    OutgoingStat<?, ?> result = new KeywordsCalculation(reviews).calculate();
+    OutgoingStat<?, ?> result = new KeywordsCalculation(reviews, new MockSSM()).calculate();
 
     Map<String, Keyword[]> keywords = new HashMap<String, Keyword[]>();
     keywords.put("positive", new Keyword[]{ new Keyword("present always", 100.0), new Keyword("present sometimes", 1.0 / 2 * 100)});
