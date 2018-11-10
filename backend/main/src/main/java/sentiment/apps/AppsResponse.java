@@ -13,17 +13,12 @@ import java.util.Map;
 public class AppsResponse extends Response {
   private AppInfo[] apps;
 
-  private Status status;
-  private String message;
-
   public AppsResponse(AppInfo[] apps) {
-    this.status = Status.SUCCESS;
     this.apps = apps;
   }
 
   public AppsResponse(String message) {
-    this.status = Status.ERROR;
-    this.message = message;
+    super(message);
   }
 
   /**
@@ -31,20 +26,15 @@ public class AppsResponse extends Response {
    */
   @JsonAnyGetter
   public Map<String, Object> getData() {
-    Map<String, Object> data = new HashMap<String, Object>();
+    Map<String, Object> data = super.getData();
 
-    data.put("status", status);
-    if (status == Status.SUCCESS) {
+    if (this.getStatus() == Status.SUCCESS) {
       Map<String, AppInfo> appList = new HashMap<String, AppInfo>();
       for (AppInfo app : apps) {
         appList.put(app.getAppIdStore(), app);
       }
       data.put("apps", appList);
-    } else {
-      data.put("message", message);
     }
-
-    System.out.println(data.toString());
 
     return data;
   }

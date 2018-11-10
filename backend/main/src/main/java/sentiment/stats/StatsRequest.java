@@ -5,6 +5,8 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -170,7 +172,9 @@ public class StatsRequest extends Request {
           nextIndex++;
           break;
         case "keywords":
-          results[nextIndex] = new KeywordsCalculation(items).calculate();
+          AWSSimpleSystemsManagement client = 
+              AWSSimpleSystemsManagementClientBuilder.defaultClient();
+          results[nextIndex] = new KeywordsCalculation(items, client).calculate();
           nextIndex++;
           break;
         case "sentimentOverTime":
