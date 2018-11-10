@@ -1,17 +1,27 @@
 package sentiment.stats;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterResult;
+import com.amazonaws.services.simplesystemsmanagement.model.ParameterNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Handles calculation of top N keywords from a list of DynamoDB reviews.
  */
 public class KeywordsCalculation extends StatCalculation {
+  private static final String STAGE = System.getenv("STAGE");
+
   /**
    * The number of keywords to return for each review category.
    */
@@ -27,8 +37,16 @@ public class KeywordsCalculation extends StatCalculation {
    */
   private List<String> negativeKeywords = new ArrayList<String>();
 
-  public KeywordsCalculation(List<Map<String, AttributeValue>> items) {
+  /**
+   * The SSM client to use.
+   */
+  private AWSSimpleSystemsManagement client;
+
+  public KeywordsCalculation(
+      List<Map<String, AttributeValue>> items, 
+      AWSSimpleSystemsManagement client) {
     super(items);
+    this.client = client;
   }
 
   /**
@@ -39,9 +57,12 @@ public class KeywordsCalculation extends StatCalculation {
     // Mapping step: DB Item -> Keyword Lists
     separateKeywordsByReviewSentiment();
 
+    // Get ignore list from SSM
+    String[] ignoreList = getIgnoreList();
+
     // Reducing step: Keyword Values -> Counts
-    Map<String, Integer> positiveKeywordCounts = countKeywords(positiveKeywords);
-    Map<String, Integer> negativeKeywordCounts = countKeywords(negativeKeywords);
+    Map<String, Integer> positiveKeywordCounts = countKeywords(positiveKeywords, ignoreList);
+    Map<String, Integer> negativeKeywordCounts = countKeywords(negativeKeywords, ignoreList);
 
     // Get top N keywords and map them to percentages
     Keyword[] positiveResults = 
@@ -56,6 +77,23 @@ public class KeywordsCalculation extends StatCalculation {
     result.put("negative", negativeResults);
 
     return new OutgoingStat<String, Keyword[]>("keywords", result);
+  }
+
+  private String[] getIgnoreList() {
+    GetParameterResult result = null;
+    String value = null;
+    try {
+      result = client.getParameter(new GetParameterRequest().withName("ignoreList-" + STAGE));
+      value = result.getParameter().getValue();
+    } catch (ParameterNotFoundException exp) {
+      value = "[]";
+    }
+
+    try {
+      return new ObjectMapper().readValue(value, String[].class);
+    } catch (Exception exp) {
+      return new String[0];
+    }
   }
 
   /**
@@ -94,11 +132,18 @@ public class KeywordsCalculation extends StatCalculation {
   /**
    * Given a list of keywords, counts the number of occurrences of each keyword.
    * @param keywordList The list of keywords to process.
+   * @param ignoreList The list of words to ignore when counting.
    * @return A mapping from keyword to number of occurrences.
    */
-  private Map<String, Integer> countKeywords(List<String> keywordList) {
+  private Map<String, Integer> countKeywords(List<String> keywordList, String[] ignoreList) {
+    Set<String> ignoreSet = new HashSet<String>(Arrays.asList(ignoreList));
     Map<String, Integer> counts = new HashMap<String, Integer>();
     for (String keyword : keywordList) {
+      if (ignoreSet.contains(keyword)) {
+        // Don't count words in the ignore list
+        continue;
+      }
+
       if (counts.containsKey(keyword)) {
         counts.put(keyword, counts.get(keyword) + 1);
       } else {
