@@ -9,10 +9,7 @@ import java.util.Map;
  * A response to a query for sentiment statistics.
  */
 public class StatsResponse extends Response {
-  
-  private Status status;
-  private String message;
-  
+ 
   private String appIdStore;
   private String version;
   private OutgoingStat<?, ?>[] stats;
@@ -30,25 +27,21 @@ public class StatsResponse extends Response {
   }
 
   public StatsResponse(String message) {
-    this.status = Status.ERROR;
-    this.message = message;
+    super(message);
   }
 
   /**
    * Return a map of the JSON keys and values for this object.
    */
   public Map<String, Object> getData() {
-    Map<String, Object> data = new HashMap<String, Object>();
+    Map<String, Object> data = super.getData();
 
-    data.put("status", this.status);
-    if (this.stats != null) {
+    if (this.getStatus() == Status.SUCCESS) {
       data.put("appIdStore", appIdStore);
       data.put("version", version);
       for (OutgoingStat<?, ?> stat : stats) {
         data.put(stat.getName(), stat.getValues());
       }
-    } else {
-      data.put("message", this.message);
     }
     return data;
   }

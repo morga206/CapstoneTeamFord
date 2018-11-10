@@ -2,7 +2,8 @@ package sentiment.settings;
 
 public final class Constants {
 
-  private static final String STAGE = System.getenv("STAGE");
+  public static final String STAGE = System.getenv("STAGE");
+  public static final String REGION = System.getenv("DEPLOY_REGION");
 
   public static final String APPLIST_SSM_PARAM = "appList-" + STAGE;
 

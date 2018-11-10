@@ -13,8 +13,6 @@ import java.util.Map;
  */
 public class AppListResponse extends Response {
   private App[] appList;
-  private Status status;
-  private String message;
 
   /**
    * Create an AppListResponse (success condition).
@@ -22,8 +20,6 @@ public class AppListResponse extends Response {
    */
   public AppListResponse(App[] appList) {
     this.appList = appList;
-    this.status = Status.SUCCESS;
-    this.message = "";
   }
 
   /**
@@ -31,9 +27,7 @@ public class AppListResponse extends Response {
    * @param message The error message.
    */
   public AppListResponse(String message) {
-    this.appList = null;
-    this.status = Status.ERROR;
-    this.message = message;
+    super(message);
   }
 
   /**
@@ -41,13 +35,10 @@ public class AppListResponse extends Response {
    */
   @JsonAnyGetter
   public Map<String, Object> getData() {
-    Map<String, Object> data = new HashMap<String, Object>();
+    Map<String, Object> data = super.getData();
 
-    data.put("status", this.status);
-    if (this.appList != null) {
+    if (this.getStatus() == Status.SUCCESS) {
       data.put("appList", this.appList);
-    } else {
-      data.put("message", this.message);
     }
 
     return data;

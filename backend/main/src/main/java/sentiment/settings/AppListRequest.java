@@ -23,20 +23,7 @@ import java.util.Arrays;
 /**
  * A query to get or update the list of apps to scrape.
  */
-public class AppListRequest extends Request {
-
-  private static final String REGION = System.getenv("DEPLOY_REGION");
-  private static final String STAGE = System.getenv("STAGE");
-
-  private enum Command {
-    ADD,
-    DELETE,
-    GET;
-  }
-
-  private Command command;
-  private App app;
-  private App[] appList;
+public class AppListRequest extends ListRequest<App> {
 
   /**
    * Creatse a new AppListRequest.
@@ -45,70 +32,58 @@ public class AppListRequest extends Request {
    */
   @JsonCreator
   public AppListRequest(@JsonProperty("command") String command, @JsonProperty("app") App app) {
-    try {
-      this.command = Command.valueOf(command);
-    } catch (Exception exp) {
-      this.command = null; // We'll return an error during processing
-    }
-    this.app = app;
+    super(command, Constants.APPLIST_SSM_PARAM, app);
   }
 
   /**
    * Process the data for this request and return a response.
    */
+  @Override
   public Response process() {
-    AWSSimpleSystemsManagement client = AWSSimpleSystemsManagementClientBuilder.defaultClient();
-    String message = getList(client);
-
-    if (!message.isEmpty()) {
-      return new AppListResponse(message);
+    Response response = super.process();
+    if (super.getCommand() == Command.ADD) {     
+      runScraper();
     }
+    return response;
+  }
 
-    switch (this.command) {
-      case ADD:
-        AppListResponse addResponse = addApp(client, this.appList);
-        runScraper();
-        return addResponse;
-      case DELETE:
-        return deleteApp(client, this.appList);
-      case GET:
-        return new AppListResponse(this.appList);
-      default:
-        return new AppListResponse("Invalid command " + this.command);
+  /**
+   * Runs the scraper Lambda.
+   */
+  private void runScraper() {
+    AWSLambda client = AWSLambdaClientBuilder.standard()
+        .withRegion(Constants.REGION)
+        .build();
+    
+    String functionName = "sentiment-dashboard-" + Constants.STAGE + "-reviews";
+    InvokeRequest req = new InvokeRequest()
+        .withInvocationType(InvocationType.Event) // Asynchronous - don't wait for return
+        .withFunctionName(functionName);
+
+    try {
+      client.invoke(req);
+    } catch (Exception exp) {
+      System.err.println("Error invoking Scraping Lambda: " + exp.getMessage());
     }
   }
 
   /**
-   * Query SSM to get the existing JSON list and deserialize it.
-   * @param client The SSM client.
-   * @return An error message, if any.
+   * Convert SSM's JSON representation to a POJO representation
+   * @param json The JSON list.
+   * @return The list as an array of Java objects
    */
-  private String getList(AWSSimpleSystemsManagement client) {
-    GetParameterResult result = null;
-    String value = null;
-    try {
-      result = client.getParameter(new GetParameterRequest().withName(Constants.APPLIST_SSM_PARAM));
-      value = result.getParameter().getValue();
-    } catch (ParameterNotFoundException exp) {
-      value = "[]";
-    }
-
-    try {
-      this.appList = new ObjectMapper().readValue(value, App[].class);
-    } catch (Exception exp) {
-      return "Unable to parse app list from JSON.";
-    }
-
-    return "";
+  protected App[] deserializeList(String json) throws Exception {
+    return new ObjectMapper().readValue(json, App[].class);
   }
 
   /**
    * Add an app to the SSM list.
    * @param client The SSM client to use.
    * @param appList The existing app list.
+   * @param app The app to add.
    * @return An AppListResponse with either an error message or the updated list.
    */
-  protected AppListResponse addApp(AWSSimpleSystemsManagement client, App[] appList) {
+  protected AppListResponse add(AWSSimpleSystemsManagement client, App[] appList, App app) {
     String message = app.checkValidity();
 
     if (!message.isEmpty()) {
@@ -136,32 +111,13 @@ public class AppListRequest extends Request {
   }
 
   /**
-   * Runs the scraper Lambda.
-   */
-  private void runScraper() {
-    AWSLambda client = AWSLambdaClientBuilder.standard()
-        .withRegion(REGION)
-        .build();
-    
-    String functionName = "sentiment-dashboard-" + STAGE + "-reviews";
-    InvokeRequest req = new InvokeRequest()
-        .withInvocationType(InvocationType.Event) // Asynchronous - don't wait for return
-        .withFunctionName(functionName);
-
-    try {
-      client.invoke(req);
-    } catch (Exception exp) {
-      System.err.println("Error invoking Scraping Lambda: " + exp.getMessage());
-    }
-  }
-
-  /**
    * Delete an app from the SSM list.
    * @param client The SSM client to use.
    * @param appList The existing app list.
+   * @param app The app to delete.
    * @return An AppListResponse with either an error message or the updated list.
    */
-  protected AppListResponse deleteApp(AWSSimpleSystemsManagement client, App[] appList) {
+  protected AppListResponse delete(AWSSimpleSystemsManagement client, App[] appList, App app) {
     String message = app.checkValidity();
 
     if (!message.isEmpty()) {
@@ -195,29 +151,13 @@ public class AppListRequest extends Request {
   }
 
   /**
-   * Write the updated list to SSM.
-   * @param client The SSM client to use.
-   * @param newList The updated list to write.
-   * @return An error message, if any.
+   * Format the current list in a Response object.
+   * @param list The list to format
+   * @return A Response with the list.
    */
-  private String writeList(AWSSimpleSystemsManagement client, App[] newList) {
-    String json;
-    try {
-      json = new ObjectMapper().writeValueAsString(newList);
-    } catch (Exception exp) {
-      return "Unable to serialize updated list to JSON.";
-    }
-
-    try {
-      client.putParameter(new PutParameterRequest()
-          .withName(Constants.APPLIST_SSM_PARAM)
-          .withValue(json)
-          .withType(ParameterType.String)
-          .withOverwrite(true));
-    } catch (Exception exp) {
-      return exp.getMessage();
-    }
-
-    return "";
+  protected AppListResponse get(App[] list) {
+    return new AppListResponse(list);
   }
+
+
 }
