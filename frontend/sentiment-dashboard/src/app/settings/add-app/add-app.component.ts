@@ -22,7 +22,7 @@ export class AddAppComponent implements OnInit {
     this.addAppForm = this.fb.group({
       'appName': ['', Validators.required],
       'appStore': ['', Validators.required],
-      'appId': ['', Validators.compose([Validators.required, Validators.pattern('[0-9a-zA-Z_.]+')])]
+      'appId': ['', Validators.compose([Validators.required])]
     });
     this.appName = this.addAppForm.get('appName');
     this.appStore = this.addAppForm.get('appStore');
@@ -36,5 +36,20 @@ export class AddAppComponent implements OnInit {
       appId: this.appId.value
     });
     this.bsModalRef.hide();
+  }
+
+  onStoreChange() {
+    const appStorePattern = '[0-9]+';
+    const googlePlayPattern = '[0-9a-zA-Z_.]+';
+
+    const store = this.appStore.value;
+
+    if (store === 'App Store') {
+      this.appId.setValidators([Validators.required, Validators.pattern(appStorePattern)]);
+    } else if (store === 'Google Play') {
+      this.appId.setValidators([Validators.required, Validators.pattern(googlePlayPattern)]);
+    }
+
+    this.appId.updateValueAndValidity();
   }
 }
