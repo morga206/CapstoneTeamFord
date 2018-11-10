@@ -54,6 +54,9 @@ async function handler (event) {
  * @param httpEvent The http JSON formatted event
  */
 async function handleHttpRequest(httpEvent) {
+
+  // TO DO: handle manual invocation / get request
+  // Currently get request by postman invokes else so we send a default report
   if (httpEvent.httpMethod === 'POST') {
     const requestBody = queryString.parse(httpEvent.body);
     await handleCommand(requestBody);
@@ -69,10 +72,10 @@ async function handleHttpRequest(httpEvent) {
  */
 async function handleCommand(slackFields){
   const responseURL = slackFields['response_url'];
-  let slackResponses = []; // List of messages sending to slack
-
   const parameters = await extractSlackParameters(slackFields);
   const statsList = await getStatistics(parameters);
+
+  let slackResponses = []; // List of messages sending to slack
 
   // Determine which command should be invoked
   switch (slackFields.command) {
@@ -110,7 +113,7 @@ async function extractSlackParameters(slackFields) {
     const userInput = slackFields.text.split(' ');
 
     for (let parameter in userInput) {
-      let pair = userInput[parameter].split('=');
+      const pair = userInput[parameter].split('=');
       parameters[pair[0]] = pair[1];
     }
   }
@@ -125,7 +128,6 @@ async function extractSlackParameters(slackFields) {
  */
 async function handleScheduledReport() {
   const statsList = await getStatistics();  // Get the statistics with default values
-
   const slackResponse = await report(statsList);  // Create the message to post to slack
 
   // Post all of the reports to slack
@@ -153,14 +155,15 @@ async function getStatistics(parameters={}){
   const apps = await getApps(store);
   const statsRequests = await buildParameters(apps, parameters); // Get list of parameters to post a report for each app
 
+
   // Create a list of promises to await the statistics response
   let promises = [];
   for (let request in statsRequests) {
-    let promise = axios.post(endpoint, statsRequests[request]);
+    const promise = axios.post(endpoint, statsRequests[request]);
     promises.push(promise);
   }
 
-  let allPromises = Promise.all(promises);
+  const allPromises = Promise.all(promises);
   let statistics = [];
 
   try {
@@ -172,7 +175,8 @@ async function getStatistics(parameters={}){
 
   // Add in app names to statistics
   for (let i = 0; i < statistics.length; i++) {
-    statistics[i].data.name = apps[statistics[i].data.appIdStore].name;
+    const appName = apps[statistics[i].data.appIdStore].name;
+    statistics[i].data.name = appName;
     statisticsList.push(statistics[i].data);
   }
 
@@ -187,21 +191,26 @@ async function getStatistics(parameters={}){
  */
 async function getApps(store='both') {
   const endpoint = gatewayURL + '/apps';
-  let filteredApps = {};  // apps we want to return depending on store specified
-
-  let appsRequest = await axios.get(endpoint); // Get list of available apps
+  const appsRequest = await axios.get(endpoint); // Get list of available apps
   const apps = appsRequest.data;
 
+  let filteredApps = {};  // apps we want to return depending on store specified
+
+
   if (store == 'both') {
-    return apps;
+    for (let appIdStore in apps.apps) {
+      filteredApps[appIdStore] = apps.apps[appIdStore];
+    }
+
   } else {
+
     // Filter apps based on appStoreId and user provided store
-    for (let appIdStore in apps) {
+    for (let appIdStore in apps.apps) {
       if ( (store.includes('google') || store.includes('android')) && appIdStore.includes('Google Play') ) {
-        filteredApps[appIdStore] = apps[appIdStore];
+        filteredApps[appIdStore] = apps.apps[appIdStore];
       }
       else if ( (store.includes('apple') || store.includes('ios')) && appIdStore.includes('App Store') ) {
-        filteredApps[appIdStore] = apps[appIdStore];
+        filteredApps[appIdStore] = apps.apps[appIdStore];
       }
     }
   }
@@ -219,34 +228,35 @@ function buildParameters(apps, slackInput) {
   let statsRequests = [];
 
   for (let app in apps) {
-    let params = {};
-
-    let days = 7;
+    let days;
     if (slackInput.hasOwnProperty('days')) {
       days = slackInput.days;
+    } else {
+      days = 7;
     }
 
     // Calculate date range using days or defaulting to 7 days back from latest available
-    let endDate = new Date();
-    let startDate = new Date();
-    startDate.setDate(endDate.getDate() - days);
-
-    if (slackInput.hasOwnProperty('startDate')) {
+    let startDate;
+    let endDate;
+    if (slackInput.hasOwnProperty('startDate') && slackInput.hasOwnProperty('endDate')) {
       startDate = new Date(slackInput.startDate);
-    }
-
-    if (slackInput.hasOwnProperty('endDate')) {
       endDate = new Date(slackInput.endDate);
+    } else {
+      endDate = new Date();
+      startDate = new Date();
+      startDate.setDate(endDate.getDate() - days);
     }
 
     // Either use specified version or default to latest version
-    let version = apps[app].versions[apps[app].versions.length - 1];
+    let version;
     if (slackInput.hasOwnProperty('version')) {
       version = slackInput.version;
+    } else {
+      version = apps[app].versions[apps[app].versions.length - 1];
     }
 
     // Parameters to make request to stats endpoint
-    params = {
+    const params = {
       'appIdStore': app,
       'version': version,
       'startDate': startDate.toISOString(),
@@ -277,7 +287,7 @@ async function report(statistics){
   let slackMessages = []; // List of reports to send to slack as messages (One report per app)
 
   // report represents the index in statistics list
-  for (let report in statistics) {
+  for (let i = 0; i < statistics.length; i++) {
     let message = '';
     let slackAttachments = [
       {'fallback': 'Overall Sentiment',
@@ -295,15 +305,15 @@ async function report(statistics){
     ];
 
     // Get fields from statsList to send in messages
-    let statsList = statistics[report];
+    const stats = statistics[i];
 
-    let overallSentiment = statsList.overallSentiment;
-    let rawReviews = statsList.rawReviews;
-    let keywords = statsList.keywords;
-    let version = statsList.version;
-    let name = statsList.name;
-    let startDate = statsList.sentimentOverTime.labels[0];
-    let endDate = statsList.sentimentOverTime.labels[statsList.sentimentOverTime.labels.length-1];
+    const overallSentiment = stats.overallSentiment;
+    const rawReviews = stats.rawReviews;
+    const keywords = stats.keywords;
+    const version = stats.version;
+    const name = stats.name;
+    const startDate = stats.sentimentOverTime.labels[0];
+    const endDate = stats.sentimentOverTime.labels[stats.sentimentOverTime.labels.length-1];
 
     const attitude = await getAttitude(overallSentiment);
 
@@ -335,26 +345,26 @@ async function getSentimentOverTime(statistics){
   let slackMessages = [];
 
   // report represents the index in statistics list
-  for (let report in statistics) {
+  for (let i = 0; i < statistics.length; i++) {
     let message = '';
     let attachments = [
       {
         'fallback': 'Sentiment Over Time',
-        'color': '#0066ff',
-        'title': 'Percentage of positive reviews by day',
+        'color': '#ff5c22',
+        'title': 'Percentage of negative reviews by day',
       }
     ];
 
     // Get the fields we want to use in our message to slack
-    let stats = statistics[report];
-    let sentimentOverTime = stats.sentimentOverTime;
-    let overallSentiment = stats.overallSentiment;
+    const stats = statistics[i];
 
-    let data = sentimentOverTime.data;
-    let labels = sentimentOverTime.labels;
-
-    let startDate = stats.sentimentOverTime.labels[0];
-    let endDate = stats.sentimentOverTime.labels[stats.sentimentOverTime.labels.length-1];
+    const overallSentiment = stats.overallSentiment;
+    const sentimentOverTime = stats.sentimentOverTime;
+    const data = sentimentOverTime.data;
+    const labels = sentimentOverTime.labels;
+    const totals = sentimentOverTime.totals;
+    const startDate = stats.sentimentOverTime.labels[0];
+    const endDate = stats.sentimentOverTime.labels[stats.sentimentOverTime.labels.length-1];
 
     const attitude = await getAttitude(overallSentiment);
 
@@ -362,7 +372,7 @@ async function getSentimentOverTime(statistics){
     message += `Report for:\nApp: ${stats.name}\nVersion: ${stats.version}\n`;
     message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(stats.rawReviews).length} reviews`;
 
-    attachments[0].text = await sentimentOverTimeText(data, labels);
+    attachments[0].text = await sentimentOverTimeText(data, labels, totals);
 
     let params = {
       text: message,
@@ -380,16 +390,18 @@ async function getSentimentOverTime(statistics){
  * Helper function to build the text that matches days to percentage of negative reviews
  * @param data: the percentages of negative reviews
  * @param labels: the month, day labels for the data
+ * @param totals: the total number of reviews for that day
  * @returns text: the text attachment for sentimentOverTime
  */
-async function sentimentOverTimeText(data, labels) {
+async function sentimentOverTimeText(data, labels, totals) {
   let text = '';
   for (let day in data) {
-    let date =  labels[day];
-    let percent = Math.round(data[day]*100)/100;
+    const date =  labels[day];
+    const percent = Math.round(data[day]*100)/100;
+    const total = totals[day];
 
     if (data[day] != null) {
-      text += `On ${date}, ${percent}% of reviews were negative\n`;
+      text += `On ${date}, ${percent}% of reviews were negative: ${total} total reviews\n`;
     }
   }
 
@@ -407,7 +419,7 @@ async function sentimentText(overallSentiment) {
     Math.round(overallSentiment.MIXED),
     Math.round(overallSentiment.NEUTRAL)];
 
-  let text = `Positive: ${sentiment[0]}%\nNegative: ${sentiment[1]}%\nNeutral: ${sentiment[2]}%\nMixed: ${sentiment[3]}%`;
+  const text = `Positive: ${sentiment[0]}%\nNegative: ${sentiment[1]}%\nNeutral: ${sentiment[2]}%\nMixed: ${sentiment[3]}%`;
 
   return text;
 }
@@ -438,7 +450,7 @@ async function getAttitude(overallSentiment) {
   const max = Math.max(...sentiment);
 
   // Determine the maximum attitude
-  let attitude = '';
+  let attitude;
   switch (max) {
   case sentiment[0]:
     attitude = 'Positive';
@@ -513,7 +525,7 @@ async function getSentimentHelp() {
     'fallback': 'getSentimentOverTime Help',
     'color': '#184d1d',
     'title': '/getSentimentOverTime',
-    'text':  'Description: Gets the percentage of positive reviews per day given dates\n',
+    'text':  'Description: Gets the percentage of negative reviews per day given dates\n',
     'fields': [
       {
         'title': 'Optional Parameters',
@@ -528,7 +540,7 @@ async function getSentimentHelp() {
     ]
   };
 
-  let params = {
+  const params = {
     text: message,
     attachments: attachments
   };
