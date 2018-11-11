@@ -63,10 +63,8 @@ export class AuthService {
         const userGroups = session.getIdToken().decodePayload()['cognito:groups'];
         if (userGroups !== undefined) {
           const found = userGroups.includes('admin');
-          if (userGroups.includes('admin')) {
+          if (found) {
             return true;
-          } else {
-            return false;
           }
         }
         return false;
