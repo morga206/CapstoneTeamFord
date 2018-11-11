@@ -1,6 +1,10 @@
 'use strict';
-const hook = 'https://hooks.slack.com/services/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'; // group slack
+let botToken;
+const slackURL = 'https://slack.com/api/chat.postMessage';
 const gatewayURL = process.env.GW_URL;
+const stage = process.env.STAGE;
+
+const aws = require('aws-sdk');
 const axios = require('axios');
 const queryString = require('query-string');
 
@@ -13,6 +17,15 @@ module.exports = {
  * @param event The event or request
  */
 async function handler (event) {
+  try {
+    botToken = await getSSMParam('slackBotToken');
+  } catch (error) {
+    return {
+      statusCode: 500,
+      error: `Error getting bot token from SSM: ${error}`
+    }
+  }
+
   if (event.hasOwnProperty('detail-type')) {
 
     try {
@@ -47,6 +60,29 @@ async function handler (event) {
     statusCode: 200
   };
 
+}
+
+/**
+ * Get a value from the SSM parameter store
+ */
+async function getSSMParam(name) {
+  const ssm = new aws.SSM();
+
+  const params = {
+    Name: name,
+    WithDecryption: true
+  };
+
+  let response;
+
+  try {
+    response = await ssm.getParameter(params).promise();
+  } catch (error) {
+    console.log(`Error getting parameter ${name}: ${error}`);
+    throw error;
+  }
+
+  return response.Parameter.Value;
 }
 
 /**
@@ -130,9 +166,14 @@ async function handleScheduledReport() {
   const statsList = await getStatistics();  // Get the statistics with default values
   const slackResponse = await report(statsList);  // Create the message to post to slack
 
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${botToken}`
+  };
+
   // Post all of the reports to slack
   for (let message in slackResponse) {
-    await axios.post(hook, slackResponse[message]);
+    await axios.post(slackURL, slackResponse[message], { headers: headers });
   }
 }
 
@@ -285,6 +326,7 @@ function buildParameters(apps, slackInput) {
  */
 async function report(statistics){
   let slackMessages = []; // List of reports to send to slack as messages (One report per app)
+  const channel = '#' + await getSSMParam(`postingChannel-${stage}`);
 
   // report represents the index in statistics list
   for (let i = 0; i < statistics.length; i++) {
@@ -327,7 +369,8 @@ async function report(statistics){
 
     let params = {
       text: message,
-      attachments: slackAttachments
+      attachments: slackAttachments,
+      channel: channel
     };
 
     slackMessages.push(params);
