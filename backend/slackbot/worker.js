@@ -511,7 +511,7 @@ async function getSentimentHelp() {
         'short': false
       },
       {
-        'title': 'gExample use cases',
+        'title': 'Example use cases',
         'value': '/getlatestreviews\n/getlatestreviews store=google\n/getlatestreviews days=4 store=android',
         'short': false
       }
