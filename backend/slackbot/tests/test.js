@@ -1,9 +1,9 @@
 'use strict';
 var assert = require('assert');
 
-var handler = require('../handler');
+var worker = require('../worker');
 
-describe('handler', function() {
-  console.log(handler);
+describe('worker', function() {
+  console.log(worker);
   console.log(assert);
 });

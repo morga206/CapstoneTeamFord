@@ -1,8 +1,11 @@
 'use strict';
-const hook = 'https://hooks.slack.com/services/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'; // group slack
+let botToken;
+const slackURL = 'https://slack.com/api/chat.postMessage';
 const gatewayURL = process.env.GW_URL;
+const stage = process.env.STAGE;
+
+const aws = require('aws-sdk');
 const axios = require('axios');
-const queryString = require('query-string');
 
 module.exports = {
   handler,
@@ -13,30 +16,35 @@ module.exports = {
  * @param event The event or request
  */
 async function handler (event) {
-  if (event.hasOwnProperty('detail-type')) {
+  try {
+    botToken = await getSSMParam('slackBotToken');
+  } catch (error) {
+    return {
+      statusCode: 500,
+      error: `Error getting bot token from SSM: ${error}`
+    };
+  }
 
+  if (event.type === 'report') {
     try {
       await handleScheduledReport();
     } catch (error) {
       return {
         statusCode: 500,
-        error: `Error handling scheduled report: ${error}`
+        error: `Error handling eport: ${error}`
       };
     }
 
-  } else if (event.hasOwnProperty('httpMethod')) {
-
+  } else if (event.type === 'command') {
     try {
-      await handleHttpRequest(event);
+      await handleCommand(event.request);
     } catch (error) {
       return {
         statusCode: 500,
-        error: `Error handling httpRequest: ${error}`
+        error: `Error handling command: ${error}`
       };
     }
-
   } else {
-
     return {
       statusCode: 500,
       error: 'Error, Unrecognized event type'
@@ -50,20 +58,26 @@ async function handler (event) {
 }
 
 /**
- * Function takes in an httpEvent and determines if it is a get request or slash command (post request)
- * @param httpEvent The http JSON formatted event
+ * Get a value from the SSM parameter store
  */
-async function handleHttpRequest(httpEvent) {
+async function getSSMParam(name) {
+  const ssm = new aws.SSM();
 
-  // TO DO: handle manual invocation / get request
-  // Currently get request by postman invokes else so we send a default report
-  if (httpEvent.httpMethod === 'POST') {
-    const requestBody = queryString.parse(httpEvent.body);
-    await handleCommand(requestBody);
-  } else {
-    await handleScheduledReport();
+  const params = {
+    Name: name,
+    WithDecryption: true
+  };
+
+  let response;
+
+  try {
+    response = await ssm.getParameter(params).promise();
+  } catch (error) {
+    console.log(`Error getting parameter ${name}: ${error}`);
+    throw error;
   }
 
+  return response.Parameter.Value;
 }
 
 /**
@@ -130,9 +144,14 @@ async function handleScheduledReport() {
   const statsList = await getStatistics();  // Get the statistics with default values
   const slackResponse = await report(statsList);  // Create the message to post to slack
 
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${botToken}`
+  };
+
   // Post all of the reports to slack
   for (let message in slackResponse) {
-    await axios.post(hook, slackResponse[message]);
+    await axios.post(slackURL, slackResponse[message], { headers: headers });
   }
 }
 
@@ -285,6 +304,7 @@ function buildParameters(apps, slackInput) {
  */
 async function report(statistics){
   let slackMessages = []; // List of reports to send to slack as messages (One report per app)
+  const channel = '#' + await getSSMParam(`postingChannel-${stage}`);
 
   // report represents the index in statistics list
   for (let i = 0; i < statistics.length; i++) {
@@ -327,7 +347,8 @@ async function report(statistics){
 
     let params = {
       text: message,
-      attachments: slackAttachments
+      attachments: slackAttachments,
+      channel: channel
     };
 
     slackMessages.push(params);

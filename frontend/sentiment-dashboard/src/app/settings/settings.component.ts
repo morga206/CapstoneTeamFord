@@ -73,7 +73,7 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pollingInterval = this.scrapingForm.get('pollingInterval');
 
     this.slackForm = this.fb.group({
-      'postingChannel': ['', Validators.compose([Validators.required, Validators.pattern('[a-zA-Z0-9-]+')])],
+      'postingChannel': ['', Validators.compose([Validators.required, Validators.pattern('[a-zA-Z0-9-_]+')])],
       'postingInterval': ['', Validators.compose([Validators.required, Validators.pattern('[0-9]+')])]
     });
     this.postingChannel = this.slackForm.get('postingChannel');
