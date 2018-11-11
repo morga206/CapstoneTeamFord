@@ -56,4 +56,19 @@ export class AuthService {
       })
     );
   }
+
+  public isAdmin(): Observable<boolean> {
+    return from(Auth.currentSession()).pipe(
+      map(session => {
+        const userGroups = session.getIdToken().decodePayload()['cognito:groups'];
+        if (userGroups !== undefined) {
+          const found = userGroups.includes('admin');
+          if (found) {
+            return true;
+          }
+        }
+        return false;
+      })
+    );
+  }
 }
