@@ -502,7 +502,7 @@ async function getSentimentHelp() {
   attachments[0] = {
     'fallback': 'getLatestReviews Help',
     'color': '#0066ff',
-    'title': '/getReviews',
+    'title': '/getLatestReviews',
     'text':  'Description: Gets the review sentiment and common keywords for an app or list of apps\n',
     'fields': [
       {
@@ -511,8 +511,8 @@ async function getSentimentHelp() {
         'short': false
       },
       {
-        'title': 'Example use cases',
-        'value': '/getreviews\n/getreviews store=google\n/getreviews days=4 store=android',
+        'title': 'gExample use cases',
+        'value': '/getlatestreviews\n/getlatestreviews store=google\n/getlatestreviews days=4 store=android',
         'short': false
       }
     ]
@@ -521,8 +521,8 @@ async function getSentimentHelp() {
   attachments[1] = {
     'fallback': 'getReviews Help',
     'color': '#f3ff2b',
-    'title': '/getLatestReviews',
-    'text':  'Description: Gets the most recent review sentiment and common keywords for an app or list of apps\n',
+    'title': '/getReviews',
+    'text':  'Description: Gets the sentiment of apps over a time period for a specific version\n',
     'fields': [
       {
         'title': 'Required Parameters',
@@ -536,7 +536,7 @@ async function getSentimentHelp() {
       },
       {
         'title': 'Example use cases',
-        'value': '/getlatestreviews startDate=10/30/2018 endDate=11/5/2018 version=2.4.1',
+        'value': '/getreviews startDate=10/30/2018 endDate=11/5/2018 version=2.4.1',
         'short': false
       }
     ]
