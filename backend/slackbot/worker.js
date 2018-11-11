@@ -503,7 +503,7 @@ async function getSentimentHelp() {
     'fallback': 'getLatestReviews Help',
     'color': '#0066ff',
     'title': '/getLatestReviews',
-    'text':  'Description: Gets the review sentiment and common keywords for an app or list of apps\n',
+    'text':  'Description: Gets the most recent review sentiment for apps from both stores unless specified\n',
     'fields': [
       {
         'title': 'Optional Parameters',
