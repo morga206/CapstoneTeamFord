@@ -121,10 +121,29 @@ functions:
       - schedule:
           name: ${self:custom.reviewsEventName}
           rate: rate(30 minutes)
-  slackbot:
+  slackbot-dispatcher:
+    runtime: nodejs8.10
+    handler: slackbot/dispatcher.handler
+    package:
+      include:
+        - slackbot/**
+    environment:
+      WORKER_LAMBDA: ${self:service}-${self:provider.stage}-slackbot-worker
+      DEPLOY_REGION: ${self:provider.region}
+    events:
+      - http:
+          method: get
+          path: slackbot/report
+      - http:
+          method: post
+          path: slackbot/command
+      - schedule:
+          name: ${self:custom.slackbotEventName}
+          rate: rate(30 minutes)
+  slackbot-worker:
     runtime: nodejs8.10
     timeout: 20
-    handler: slackbot/handler.handler
+    handler: slackbot/worker.handler
     package:
       include:
         - slackbot/**
@@ -141,16 +160,6 @@ functions:
             - ${self:provider.region}
             - ".amazonaws.com/"
             - ${self:provider.stage}
-    events:
-      - http:
-          method: get
-          path: slackbot/report
-      - http:
-          method: post
-          path: slackbot/command
-      - schedule:
-          name: ${self:custom.slackbotEventName}
-          rate: rate(30 minutes)
 
 
 resources:

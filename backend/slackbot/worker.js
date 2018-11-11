@@ -6,7 +6,6 @@ const stage = process.env.STAGE;
 
 const aws = require('aws-sdk');
 const axios = require('axios');
-const queryString = require('query-string');
 
 module.exports = {
   handler,
@@ -26,30 +25,26 @@ async function handler (event) {
     }
   }
 
-  if (event.hasOwnProperty('detail-type')) {
-
+  if (event.type === 'report') {
     try {
       await handleScheduledReport();
     } catch (error) {
       return {
         statusCode: 500,
-        error: `Error handling scheduled report: ${error}`
+        error: `Error handling eport: ${error}`
       };
     }
 
-  } else if (event.hasOwnProperty('httpMethod')) {
-
+  } else if (event.type === 'command') {
     try {
-      await handleHttpRequest(event);
+      await handleCommand(event.request);
     } catch (error) {
       return {
         statusCode: 500,
-        error: `Error handling httpRequest: ${error}`
+        error: `Error handling command: ${error}`
       };
     }
-
   } else {
-
     return {
       statusCode: 500,
       error: 'Error, Unrecognized event type'
@@ -83,23 +78,6 @@ async function getSSMParam(name) {
   }
 
   return response.Parameter.Value;
-}
-
-/**
- * Function takes in an httpEvent and determines if it is a get request or slash command (post request)
- * @param httpEvent The http JSON formatted event
- */
-async function handleHttpRequest(httpEvent) {
-
-  // TO DO: handle manual invocation / get request
-  // Currently get request by postman invokes else so we send a default report
-  if (httpEvent.httpMethod === 'POST') {
-    const requestBody = queryString.parse(httpEvent.body);
-    await handleCommand(requestBody);
-  } else {
-    await handleScheduledReport();
-  }
-
 }
 
 /**
