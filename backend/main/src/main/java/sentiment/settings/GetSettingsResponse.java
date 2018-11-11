@@ -11,9 +11,6 @@ import java.util.Map;
  */
 public class GetSettingsResponse extends Response {
 
-  private Status status;
-  private String message;
-
   private Setting[] settings;
 
   /**
@@ -22,20 +19,14 @@ public class GetSettingsResponse extends Response {
    */
   public GetSettingsResponse(Setting[] settings) {
     this.settings = settings;
-
-    this.status = Status.SUCCESS;
-    this.message = "";
   }
 
   /**
    * Return an error in response to a get settings request.
-   * @param error The error message to send.
+   * @param message The error message to send.
    */
-  public GetSettingsResponse(String error) {
-    this.settings = null;
-
-    this.status = Status.ERROR;
-    this.message = error;
+  public GetSettingsResponse(String message) {
+    super(message);
   }
 
   /**
@@ -43,13 +34,10 @@ public class GetSettingsResponse extends Response {
    */
   @JsonAnyGetter
   public Map<String, Object> getData() {
-    Map<String, Object> data = new HashMap<String, Object>();
+    Map<String, Object> data = super.getData();
 
-    data.put("status", this.status);
-    if (this.settings != null) {
+    if (this.getStatus() == Status.SUCCESS) {
       data.put("settings", this.settings);
-    } else {
-      data.put("message", this.message);
     }
 
     return data;

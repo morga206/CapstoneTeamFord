@@ -2,9 +2,11 @@ package sentiment.settings;
 
 public final class Constants {
 
-  private static final String STAGE = System.getenv("STAGE");
+  public static final String STAGE = System.getenv("STAGE");
+  public static final String REGION = System.getenv("DEPLOY_REGION");
 
   public static final String APPLIST_SSM_PARAM = "appList-" + STAGE;
+  public static final String IGNORELIST_SSM_PARAM = "ignoreList-" + STAGE;
 
   /**
    * Add the current stage to the requested parameter name.

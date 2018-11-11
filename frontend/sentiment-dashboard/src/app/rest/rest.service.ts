@@ -3,7 +3,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {environment} from '../../environments/environment';
-import { AppInfo, StatResponse, StatRequest, Setting, SettingResponse, App, AppListResponse } from './domain';
+import { StatResponse,
+  StatRequest,
+  Setting,
+  SettingResponse,
+  App,
+  AppListResponse,
+  FilterListResponse,
+  IgnoreListResponse } from './domain';
 import { AuthService } from '../auth/auth.service';
 
 @Injectable({
@@ -22,11 +29,11 @@ export class RestService {
     });
   }
 
-  getFilterApps(): Observable<{ [id: string]: AppInfo }> {
+  getFilterList(): Observable<FilterListResponse> {
     const options = {
       headers: new HttpHeaders({'Content-Type' : 'application/json'})
     };
-    return this.http.get<{ [id: string]: AppInfo }>(this.API_URL + 'apps', options);
+    return this.http.get<FilterListResponse>(this.API_URL + 'apps', options);
   }
 
   getSentimentStats(appIdStore: string, version: string, startDate: Date, endDate: Date, stats: StatRequest[]) {
@@ -113,5 +120,49 @@ export class RestService {
       app: app
     });
     return this.http.post<AppListResponse>(this.API_URL + 'settings/apps', body, options);
+  }
+
+  getIgnoreList(): Observable<IgnoreListResponse> {
+    const options = {
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
+    };
+    const body = JSON.stringify({
+      command: 'GET'
+    });
+    return this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, options);
+  }
+
+  addKeyword(keyword: string): Observable<IgnoreListResponse> {
+    const options = {
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
+    };
+    const body = JSON.stringify({
+      command: 'ADD',
+      keyword: keyword
+    });
+    return this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, options);
+  }
+
+  deleteKeyword(keyword: string): Observable<IgnoreListResponse> {
+    const options = {
+      headers: new HttpHeaders(
+        {
+          'Content-Type' : 'application/json',
+          'Authorization' : this.apiKey
+        })
+    };
+    const body = JSON.stringify({
+      command: 'DELETE',
+      keyword: keyword
+    });
+    return this.http.post<IgnoreListResponse>(this.API_URL + 'settings/keywords', body, options);
   }
 }

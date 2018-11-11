@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, AbstractControl, Validators, FormBuilder } from '@angular/forms';
-import { AppInfo } from 'src/app/rest/domain';
+import { FilterInfo } from 'src/app/rest/domain';
 
 
 export interface StatsFilterValues {
@@ -25,8 +25,8 @@ export class FormComponent implements OnInit {
 
   @Output() filterChange = new EventEmitter<StatsFilterValues>();
 
-  public appList: { [id: string]: AppInfo } = {};
-  public selectedApp?: AppInfo;
+  public appList: { [id: string]: FilterInfo } = {};
+  public selectedApp?: FilterInfo;
   public minDate?: Date;
   public maxDate?: Date;
 
@@ -106,7 +106,7 @@ export class FormComponent implements OnInit {
     this.compare.emit(this.currentlyComparing);
   }
 
-  public setAppList(apps: { [id: string]: AppInfo }) {
+  public setAppList(apps: { [id: string]: FilterInfo }) {
     this.appList = apps;
   }
 

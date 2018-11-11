@@ -1,7 +1,6 @@
 package sentiment.apps;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import sentiment.Response;
 
@@ -18,18 +17,24 @@ public class AppsResponse extends Response {
     this.apps = apps;
   }
 
+  public AppsResponse(String message) {
+    super(message);
+  }
+
   /**
    * Return a map of JSON keys and values for this object.
    */
   @JsonAnyGetter
   public Map<String, Object> getData() {
-    Map<String, Object> data = new HashMap<String, Object>();
+    Map<String, Object> data = super.getData();
 
-    for (AppInfo app : apps) {
-      data.put(app.getAppIdStore(), app);
+    if (this.getStatus() == Status.SUCCESS) {
+      Map<String, AppInfo> appList = new HashMap<String, AppInfo>();
+      for (AppInfo app : apps) {
+        appList.put(app.getAppIdStore(), app);
+      }
+      data.put("apps", appList);
     }
-
-    System.out.println(data.toString());
 
     return data;
   }

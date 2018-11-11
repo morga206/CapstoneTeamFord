@@ -72,9 +72,6 @@ export class StatsComponent implements OnInit {
     this.lineChartData = [
       { data: stats['sentimentOverTime']['data'], label: '% Negative Reviews'},
     ];
-
-    console.log(this.pieChartData);
-    console.log(this.lineChartData);
   }
 
   public getPercentTooltip() {
