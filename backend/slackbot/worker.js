@@ -22,7 +22,7 @@ async function handler (event) {
     return {
       statusCode: 500,
       error: `Error getting bot token from SSM: ${error}`
-    }
+    };
   }
 
   if (event.type === 'report') {

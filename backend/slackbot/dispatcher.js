@@ -21,10 +21,10 @@ function handler (event, _, callback) {
       invokeWorker('report');
     } catch (error) {
       response = {
-        "statusCode": 500,
-        "headers": {},
-        "body": JSON.stringify({ error: `Error handling scheduled report: ${error}` }),
-        "isBase64Encoded": false
+        'statusCode': 500,
+        'headers': {},
+        'body': JSON.stringify({ error: `Error handling scheduled report: ${error}` }),
+        'isBase64Encoded': false
       };
     }
   } else if (event.hasOwnProperty('httpMethod')) {
@@ -34,25 +34,25 @@ function handler (event, _, callback) {
       command = handleHttpRequest(event);
     } catch (error) {
       response = {
-        "statusCode": 500,
-        "headers": {},
-        "body": JSON.stringify({ error: `Error handling httpRequest: ${error}` }),
-        "isBase64Encoded": false
+        'statusCode': 500,
+        'headers': {},
+        'body': JSON.stringify({ error: `Error handling httpRequest: ${error}` }),
+        'isBase64Encoded': false
       };
     }
 
     response = {
-      "statusCode": 200,
-      "headers": {},
-      "body": command ? JSON.stringify({ response_type: 'in_channel'}) : JSON.stringify({}),
-      "isBase64Encoded": false
+      'statusCode': 200,
+      'headers': {},
+      'body': command ? JSON.stringify({ response_type: 'in_channel'}) : JSON.stringify({}),
+      'isBase64Encoded': false
     };
   } else {
     response = {
-      "statusCode": 500,
-      "headers": {},
-      "body": JSON.stringify({ error: 'Error, Unrecognized event type' }),
-      "isBase64Encoded": false
+      'statusCode': 500,
+      'headers': {},
+      'body': JSON.stringify({ error: 'Error, Unrecognized event type' }),
+      'isBase64Encoded': false
     };
   }
 
@@ -88,8 +88,8 @@ function invokeWorker(type, request) {
     Payload: JSON.stringify({ type: type, request: request })
   };
 
-  lambda.invoke(params, function (err, _) {
-    if (err !== null) {
+  lambda.invoke(params, function (error) {
+    if (error !== null) {
       console.log(`Error invoking worker lambda: ${error}`);
       throw error;
     }
