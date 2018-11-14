@@ -3,6 +3,7 @@ export interface StatRequest {
 }
 
 export interface StatResponse {
+  numReviews?: { total: number };
   overallSentiment?: { [label: string]: number };
   keywords?: {
     positive: Keyword[],
