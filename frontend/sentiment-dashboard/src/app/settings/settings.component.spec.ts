@@ -11,6 +11,7 @@ import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
 import { ComponentLoaderFactory } from 'ngx-bootstrap';
 import { PositioningService } from 'ngx-bootstrap/positioning';
 import { of } from 'rxjs';
+import { LoaderComponent } from '../shared/loader/loader.component';
 
 class MockAuthService {
   getIdToken() {
@@ -28,7 +29,7 @@ describe('SettingsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SettingsComponent ],
+      declarations: [ SettingsComponent, LoaderComponent ],
       imports: [ ReactiveFormsModule, HttpClientModule, HttpClientTestingModule, ModalModule ],
       providers: [ { provide: AuthService, useClass: MockAuthService }, BsModalService, ComponentLoaderFactory, PositioningService ]
     })
@@ -218,6 +219,12 @@ describe('SettingsComponent', () => {
   });
 
   it('should display any error messages from the backend', async () => {
+    spyOn(component.dashboardLoader, 'showErrorAlert');
+    spyOn(component.scrapingLoader, 'showErrorAlert');
+    spyOn(component.slackLoader, 'showErrorAlert');
+    spyOn(component.appListLoader, 'showErrorAlert');
+    spyOn(component.ignoreListLoader, 'showErrorAlert');
+
     const testResponse: SettingResponse = {
       settings: null,
       message: 'Test Error Message',
@@ -235,14 +242,20 @@ describe('SettingsComponent', () => {
 
     httpMock.verify();
 
-    expect(component.dashboardFormError).toEqual('Test Error Message');
-    expect(component.scrapingFormError).toEqual('Test Error Message');
-    expect(component.slackFormError).toEqual('Test Error Message');
-    expect(component.appListError).toEqual('Test Error Message');
-    expect(component.ignoreListError).toEqual('Test Error Message');
+    expect(component.dashboardLoader.showErrorAlert).toHaveBeenCalledWith('Test Error Message');
+    expect(component.scrapingLoader.showErrorAlert).toHaveBeenCalledWith('Test Error Message');
+    expect(component.slackLoader.showErrorAlert).toHaveBeenCalledWith('Test Error Message');
+    expect(component.appListLoader.showErrorAlert).toHaveBeenCalledWith('Test Error Message');
+    expect(component.ignoreListLoader.showErrorAlert).toHaveBeenCalledWith('Test Error Message');
   });
 
   it('should display a success message on save for a time interval', async() => {
+    spyOn(component.dashboardLoader, 'showSuccessAlert');
+    spyOn(component.scrapingLoader, 'showSuccessAlert');
+    spyOn(component.slackLoader, 'showSuccessAlert');
+    spyOn(component.appListLoader, 'showSuccessAlert');
+    spyOn(component.ignoreListLoader, 'showSuccessAlert');
+
     initializeSettings();
 
     component.refreshInterval.setValue('25');
@@ -290,46 +303,39 @@ describe('SettingsComponent', () => {
     component.onDashboardSubmit();
     let req = httpMock.expectOne(API_URL + 'settings/set');
     req.flush(testSuccessResponse);
-    expect(component.dashboardFormSuccess).toBeTruthy();
+    expect(component.dashboardLoader.showSuccessAlert).toHaveBeenCalled();
 
     component.onScrapingSubmit();
     req = httpMock.expectOne(API_URL + 'settings/set');
     req.flush(testSuccessResponse);
-    expect(component.dashboardFormSuccess).toBeTruthy();
-
-    component.onScrapingSubmit();
-    req = httpMock.expectOne(API_URL + 'settings/set');
-    req.flush(testSuccessResponse);
-    expect(component.scrapingFormSuccess).toBeTruthy();
+    expect(component.scrapingLoader.showSuccessAlert).toHaveBeenCalled();
 
     component.onSlackSubmit();
     req = httpMock.expectOne(API_URL + 'settings/set');
     req.flush(testSuccessResponse);
-    expect(component.slackFormSuccess).toBeTruthy();
+    expect(component.slackLoader.showSuccessAlert).toHaveBeenCalled();
 
     component.onAddApp({ name: 'test', store: 'App Store', appId: 'com.ford.test'});
     req = httpMock.expectOne(API_URL + 'settings/apps');
     req.flush(testAppListSuccessResponse);
-    expect(component.appListSuccess).toBeTruthy();
 
     const toDelete = component.appList[0];
     component.onDeleteApp(toDelete);
     req = httpMock.expectOne(API_URL + 'settings/apps');
     req.flush(testAppListSuccessResponse);
-    expect(component.appListSuccess).toBeTruthy();
+    expect(component.appListLoader.showSuccessAlert).toHaveBeenCalledTimes(2);
 
     component.addKeyword.setValue('anotherKeyword');
     component.addKeyword.updateValueAndValidity();
     component.onAddKeyword();
     req = httpMock.expectOne(API_URL + 'settings/keywords');
     req.flush(testIgnoreListSuccessResponse);
-    expect(component.ignoreListSuccess).toBeTruthy();
 
     const toDeleteKeyword = component.ignoreList[0];
     component.onDeleteKeyword(toDeleteKeyword);
     req = httpMock.expectOne(API_URL + 'settings/keywords');
     req.flush(testIgnoreListSuccessResponse);
-    expect(component.ignoreListSuccess).toBeTruthy();
+    expect(component.ignoreListLoader.showSuccessAlert).toHaveBeenCalledTimes(2);
 
     httpMock.verify();
   });

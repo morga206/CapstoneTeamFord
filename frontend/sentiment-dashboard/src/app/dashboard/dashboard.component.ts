@@ -4,6 +4,7 @@ import { Subscription, timer } from 'rxjs';
 import { FormComponent, StatsFilterValues } from './form/form.component';
 import { StatsComponent } from './stats/stats.component';
 import { RestService } from '../rest/rest.service';
+import { LoaderComponent } from '../shared/loader/loader.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,10 +14,14 @@ import { RestService } from '../rest/rest.service';
 export class DashboardComponent implements OnInit, OnDestroy {
 
   @ViewChild('form1') form: FormComponent;
+  @ViewChild('form1Loader') formLoader: LoaderComponent;
   @ViewChild('form2') formCompare: FormComponent;
+  @ViewChild('form2Loader') formCompareLoader: LoaderComponent;
 
   @ViewChild('stats1') stats: StatsComponent;
+  @ViewChild('stats1Loader') statsLoader: LoaderComponent;
   @ViewChild('stats2') statsCompare: StatsComponent;
+  @ViewChild('stats2Loader') statsCompareLoader: LoaderComponent;
   public currentlyComparing = false;
 
   public errorMessage = '';
@@ -38,9 +43,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.formLoader.startLoading();
+    if (this.currentlyComparing) {
+      this.formCompareLoader.startLoading();
+    }
     this.appsSubscription = this.rest.getFilterList().subscribe((response: FilterListResponse) => {
       this.form.setAppList(response.apps);
       this.formCompare.setAppList(response.apps);
+
+      this.formLoader.stopLoading();
+      if (this.currentlyComparing) {
+        this.formCompareLoader.stopLoading();
+      }
     });
   }
 
@@ -93,6 +107,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { sentimentOverTime: null }
     ];
 
+    this.statsLoader.startLoading();
     this.statsSubscription = this.rest.getSentimentStats(
             event.appIdStore,
             event.version,
@@ -100,6 +115,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             event.endDate,
             statsToGet).subscribe((response) => {
               this.stats.setStats(response);
+              this.statsLoader.stopLoading();
             });
   }
 
@@ -110,6 +126,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { sentimentOverTime: null }
     ];
 
+    this.statsCompareLoader.startLoading();
     this.statsSubscription = this.rest.getSentimentStats(
       event.appIdStore,
       event.version,
@@ -118,6 +135,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       statsToGet).subscribe((response) => {
       if (this.statsCompare !== undefined) {
         this.statsCompare.setStats(response);
+        this.statsCompareLoader.stopLoading();
       }
     });
   }

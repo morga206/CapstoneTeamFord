@@ -20,6 +20,7 @@ import { AddAppComponent } from './settings/add-app/add-app.component';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+import { LoaderComponent } from './shared/loader/loader.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
     CardComponent,
     StatsComponent,
     FormComponent,
-    AddAppComponent
+    AddAppComponent,
+    LoaderComponent
   ],
   imports: [
     BrowserModule,
