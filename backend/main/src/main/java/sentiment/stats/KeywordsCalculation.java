@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Handles calculation of top N keywords from a list of DynamoDB reviews.
@@ -58,7 +59,7 @@ public class KeywordsCalculation extends StatCalculation {
     separateKeywordsByReviewSentiment();
 
     // Get ignore list from SSM
-    String[] ignoreList = getIgnoreList();
+    List<String> ignoreList = getIgnoreList();
 
     // Reducing step: Keyword Values -> Counts
     Map<String, Integer> positiveKeywordCounts = countKeywords(positiveKeywords, ignoreList);
@@ -79,7 +80,7 @@ public class KeywordsCalculation extends StatCalculation {
     return new OutgoingStat<String, Keyword[]>("keywords", result);
   }
 
-  private String[] getIgnoreList() {
+  private List<String> getIgnoreList() {
     GetParameterResult result = null;
     String value = null;
     try {
@@ -90,9 +91,10 @@ public class KeywordsCalculation extends StatCalculation {
     }
 
     try {
-      return new ObjectMapper().readValue(value, String[].class);
+      String[] ignoreArray = new ObjectMapper().readValue(value, String[].class);
+      return Arrays.asList(ignoreArray);
     } catch (Exception exp) {
-      return new String[0];
+      return new ArrayList<String>();
     }
   }
 
@@ -135,11 +137,15 @@ public class KeywordsCalculation extends StatCalculation {
    * @param ignoreList The list of words to ignore when counting.
    * @return A mapping from keyword to number of occurrences.
    */
-  private Map<String, Integer> countKeywords(List<String> keywordList, String[] ignoreList) {
-    Set<String> ignoreSet = new HashSet<String>(Arrays.asList(ignoreList));
+  private Map<String, Integer> countKeywords(List<String> keywordList, List<String> ignoreList) {
     Map<String, Integer> counts = new HashMap<String, Integer>();
-    for (String keyword : keywordList) {
-      if (ignoreSet.contains(keyword)) {
+    for (String rawKeyword : keywordList) {
+      String keyword = rawKeyword.toLowerCase();
+      if (ignoreList.stream()
+          // Check for partial matches in ignoreList
+          .filter((String word) -> keyword.contains(word)) 
+          // If match is found...
+          .findAny().isPresent()) { 
         // Don't count words in the ignore list
         continue;
       }

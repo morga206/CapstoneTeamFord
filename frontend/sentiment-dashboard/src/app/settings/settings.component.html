@@ -59,12 +59,12 @@
 
 <app-loader #ignoreListLoader>
   <div class="row mb-2">
-    <span *ngFor="let keyword of ignoreList" class="badge badge-primary mx-1" (click)="onDeleteKeyword(keyword)">{{ keyword }} &times;</span>
+    <span *ngFor="let keyword of ignoreList" class="badge badge-primary m-1" (click)="onDeleteKeyword(keyword)">{{ keyword }} &times;</span>
   </div>
   <form [formGroup]="ignoreListForm" (ngSubmit)="onAddKeyword()">
     <div class="row mb-4">
       <input type="text" class="form-control" id="add-keyword" formControlName="addKeyword" [class.is-invalid]="addKeyword.invalid">
-      <button type="submit" class="btn btn-primary my-2">Add Keyword</button>
+      <button type="submit" class="btn btn-primary my-2" [disabled]="addKeyword.invalid">Add Keyword</button>
     </div>
   </form>
 </app-loader>

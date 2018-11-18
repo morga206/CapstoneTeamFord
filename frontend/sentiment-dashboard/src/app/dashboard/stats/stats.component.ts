@@ -9,6 +9,7 @@ import { Tooltip, ChartData } from './chartjs.types';
   styleUrls: ['./stats.component.scss']
 })
 export class StatsComponent implements OnInit {
+  public totalReviews: number;
 
   public pieChartLabels: string[] = [];
   public pieChartData: number[] = [];
@@ -57,6 +58,8 @@ export class StatsComponent implements OnInit {
   }
 
   public setStats(stats: StatResponse) {
+    this.totalReviews = stats['numReviews']['total'];
+
     // Cannot change reference to labels array or chart won't update
     this.pieChartLabels.length = 0;
     this.pieChartLabels.push(...Object.keys(stats['overallSentiment']));
