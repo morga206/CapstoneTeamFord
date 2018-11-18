@@ -88,6 +88,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   public updateStatsSubscription(event: StatsFilterValues) {
     const statsToGet: StatRequest[] = [
+      { numReviews: null },
       { overallSentiment: null },
       { keywords: null },
       { sentimentOverTime: null }
@@ -105,6 +106,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   public updateCompareStatsSubscription(event: StatsFilterValues) {
     const statsToGet: StatRequest[] = [
+      { numReviews: null },
       { overallSentiment: null },
       { keywords: null },
       { sentimentOverTime: null }
