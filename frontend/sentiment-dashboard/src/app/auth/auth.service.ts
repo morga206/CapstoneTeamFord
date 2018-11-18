@@ -12,10 +12,12 @@ import { environment } from './../../environments/environment';
 @Injectable()
 export class AuthService {
   public loggedIn: BehaviorSubject<boolean>;
+  private adminUser: BehaviorSubject<boolean>;
 
   constructor() {
     Amplify.configure(environment.amplify);
     this.loggedIn = new BehaviorSubject<boolean>(false);
+    this.adminUser = new BehaviorSubject<boolean>(false);
   }
 
   public signIn(username, password): Observable<boolean> {
@@ -29,6 +31,7 @@ export class AuthService {
     from(Auth.signOut()).subscribe(
         result => {
           this.loggedIn.next(false);
+          this.adminUser.next(false);
         },
         error => console.log(error)
       );
@@ -64,11 +67,17 @@ export class AuthService {
         if (userGroups !== undefined) {
           const found = userGroups.includes('admin');
           if (found) {
+            this.adminUser.next(true);
             return true;
           }
         }
+        this.adminUser.next(false);
         return false;
       })
     );
+  }
+
+  public setAdmin(newVal: boolean) {
+    this.adminUser.next(newVal);
   }
 }
