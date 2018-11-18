@@ -1,5 +1,5 @@
 <div class="row mb-4">
-    <h1>Settings and Administration</h1>
+  <h1>Settings and Administration</h1>
 </div>
 
 <div class="row mb-2">
@@ -7,26 +7,26 @@
   <button type="button" class="btn btn-sm btn-primary ml-auto mb-2" (click)="openModal()">Add App</button>
 </div>
 <div class="row mb-4">
-    <app-loader #appListLoader>
-        <table class="table">
-            <thead>
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Store</th>
-              <th scope="col">App ID</th>
-              <th scope="col"></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let app of appList">
-              <td>{{ app.name }}</td>
-              <td>{{ app.store }}</td>
-              <td>{{ app.appId }}</td> 
-              <td><button type="button" class="btn btn-sm btn-primary ml-auto" (click)="onDeleteApp(app)">&times;</button></td>
-            </tr>
-            </tbody>
-          </table>
-    </app-loader>
+  <app-loader #appListLoader>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+            <th scope="col">Store</th>
+            <th scope="col">App ID</th>
+            <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of appList">
+          <td>{{ app.name }}</td>
+          <td>{{ app.store }}</td>
+          <td>{{ app.appId }}</td> 
+          <td><button type="button" class="btn btn-sm btn-primary ml-auto" (click)="onDeleteApp(app)">&times;</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </app-loader>
 </div>
 
 <div class="row mb-4 border-bottom">
@@ -36,20 +36,20 @@
 <app-loader #dashboardLoader>
   <form [formGroup]="dashboardForm" (ngSubmit)="onDashboardSubmit()">
     <div class="form-group mb-4">
-        <div class="row">
-          <label for="refresh-interval">Data Refresh Interval</label>
-          <div class="input-group mb-2">
-            <input type="text" class="form-control" id="refresh-interval" formControlName="refreshInterval" [class.is-invalid]="refreshInterval.invalid">
-            <div class="input-group-append">
-                <span class="input-group-text">minutes</span>
-            </div>
+      <div class="row">
+        <label for="refresh-interval">Data Refresh Interval</label>
+        <div class="input-group mb-2">
+          <input type="text" class="form-control" id="refresh-interval" formControlName="refreshInterval" [class.is-invalid]="refreshInterval.invalid">
+          <div class="input-group-append">
+              <span class="input-group-text">minutes</span>
           </div>
         </div>
-      
-        <div class="row">
-          <button type="submit" class="btn btn-primary" [disabled]="dashboardForm.invalid">Save</button>
-        </div>
       </div>
+      
+      <div class="row">
+        <button type="submit" class="btn btn-primary" [disabled]="dashboardForm.invalid">Save</button>
+      </div>
+    </div>
   </form>
 </app-loader>
 
@@ -58,15 +58,15 @@
 </div>
 
 <app-loader #ignoreListLoader>
-    <div class="row mb-2">
-        <span *ngFor="let keyword of ignoreList" class="badge badge-primary mx-1" (click)="onDeleteKeyword(keyword)">{{ keyword }} &times;</span>
+  <div class="row mb-2">
+    <span *ngFor="let keyword of ignoreList" class="badge badge-primary mx-1" (click)="onDeleteKeyword(keyword)">{{ keyword }} &times;</span>
+  </div>
+  <form [formGroup]="ignoreListForm" (ngSubmit)="onAddKeyword()">
+    <div class="row mb-4">
+      <input type="text" class="form-control" id="add-keyword" formControlName="addKeyword" [class.is-invalid]="addKeyword.invalid">
+      <button type="submit" class="btn btn-primary my-2">Add Keyword</button>
     </div>
-    <form [formGroup]="ignoreListForm" (ngSubmit)="onAddKeyword()">
-      <div class="row mb-4">
-        <input type="text" class="form-control" id="add-keyword" formControlName="addKeyword" [class.is-invalid]="addKeyword.invalid">
-        <button type="submit" class="btn btn-primary my-2">Add Keyword</button>
-      </div>
-    </form>
+  </form>
 </app-loader>
 
 <div class="row mb-4 border-bottom">
@@ -76,20 +76,20 @@
 <app-loader #scrapingLoader>
   <form [formGroup]="scrapingForm" (ngSubmit)="onScrapingSubmit()">
     <div class="form-group mb-4">
-        <div class="row">
-          <label for="polling-interval">Polling Interval</label>
-          <div class="input-group mb-2">
-            <input type="text" class="form-control" id="polling-interval" formControlName="pollingInterval" [class.is-invalid]="pollingInterval.invalid">
-            <div class="input-group-append">
-                <span class="input-group-text">minutes</span>
-            </div>
+      <div class="row">
+        <label for="polling-interval">Polling Interval</label>
+        <div class="input-group mb-2">
+          <input type="text" class="form-control" id="polling-interval" formControlName="pollingInterval" [class.is-invalid]="pollingInterval.invalid">
+          <div class="input-group-append">
+            <span class="input-group-text">minutes</span>
           </div>
         </div>
-      
-        <div class="row">
-          <button type="submit" class="btn btn-primary" [disabled]="scrapingForm.invalid">Save</button>
-        </div>
       </div>
+      
+      <div class="row">
+        <button type="submit" class="btn btn-primary" [disabled]="scrapingForm.invalid">Save</button>
+      </div>
+    </div>
   </form>
 </app-loader>
 
@@ -98,31 +98,31 @@
 </div>
 
 <app-loader #slackLoader>
-    <form [formGroup]="slackForm" (ngSubmit)="onSlackSubmit()">
-        <div class="form-group mb-4">
-            <div class="row">
-              <label for="posting-channel">Posting Channel</label>
-              <div class="input-group mb-2">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">#</span>
-                </div>
-                <input type="text" class="form-control" id="posting-channel" formControlName="postingChannel" [class.is-invalid]="postingChannel.invalid">
-              </div>
-            </div>
-          
-            <div class="row">
-                <label for="posting-interval">Posting Interval</label>
-                <div class="input-group mb-2">
-                  <input type="text" class="form-control" id="posting-interval" formControlName="postingInterval" [class.is-invalid]="postingInterval.invalid">
-                  <div class="input-group-append">
-                      <span class="input-group-text">minutes</span>
-                  </div>
-                </div>
-            </div>
-            <div class="row">
-                <button type="submit" class="btn btn-primary" [disabled]="slackForm.invalid">Save</button>
-            </div>
+  <form [formGroup]="slackForm" (ngSubmit)="onSlackSubmit()">
+    <div class="form-group mb-4">
+      <div class="row">
+        <label for="posting-channel">Posting Channel</label>
+        <div class="input-group mb-2">
+          <div class="input-group-prepend">
+            <span class="input-group-text">#</span>
+          </div>
+          <input type="text" class="form-control" id="posting-channel" formControlName="postingChannel" [class.is-invalid]="postingChannel.invalid">
         </div>
-      </form>
+      </div>
+      
+      <div class="row">
+        <label for="posting-interval">Posting Interval</label>
+        <div class="input-group mb-2">
+          <input type="text" class="form-control" id="posting-interval" formControlName="postingInterval" [class.is-invalid]="postingInterval.invalid">
+          <div class="input-group-append">
+            <span class="input-group-text">minutes</span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <button type="submit" class="btn btn-primary" [disabled]="slackForm.invalid">Save</button>
+      </div>
+    </div>
+  </form>
 </app-loader>
 
