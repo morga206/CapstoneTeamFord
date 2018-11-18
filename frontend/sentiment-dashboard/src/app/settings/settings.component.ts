@@ -1,58 +1,47 @@
-import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterContentInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { RestService } from '../rest/rest.service';
 import { App } from '../rest/domain';
 import { AddAppComponent } from './add-app/add-app.component';
 import { BsModalService } from 'ngx-bootstrap/modal';
+import { LoaderComponent } from '../shared/loader/loader.component';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss']
 })
-export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class SettingsComponent implements OnInit, AfterContentInit, OnDestroy {
   public appList: App[];
-  public appListError = '';
-  public appListSuccess = false;
+  @ViewChild('appListLoader') appListLoader: LoaderComponent;
   private appListSubscription: Subscription;
-  private appListTimer: any;
+  private modalSubscription?: Subscription;
 
   public ignoreList: string[];
+  @ViewChild('ignoreListLoader') ignoreListLoader: LoaderComponent;
+  private ignoreListSubscription: Subscription;
   public ignoreListForm: FormGroup;
   public addKeyword: AbstractControl;
-  public ignoreListError = '';
-  public ignoreListSuccess = false;
-  private ignoreListSubscription: Subscription;
-  private ignoreListTimer: any;
 
-  public scrapingForm: FormGroup;
-  public pollingInterval: AbstractControl;
-  public scrapingFormError = '';
-  public scrapingFormSuccess = false;
+  @ViewChild('scrapingLoader') scrapingLoader: LoaderComponent;
   private scrapingFormGetSubscription: Subscription;
   private scrapingFormSetSubscription: Subscription;
-  private scrapingFormTimer: any;
+  public scrapingForm: FormGroup;
+  public pollingInterval: AbstractControl;
 
-  public dashboardForm: FormGroup;
-  public refreshInterval: AbstractControl;
-  public dashboardFormError = '';
-  public dashboardFormSuccess = false;
+  @ViewChild('dashboardLoader') dashboardLoader: LoaderComponent;
   private dashboardFormGetSubscription: Subscription;
   private dashboardFormSetSubscription: Subscription;
-  private dashboardFormTimer: any;
+  public dashboardForm: FormGroup;
+  public refreshInterval: AbstractControl;
 
+  @ViewChild('slackLoader') slackLoader: LoaderComponent;
+  private slackFormGetSubscription: Subscription;
+  private slackFormSetSubscription: Subscription;
   public slackForm: FormGroup;
   public postingChannel: AbstractControl;
   public postingInterval: AbstractControl;
-
-  public slackFormError = '';
-  public slackFormSuccess = false;
-  private slackFormGetSubscription: Subscription;
-  private slackFormSetSubscription: Subscription;
-  private slackFormTimer: any;
-
-  private modalSubscription?: Subscription;
 
   constructor(private fb: FormBuilder, private rest: RestService, private modalService: BsModalService) { }
 
@@ -80,49 +69,59 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.postingInterval = this.slackForm.get('postingInterval');
   }
 
-  ngAfterViewInit() {
+  ngAfterContentInit() {
+    this.dashboardLoader.startLoading();
     this.dashboardFormGetSubscription = this.rest.getSettings(['refreshInterval'])
     .subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.dashboardFormError = response.message;
+        this.dashboardLoader.showErrorAlert(response.message);
       } else {
         response.settings.forEach((setting) => this.dashboardForm.get(setting.name).setValue(setting.value));
+        this.dashboardLoader.stopLoading();
       }
     });
 
+    this.appListLoader.startLoading();
     this.appListSubscription = this.rest.getAppList()
     .subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.appListError = response.message;
+        this.appListLoader.showErrorAlert(response.message);
       } else {
         this.appList = response.appList;
+        this.appListLoader.stopLoading();
       }
     });
 
+    this.ignoreListLoader.startLoading();
     this.ignoreListSubscription = this.rest.getIgnoreList()
     .subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.ignoreListError = response.message;
+        this.ignoreListLoader.showErrorAlert(response.message);
       } else {
         this.ignoreList = response.ignoreList;
+        this.ignoreListLoader.stopLoading();
       }
     });
 
+    this.scrapingLoader.startLoading();
     this.scrapingFormGetSubscription = this.rest.getSettings(['pollingInterval'])
     .subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.scrapingFormError = response.message;
+        this.scrapingLoader.showErrorAlert(response.message);
       } else {
         response.settings.forEach((setting) => this.scrapingForm.get(setting.name).setValue(setting.value));
+        this.scrapingLoader.stopLoading();
       }
     });
 
+    this.slackLoader.startLoading();
     this.slackFormGetSubscription = this.rest.getSettings(['postingChannel', 'postingInterval'])
     .subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.slackFormError = response.message;
+        this.slackLoader.showErrorAlert(response.message);
       } else {
         response.settings.forEach((setting) => this.slackForm.get(setting.name).setValue(setting.value));
+        this.slackLoader.stopLoading();
       }
     });
   }
@@ -177,17 +176,13 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.appListSubscription.unsubscribe();
     }
 
+    this.appListLoader.startLoading();
     this.appListSubscription = this.rest.addApp(app)
     .subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.appListError = response.message;
+        this.appListLoader.showErrorAlert(response.message);
       } else {
-        this.appListSuccess = true;
-        this.appList = response.appList;
-        clearTimeout(this.appListTimer);
-        this.appListTimer = setTimeout(() => {
-          this.appListSuccess = false;
-        }, 3000);
+        this.appListLoader.showSuccessAlert();
       }
     });
   }
@@ -197,32 +192,27 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.appListSubscription.unsubscribe();
     }
 
+    this.appListLoader.startLoading();
     this.appListSubscription = this.rest.deleteApp(app)
     .subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.appListError = response.message;
+        this.appListLoader.showErrorAlert(response.message);
       } else {
-        this.appListSuccess = true;
         this.appList = response.appList;
-        setTimeout(() => {
-          this.appListSuccess = false;
-        }, 3000);
+        this.appListLoader.showSuccessAlert();
       }
     });
   }
 
   onDashboardSubmit() {
+    this.dashboardLoader.startLoading();
     this.dashboardFormSetSubscription = this.rest.setSettings([
       { name: 'refreshInterval', value: this.refreshInterval.value }
     ]).subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.dashboardFormError = response.message;
+        this.dashboardLoader.showErrorAlert(response.message);
       } else {
-        this.dashboardFormSuccess = true;
-        clearTimeout(this.dashboardFormTimer);
-        this.dashboardFormTimer = setTimeout(() => {
-          this.dashboardFormSuccess = false;
-        }, 3000);
+        this.dashboardLoader.showSuccessAlert();
       }
     });
   }
@@ -236,17 +226,14 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.ignoreListSubscription.unsubscribe();
     }
 
+    this.ignoreListLoader.startLoading();
     this.ignoreListSubscription = this.rest.addKeyword(this.addKeyword.value)
     .subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.ignoreListError = response.message;
+        this.ignoreListLoader.showErrorAlert(response.message);
       } else {
-        this.ignoreListSuccess = true;
         this.ignoreList = response.ignoreList;
-        clearTimeout(this.ignoreListTimer);
-        this.ignoreListTimer = setTimeout(() => {
-          this.ignoreListSuccess = false;
-        }, 3000);
+        this.ignoreListLoader.showSuccessAlert();
       }
     });
 
@@ -259,49 +246,41 @@ export class SettingsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.ignoreListSubscription.unsubscribe();
     }
 
+    this.ignoreListLoader.startLoading();
     this.ignoreListSubscription = this.rest.deleteKeyword(keyword)
     .subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.ignoreListError = response.message;
+        this.ignoreListLoader.showErrorAlert(response.message);
       } else {
-        this.ignoreListSuccess = true;
         this.ignoreList = response.ignoreList;
-        setTimeout(() => {
-          this.ignoreListSuccess = false;
-        }, 3000);
+        this.ignoreListLoader.showSuccessAlert();
       }
     });
   }
 
   onScrapingSubmit() {
+    this.scrapingLoader.startLoading();
     this.scrapingFormSetSubscription = this.rest.setSettings([
       { name: 'pollingInterval', value: this.pollingInterval.value }
     ]).subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.scrapingFormError = response.message;
+        this.scrapingLoader.showErrorAlert(response.message);
       } else {
-        this.scrapingFormSuccess = true;
-        clearTimeout(this.scrapingFormTimer);
-        this.scrapingFormTimer = setTimeout(() => {
-          this.scrapingFormSuccess = false;
-        }, 3000);
+        this.scrapingLoader.showSuccessAlert();
       }
     });
   }
 
   onSlackSubmit() {
+    this.slackLoader.startLoading();
     this.slackFormSetSubscription = this.rest.setSettings([
       { name: 'postingChannel', value: this.postingChannel.value },
       { name: 'postingInterval', value: this.postingInterval.value }
     ]).subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.slackFormError = response.message;
+        this.slackLoader.showErrorAlert(response.message);
       } else {
-        this.slackFormSuccess = true;
-        clearTimeout(this.slackFormTimer);
-        this.slackFormTimer = setTimeout(() => {
-          this.slackFormSuccess = false;
-        }, 3000);
+        this.slackLoader.showSuccessAlert();
       }
     });
   }

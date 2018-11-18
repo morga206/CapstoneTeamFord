@@ -13,6 +13,7 @@ import { StatResponse, FilterInfo } from '../rest/domain';
 import { BsDatepickerModule, BsDaterangepickerConfig, BsLocaleService } from 'ngx-bootstrap/datepicker';
 import { ComponentLoaderFactory } from 'ngx-bootstrap';
 import { PositioningService } from 'ngx-bootstrap/positioning';
+import { LoaderComponent } from '../shared/loader/loader.component';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -24,7 +25,7 @@ describe('DashboardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent ],
+      declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent, LoaderComponent ],
       providers: [ AuthService, BsDaterangepickerConfig, ComponentLoaderFactory, PositioningService, BsLocaleService ],
       imports: [
         ReactiveFormsModule,
