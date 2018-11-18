@@ -182,6 +182,7 @@ export class SettingsComponent implements OnInit, AfterContentInit, OnDestroy {
       if (response.status === 'ERROR') {
         this.appListLoader.showErrorAlert(response.message);
       } else {
+        this.appList = response.appList;
         this.appListLoader.showSuccessAlert();
       }
     });
