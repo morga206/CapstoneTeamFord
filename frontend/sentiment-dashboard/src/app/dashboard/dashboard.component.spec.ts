@@ -66,6 +66,7 @@ describe('DashboardComponent', () => {
 
     // Check for properly formatted stat request when updateStats functions are called
     const statResponse: StatResponse = {
+      numReviews: { total: 13 },
       overallSentiment: {
         'positive': 10.2,
         'negative': 50,
@@ -94,6 +95,7 @@ describe('DashboardComponent', () => {
       'startDate': testStartDate.toISOString(),
       'endDate': testEndDate.toISOString(),
       'stats': [
+        { numReviews: null },
         { overallSentiment: null },
         { keywords: null },
         { sentimentOverTime: null }

@@ -167,6 +167,10 @@ public class StatsRequest extends Request {
           results[nextIndex] = new RawReviewsCalculation(items).calculate();
           nextIndex++;
           break;
+        case "numReviews":
+          results[nextIndex] = new NumReviewsCalculation(items).calculate();
+          nextIndex++;
+          break;
         case "overallSentiment":
           results[nextIndex] =  new OverallSentimentCalculation(items).calculate();
           nextIndex++;
