@@ -13,17 +13,16 @@
 </div>
 
 <div [class.row]="currentlyComparing">
-  <app-loader #stats1Loader>
-      <div [class.col-md-6]="currentlyComparing">
-        <h2 class="mt-4" *ngIf="currentlyComparing">{{ form.getCompareTitle() }}</h2>
-        <app-stats #stats1></app-stats>
-      </div>
-  </app-loader>
-
-  <app-loader #stats2Loader>
-    <div *ngIf="currentlyComparing" class="col-md-6">
-      <h2 class="mt-4">{{ formCompare.getCompareTitle() }}</h2>
+  <div [class.col-md-6]="currentlyComparing">
+    <app-loader #stats1Loader>
+      <h2 class="mt-4 text-truncate" *ngIf="currentlyComparing">{{ form.getCompareTitle() }}</h2>
+      <app-stats #stats1></app-stats>
+    </app-loader>
+  </div>
+  <div *ngIf="currentlyComparing" class="col-md-6">
+    <app-loader #stats2Loader>
+      <h2 class="mt-4 text-truncate">{{ formCompare.getCompareTitle() }}</h2>
       <app-stats #stats2></app-stats>
-    </div>
-  </app-loader>
+    </app-loader>
+  </div>
 </div>
