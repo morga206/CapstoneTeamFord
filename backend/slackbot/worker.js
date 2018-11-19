@@ -9,6 +9,13 @@ const axios = require('axios');
 
 module.exports = {
   handler,
+  buildParameters,
+  sentimentOverTimeText,
+  sentimentText,
+  getAttitude,
+  keywordText,
+  report,
+  getSentimentOverTime
 };
 
 /**
@@ -440,7 +447,7 @@ async function sentimentText(overallSentiment) {
     Math.round(overallSentiment.MIXED),
     Math.round(overallSentiment.NEUTRAL)];
 
-  const text = `Positive: ${sentiment[0]}%\nNegative: ${sentiment[1]}%\nNeutral: ${sentiment[2]}%\nMixed: ${sentiment[3]}%`;
+  const text = `Positive: ${sentiment[0]}%\nNegative: ${sentiment[1]}%\nNeutral: ${sentiment[3]}%\nMixed: ${sentiment[2]}%`;
 
   return text;
 }
