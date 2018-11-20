@@ -90,7 +90,7 @@ describe('SettingsComponent', () => {
       status: 'SUCCESS'
     };
 
-    const testAppList: App[] = [{ name: 'test', store: 'Google Play', appId: 'com.ford.test' }];
+    const testAppList: App[] = [{ name: 'test', store: 'Google Play', appId: 'com.ford.test', slackReport: true }];
     const testAppListResponse: AppListResponse = {
       appList: testAppList,
       status: 'SUCCESS',
@@ -289,7 +289,8 @@ describe('SettingsComponent', () => {
         {
           name: 'test',
           store: 'App Store',
-          appId: 'com.ford.test'
+          appId: 'com.ford.test',
+          slackReport: true
         }
       ]
     };
@@ -315,7 +316,7 @@ describe('SettingsComponent', () => {
     req.flush(testSuccessResponse);
     expect(component.slackLoader.showSuccessAlert).toHaveBeenCalled();
 
-    component.onAddApp({ name: 'test', store: 'App Store', appId: 'com.ford.test'});
+    component.onAddApp({ name: 'test', store: 'App Store', appId: 'com.ford.test', slackReport: true});
     req = httpMock.expectOne(API_URL + 'settings/apps');
     req.flush(testAppListSuccessResponse);
 
@@ -412,7 +413,7 @@ describe('SettingsComponent', () => {
     expect(req.request.method).toEqual('POST');
     expect(req.request.body).toEqual(JSON.stringify(expectedSlackRequest));
 
-    const toAdd: App = { name: 'test', store: 'App Store', appId: 'com.ford.test'};
+    const toAdd: App = { name: 'test', store: 'App Store', appId: 'com.ford.test', slackReport: true };
     component.onAddApp(toAdd);
     req = httpMock.expectOne(API_URL + 'settings/apps');
     const expectedAppListAddRequest = {
@@ -421,6 +422,16 @@ describe('SettingsComponent', () => {
     };
     expect(req.request.method).toEqual('POST');
     expect(req.request.body).toEqual(JSON.stringify(expectedAppListAddRequest));
+
+    component.onSlackCheckbox(toAdd, { target: { checked: false }});
+    const toUpdate: App = { name: 'test', store: 'App Store', appId: 'com.ford.test', slackReport: false };
+    req = httpMock.expectOne(API_URL + 'settings/apps');
+    const expectedAppListUpdateRequest = {
+      command: 'UPDATE',
+      app: toUpdate
+    };
+    expect(req.request.method).toEqual('POST');
+    expect(req.request.body).toEqual(JSON.stringify(expectedAppListUpdateRequest));
 
     const toDelete: App = component.appList[0];
     component.onDeleteApp(toDelete);
