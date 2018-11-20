@@ -38,6 +38,15 @@ public class IgnoreListTests {
     }
   }
 
+  public void testUpdateKeyword() {
+    // Should return an error
+    IgnoreListRequest request = new IgnoreListRequest("UPDATE", "testKeyword");
+    IgnoreListResponse response = request.update(new MockSSM(), new String[1], "testKeyword");
+    IgnoreListResponse expectedResponse = new IgnoreListResponse(
+      "The UPDATE operation is not supported for the keyword list.");
+    assertThat(response.getMessage()).isEqualTo(expectedResponse.getMessage());
+  }
+
   @Test
   public void testDeleteKeyword() {
     // Deleting nonexisting keyword should return error
