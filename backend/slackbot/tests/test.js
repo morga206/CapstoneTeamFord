@@ -83,7 +83,7 @@ describe('worker', function() {
           'On November 2, 18.75% of reviews were negative: 16 total reviews\n' +
           'On November 3, 86.14% of reviews were negative: 101 total reviews\n' +
           'On November 4, 65.82% of reviews were negative: 79 total reviews\n';
-      assert.equal(mockText, expectedText)
+      assert.equal(mockText, expectedText);
     });
     it('should ignore null values in the data', async () => {
       const mockLabels = ['November 1','November 2','November 3', 'November 4'];
@@ -164,7 +164,7 @@ describe('worker', function() {
         'key': 'value',
         'startDate': 'yesterday',
         'endDate': 'today'
-      }
+      };
       let slackParameters = await worker.extractSlackParameters(mockSlackFields);
       for (let key in slackParameters) {
         assert.equal(slackParameters[key], expectedFields[key]);
