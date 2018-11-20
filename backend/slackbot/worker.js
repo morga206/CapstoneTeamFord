@@ -15,7 +15,8 @@ module.exports = {
   getAttitude,
   keywordText,
   report,
-  getSentimentOverTime
+  getSentimentOverTime,
+  extractSlackParameters
 };
 
 /**
@@ -425,6 +426,8 @@ async function sentimentOverTimeText(data, labels, totals) {
   let text = '';
   for (let day in data) {
     const date =  labels[day];
+
+    // data[day] * 100 / 100 for rounding to the 2nd digit after the decimal
     const percent = Math.round(data[day]*100)/100;
     const total = totals[day];
 
@@ -447,7 +450,7 @@ async function sentimentText(overallSentiment) {
     Math.round(overallSentiment.MIXED),
     Math.round(overallSentiment.NEUTRAL)];
 
-  const text = `Positive: ${sentiment[0]}%\nNegative: ${sentiment[1]}%\nNeutral: ${sentiment[3]}%\nMixed: ${sentiment[2]}%`;
+  const text = `Positive: ${sentiment[0]}%\nNegative: ${sentiment[1]}%\nMixed: ${sentiment[2]}%\nNeutral: ${sentiment[3]}%`;
 
   return text;
 }
