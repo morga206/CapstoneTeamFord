@@ -65,7 +65,7 @@ describe('worker', function() {
       };
       let parameters = await worker.buildParameters(mockApps, mockSlackInput);
 
-      // Slicing from 0-11 to compare just the year-day-month and not seconds
+      // Slicing from 0-11 to compare just the year-day-month
       for (let i = 0; i < 3; i++) {
         assert.equal(testDate.slice(0,11), parameters[i].startDate.slice(0,11));
       }
