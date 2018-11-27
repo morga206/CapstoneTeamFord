@@ -65,6 +65,20 @@ public class IgnoreListRequest extends ListRequest<String> {
   }
 
   /**
+   * Update an existing item in the SSM list.
+   * @param client The SSM client to use.
+   * @param list The existing list.
+   * @param item The item to update.
+   * @return A Response with either an error message or the updated list.
+   */
+  protected IgnoreListResponse update(AWSSimpleSystemsManagement client, 
+      String[] ignoreList, 
+      String keyword) {
+    return new IgnoreListResponse(
+      "The UPDATE operation is not supported for the keyword list.");
+  }
+
+  /**
    * Delete a keyword from the SSM list.
    * @param client The SSM client to use.
    * @param ignoreList The existing keyword list.

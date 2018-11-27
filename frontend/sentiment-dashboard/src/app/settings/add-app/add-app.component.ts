@@ -15,6 +15,7 @@ export class AddAppComponent implements OnInit {
   public appName: AbstractControl;
   public appStore: AbstractControl;
   public appId: AbstractControl;
+  public slackReport: AbstractControl;
 
   constructor(public bsModalRef: BsModalRef, private fb: FormBuilder) { }
 
@@ -22,18 +23,21 @@ export class AddAppComponent implements OnInit {
     this.addAppForm = this.fb.group({
       'appName': ['', Validators.required],
       'appStore': ['', Validators.required],
-      'appId': ['', Validators.compose([Validators.required])]
+      'appId': ['', Validators.compose([Validators.required])],
+      'slackReport': ['']
     });
     this.appName = this.addAppForm.get('appName');
     this.appStore = this.addAppForm.get('appStore');
     this.appId = this.addAppForm.get('appId');
+    this.slackReport = this.addAppForm.get('slackReport');
   }
 
   onSubmit() {
     this.submit.emit({
       name: this.appName.value,
       store: this.appStore.value,
-      appId: this.appId.value
+      appId: this.appId.value,
+      slackReport: this.slackReport.value
     });
     this.bsModalRef.hide();
   }
