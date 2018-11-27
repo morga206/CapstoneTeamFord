@@ -38,6 +38,7 @@ export interface App {
   name: string;
   store: string;
   appId: string;
+  slackReport: boolean;
 }
 
 export interface IgnoreListResponse {

@@ -221,25 +221,29 @@ async function getApps(store='both') {
   const appsRequest = await axios.get(endpoint); // Get list of available apps
   const apps = appsRequest.data;
 
-  let filteredApps = {};  // apps we want to return depending on store specified
-
+  let filteredApps = {};
 
   if (store == 'both') {
     for (let appIdStore in apps.apps) {
-      filteredApps[appIdStore] = apps.apps[appIdStore];
+      // Filter apps that are configured to be in Slack reports
+      if (apps.apps[appIdStore].slackReport) {
+        filteredApps[appIdStore] = apps.apps[appIdStore];
+      }
     }
-
-  } else {
-
-    // Filter apps based on appStoreId and user provided store
+  } else if (store.includes('google') || store.includes('android')) {
+    // Filter apps that are 1. configured to be in Slack reports and 2. are from Google Play
     for (let appIdStore in apps.apps) {
-      if ( (store.includes('google') || store.includes('android')) && appIdStore.includes('Google Play') ) {
-        filteredApps[appIdStore] = apps.apps[appIdStore];
-      }
-      else if ( (store.includes('apple') || store.includes('ios')) && appIdStore.includes('App Store') ) {
+      if (apps.apps[appIdStore].slackReport && appIdStore.includes('Google Play')) {
         filteredApps[appIdStore] = apps.apps[appIdStore];
       }
     }
+  } else if (store.includes('apple') || store.includes('ios')) {
+    // Filter apps that are 1. configured to be in Slack reports and 2. are from the App Store
+    for (let appIdStore in apps.apps) {
+      if (apps.apps[appIdStore].slackReport && appIdStore.includes('App Store')) {
+        filteredApps[appIdStore] = apps.apps[appIdStore];
+      }
+    } 
   }
 
   return filteredApps;

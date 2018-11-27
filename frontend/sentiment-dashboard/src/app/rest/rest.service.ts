@@ -104,6 +104,21 @@ export class RestService {
     );
   }
 
+  updateApp(app: App): Observable<AppListResponse> {
+    const body = JSON.stringify({
+      command: 'UPDATE',
+      app: app
+    });
+
+    return this.apiKey$.pipe(
+      map((key) => new HttpHeaders({
+        'Content-Type' : 'application/json',
+        'Authorization': key
+      })),
+      switchMap((headers) => this.http.post<AppListResponse>(this.API_URL + 'settings/apps', body, { headers: headers }))
+    );
+  }
+
   deleteApp(app: App): Observable<AppListResponse> {
     const body = JSON.stringify({
       command: 'DELETE',

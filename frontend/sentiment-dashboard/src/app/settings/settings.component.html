@@ -14,6 +14,7 @@
           <th scope="col">Name</th>
             <th scope="col">Store</th>
             <th scope="col">App ID</th>
+            <th scope="col">Show in Slack?</th>
             <th scope="col"></th>
         </tr>
       </thead>
@@ -22,6 +23,7 @@
           <td>{{ app.name }}</td>
           <td>{{ app.store }}</td>
           <td>{{ app.appId }}</td> 
+          <td><input type="checkbox" [checked]="app.slackReport" (change)="onSlackCheckbox(app, $event)" /></td>
           <td><button type="button" class="btn btn-sm btn-primary ml-auto" (click)="onDeleteApp(app)">&times;</button></td>
         </tr>
       </tbody>
@@ -115,7 +117,7 @@
         <div class="input-group mb-2">
           <input type="text" class="form-control" id="posting-interval" formControlName="postingInterval" [class.is-invalid]="postingInterval.invalid">
           <div class="input-group-append">
-            <span class="input-group-text">minutes</span>
+            <span class="input-group-text">days</span>
           </div>
         </div>
       </div>
