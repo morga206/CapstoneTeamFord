@@ -20,6 +20,7 @@ public abstract class ListRequest<T> extends Request {
 
   protected enum Command {
     ADD,
+    UPDATE,
     DELETE,
     GET;
   }
@@ -59,6 +60,8 @@ public abstract class ListRequest<T> extends Request {
     switch (this.command) {
       case ADD:
         return add(client, this.list, this.item);
+      case UPDATE:
+        return update(client, this.list, this.item);
       case DELETE:
         return delete(client, this.list, this.item);
       case GET:
@@ -79,10 +82,19 @@ public abstract class ListRequest<T> extends Request {
    * Add an item to the SSM list.
    * @param client The SSM client to use.
    * @param list The existing list.
-   * @param item The item to add
+   * @param item The item to add.
    * @return A Response with either an error message or the updated list.
    */
   protected abstract Response add(AWSSimpleSystemsManagement client, T[] list, T item);
+
+  /**
+   * Update an existing item in the SSM list.
+   * @param client The SSM client to use.
+   * @param list The existing list.
+   * @param item The item to update.
+   * @return A Response with either an error message or the updated list.
+   */
+  protected abstract Response update(AWSSimpleSystemsManagement client, T[] list, T item);
 
   /**
    * Delete an item from the SSM list.
