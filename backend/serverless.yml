@@ -74,6 +74,7 @@ functions:
       # Flags for settings that require Lambda configuration updates
       POLLINGINTERVAL_CLOUDWATCH_EVENT: ${self:custom.reviewsEventName}
       POSTINGINTERVAL_CLOUDWATCH_EVENT: ${self:custom.slackbotEventName}
+      POSTINGINTERVAL_UNIT: "days"
     events:
       - http:
           method: post

@@ -3,7 +3,6 @@ package sentiment.settings;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import sentiment.Response;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
