@@ -17,13 +17,15 @@ export class AddAppComponent implements OnInit {
   public appId: AbstractControl;
   public slackReport: AbstractControl;
 
+  public idFormatMessage = '';
+
   constructor(public bsModalRef: BsModalRef, private fb: FormBuilder) { }
 
   ngOnInit() {
     this.addAppForm = this.fb.group({
       'appName': ['', Validators.required],
       'appStore': ['', Validators.required],
-      'appId': ['', Validators.compose([Validators.required])],
+      'appId': ['', Validators.required],
       'slackReport': ['']
     });
     this.appName = this.addAppForm.get('appName');
@@ -50,8 +52,10 @@ export class AddAppComponent implements OnInit {
 
     if (store === 'App Store') {
       this.appId.setValidators([Validators.required, Validators.pattern(appStorePattern)]);
+      this.idFormatMessage = 'For the App Store, app IDs are formatted as 9-digit numbers.';
     } else if (store === 'Google Play') {
       this.appId.setValidators([Validators.required, Validators.pattern(googlePlayPattern)]);
+      this.idFormatMessage = 'For Google Play, app IDs are formatted as Java package names in reverse domain structure.';
     }
 
     this.appId.updateValueAndValidity();
