@@ -16,7 +16,7 @@ export interface StatsFilterValues {
   styleUrls: ['./form.component.scss']
 })
 export class FormComponent implements OnInit {
-
+  @Input() idSuffix = '';
   @Input() showCompare = true;
 
   @Output() compare = new EventEmitter<boolean>();

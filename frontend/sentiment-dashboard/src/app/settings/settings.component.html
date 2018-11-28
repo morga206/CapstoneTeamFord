@@ -23,8 +23,8 @@
           <td>{{ app.name }}</td>
           <td>{{ app.store }}</td>
           <td>{{ app.appId }}</td> 
-          <td><input type="checkbox" [checked]="app.slackReport" (change)="onSlackCheckbox(app, $event)" /></td>
-          <td><button type="button" class="btn btn-sm btn-primary ml-auto" (click)="onDeleteApp(app)">&times;</button></td>
+          <td><input type="checkbox" [checked]="app.slackReport" (change)="onSlackCheckbox(app, $event)" [attr.aria-label]="'Show ' + app.name + ' in Slack?'" /></td>
+          <td><button type="button" class="btn btn-sm btn-primary ml-auto" (click)="onDeleteApp(app)" [attr.aria-label]="'Delete ' + app.name">&times;</button></td>
         </tr>
       </tbody>
     </table>
@@ -65,7 +65,7 @@
   </div>
   <form [formGroup]="ignoreListForm" (ngSubmit)="onAddKeyword()">
     <div class="row mb-4">
-      <input type="text" class="form-control" id="add-keyword" formControlName="addKeyword" [class.is-invalid]="addKeyword.invalid">
+      <input type="text" class="form-control" id="add-keyword" formControlName="addKeyword" [class.is-invalid]="addKeyword.invalid" aria-label="Add Keyword">
       <button type="submit" class="btn btn-primary my-2" [disabled]="addKeyword.invalid">Add Keyword</button>
     </div>
   </form>
