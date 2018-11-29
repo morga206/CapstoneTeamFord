@@ -1,8 +1,8 @@
 <form [formGroup]="statsFilterForm" novalidate>
   <div class="form-row row">
-    <label for="app-name" class="col-lg-auto col-form-label label">App name</label>
+    <label [for]="'app-name' + idSuffix" class="col-lg-auto col-form-label label">App name</label>
     <div class="mr-4 p-0 col-lg-2 form-group">
-      <select class="form-control" id="app-name" formControlName="appName" (change)="onAppSelect($event.target.value)" [class.is-invalid]="appIdStore.invalid">
+      <select class="form-control" [id]="'app-name' + idSuffix" formControlName="appName" (change)="onAppSelect($event.target.value)" [class.is-invalid]="appIdStore.invalid">
         <option *ngFor="let app of appList | keyvalue" [value]="app.key">{{ app.value.name }}</option>
       </select>
       <div class="invalid-feedback">
@@ -10,9 +10,9 @@
       </div>
     </div>
 
-    <label for="version" class="col-lg-auto col-form-label">Version</label>
+    <label [for]="'version' + idSuffix" class="col-lg-auto col-form-label">Version</label>
     <div class="mr-4 p-0 col-lg-2 form-group">
-      <select class="form-control" id="version" formControlName="appVersion" (change)="onFilterChange()" [class.is-invalid]="version.invalid">
+      <select class="form-control" [id]="'version' + idSuffix" formControlName="appVersion" (change)="onFilterChange()" [class.is-invalid]="version.invalid">
         <option *ngFor="let version of selectedApp?.versions">{{ version }}</option>
       </select>
       <div class="invalid-feedback">
@@ -20,10 +20,10 @@
       </div>
     </div>
 
-    <label for="date-range" class="col-lg-auto col-form-label">Date Range</label>
+    <label [for]="'date-range' + idSuffix" class="col-lg-auto col-form-label">Date Range</label>
     <div class="mr-4 p-0 col-lg-2 form-group">
       <input type="text"
-              id="date-range"
+              [id]="'date-range' + idSuffix"
               class="form-control"
               [class.is-invalid]="startDate === undefined || endDate === undefined"
               [bsConfig]="{ containerClass: 'theme-default' }"
