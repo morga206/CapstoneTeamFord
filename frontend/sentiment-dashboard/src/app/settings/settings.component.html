@@ -65,7 +65,7 @@
 
   <app-loader #ignoreListLoader>
     <div class="row mb-2">
-      <span *ngFor="let keyword of ignoreList" class="badge badge-primary m-1" (click)="onDeleteKeyword(keyword)">{{ keyword }} &times;</span>
+      <span role="button" *ngFor="let keyword of ignoreList" class="badge badge-primary m-1" (click)="onDeleteKeyword(keyword)" [attr.aria-label]="'Delete keyword ' + keyword">{{ keyword }} &times;</span>
     </div>
     <form [formGroup]="ignoreListForm" (ngSubmit)="onAddKeyword()">
       <div class="row mb-4">
