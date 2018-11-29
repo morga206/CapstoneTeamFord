@@ -88,7 +88,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.updateStatsSubscription(values);
       }
 
-      if (this.formCompare === undefined || this.statsCompare === undefined) {
+      if (!this.currentlyComparing) {
         return;
       }
 

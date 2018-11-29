@@ -40,7 +40,7 @@ export class StatsComponent implements OnInit {
     }
   };
   public lineChartColors: Array<any> = [
-    { // green
+    {
       backgroundColor: 'rgba(204,65,65,0.5)',
       borderColor: 'rgba(204,65,65,1)',
       pointBackgroundColor: 'rgba(204,65,65,1)',

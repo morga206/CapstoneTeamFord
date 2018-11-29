@@ -15,21 +15,25 @@ public class App {
   private String name;
   private String store;
   private String appId;
+  private boolean slackReport;
 
   /**
    * Create an App to represent an entry in the app scraping list.
    * @param name The human-readable app name.
    * @param store The store to scrape for this app.
    * @param appId The app's unique id.
+   * @param slackReport Whether to include this app in Slack messages.
    */
   @JsonCreator
   public App(
       @JsonProperty("name") String name, 
       @JsonProperty("store") String store, 
-      @JsonProperty("appId") String appId) {
+      @JsonProperty("appId") String appId,
+      @JsonProperty("slackReport") boolean slackReport) {
     this.name = name;
     this.store = store;
     this.appId = appId;
+    this.slackReport = slackReport;
   }
 
   public String getName() {
@@ -42,6 +46,10 @@ public class App {
 
   public String getAppId() {
     return this.appId;
+  }
+
+  public boolean getSlackReport() {
+    return this.slackReport;
   }
 
   /**

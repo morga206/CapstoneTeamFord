@@ -114,6 +114,8 @@ describe('DashboardComponent', () => {
     expect(statsReq.request.body).toEqual(JSON.stringify(expectedStatsRequest));
     statsReq.flush(statResponse);
 
+    component.setCurrentlyComparing(true);
+    fixture.detectChanges(); // Instantiate compareStats components
     component.updateCompareStatsSubscription({
       appIdStore: testAppIdStore,
       version: testVersion,

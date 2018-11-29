@@ -1,22 +1,22 @@
 <form class="form-inline flex-nowrap" [formGroup]="statsFilterForm" novalidate>
   <div class="form-group">
-    <label for="app-name" class="mr-2">App name</label>
-    <select class="form-control mr-2" id="app-name" formControlName="appName" (change)="onAppSelect($event.target.value)" [class.is-invalid]="appIdStore.invalid">
+    <label [for]="'app-name' + idSuffix" class="mr-2">App name</label>
+    <select class="form-control mr-2" [id]="'app-name' + idSuffix" formControlName="appName" (change)="onAppSelect($event.target.value)" [class.is-invalid]="appIdStore.invalid">
       <option *ngFor="let app of appList | keyvalue" [value]="app.key">{{ app.value.name }}</option>
     </select>
   </div>
 
   <div class="form-group">
-    <label for="version" class="mr-2">Version</label>
-    <select class="form-control mr-2" id="version" formControlName="appVersion" (change)="onFilterChange()" [class.is-invalid]="version.invalid">
+    <label [for]="'version' + idSuffix" class="mr-2">Version</label>
+    <select class="form-control mr-2" [id]="'version' + idSuffix" formControlName="appVersion" (change)="onFilterChange()" [class.is-invalid]="version.invalid">
       <option *ngFor="let version of selectedApp?.versions">{{ version }}</option>
     </select>
   </div>
 
   <div class="form-group">
-    <label for="date-range" class="mr-2">Date Range</label>
+    <label [for]="'date-range' + idSuffix" class="mr-2">Date Range</label>
     <input type="text"
-           id="date-range"
+           [id]="'date-range' + idSuffix"
            class="form-control mr-2"
            [class.is-invalid]="startDate === undefined || endDate === undefined"
            [bsConfig]="{ containerClass: 'theme-default' }"
