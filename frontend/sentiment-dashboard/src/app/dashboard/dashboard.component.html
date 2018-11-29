@@ -1,6 +1,8 @@
 <div class="p-2 p-sm-0"> <!-- Fix padding on xs breakpoint -->
     <h1 class="sr-only">Home</h1>
 
+    <app-loader #autoUpdateLoader></app-loader>
+
     <div [class.mb-2]="currentlyComparing">
       <app-loader #form1Loader>
         <app-form #form1 (compare)="setCurrentlyComparing($event)" (filterChange)="updateStatsSubscription($event)" idSuffix="form1"></app-form>
