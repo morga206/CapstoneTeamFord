@@ -3,34 +3,34 @@
     <h1>Settings and Administration</h1>
   </div>
 
-  <div class="row mb-2">
-    <h2 class="h4">App Management</h2>
-    <button type="button" class="btn btn-sm btn-primary ml-auto mb-2" (click)="openModal()">Add App</button>
-  </div>
-  <div class="row mb-4">
-    <app-loader #appListLoader>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Name</th>
-              <th scope="col">Store</th>
-              <th scope="col">App ID</th>
-              <th scope="col">Show in Slack?</th>
-              <th scope="col"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let app of appList">
-            <td>{{ app.name }}</td>
-            <td>{{ app.store }}</td>
-            <td>{{ app.appId }}</td> 
-            <td><input type="checkbox" [checked]="app.slackReport" (change)="onSlackCheckbox(app, $event)" /></td>
-            <td><button type="button" class="btn btn-sm btn-primary ml-auto" (click)="onDeleteApp(app)">&times;</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </app-loader>
-  </div>
+<div class="row mb-2">
+  <h2 class="h4">App Management</h2>
+  <button type="button" class="btn btn-sm btn-primary ml-auto mb-2" (click)="openModal()">Add App</button>
+</div>
+<div class="row mb-4">
+  <app-loader #appListLoader>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+            <th scope="col">Store</th>
+            <th scope="col">App ID</th>
+            <th scope="col">Show in Slack?</th>
+            <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of appList">
+          <td>{{ app.name }}</td>
+          <td>{{ app.store }}</td>
+          <td>{{ app.appId }}</td> 
+          <td><input type="checkbox" [checked]="app.slackReport" (change)="onSlackCheckbox(app, $event)" [attr.aria-label]="'Show ' + app.name + ' in Slack?'" /></td>
+          <td><button type="button" class="btn btn-sm btn-primary ml-auto" (click)="onDeleteApp(app)" [attr.aria-label]="'Delete ' + app.name">&times;</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </app-loader>
+</div>
 
   <div class="row mb-4 border-bottom">
     <h2 class="h4">Dashboard Settings</h2>
@@ -62,7 +62,6 @@
   <div class="row">
     <h2 class="h6 font-weight-normal mb-2">Ignored Keywords Management</h2>
   </div>
-
   <app-loader #ignoreListLoader>
     <div class="row mb-2">
       <span *ngFor="let keyword of ignoreList" class="badge badge-primary m-1" (click)="onDeleteKeyword(keyword)">{{ keyword }} &times;</span>
