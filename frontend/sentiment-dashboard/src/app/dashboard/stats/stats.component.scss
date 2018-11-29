@@ -1,0 +1,10 @@
+@import "../../../../node_modules/bootstrap/scss/_functions.scss";
+@import "../../../../node_modules/bootstrap/scss/_variables.scss";
+@import "../../../../node_modules/bootstrap/scss/_mixins.scss";
+
+// Allow two cards in top row on xl breakpoint
+@include media-breakpoint-up(xl) {
+  .top-row-card {
+    max-width: 500px;
+  }
+}
