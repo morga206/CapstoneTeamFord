@@ -44,7 +44,8 @@ function extractReviews (xml) {
       date: (new Date(item.updated[0])),
       userName: item.author[0].name[0],
       userUrl: item.author[0].uri[0],
-      version: item['im:version'][0],
+      // Occasionally reviews in Apple's XML feed do not have a version set
+      version: item['im:version'] !== undefined ? item['im:version'][0] : 'No version available',
       score: parseInt(item['im:rating'][0]),
       title: item.title[0],
       text: item.content[0]['_'],
