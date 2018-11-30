@@ -39,7 +39,7 @@ async function handler (event) {
     } catch (error) {
       return {
         statusCode: 500,
-        error: `Error handling eport: ${error}`
+        error: `Error handling report: ${error}`
       };
     }
 
@@ -100,50 +100,36 @@ async function handleCommand(slackFields){
     parameters = await extractSlackParameters(slackFields);
   } catch (error) {
     console.log(`Error Extracting Slack Parameters: ${error}`);
-    throw error;
   }
 
-  let statsList;
-  try {
-    statsList = await getStatistics(parameters);
-  } catch (error) {
-    console.log(`Error getting statistics: ${error}`);
-    throw error;
-  }
+  const statsList = await getStatistics(parameters);
 
   let slackResponses = []; // List of messages sending to slack
-
-  try {
-    // Determine which command should be invoked
-    switch (slackFields.command) {
-    case '/getlatestreviews':
-      slackResponses = await report(statsList);
-      break;
-    case '/getreviews':
-      slackResponses = await report(statsList);
-      break;
-    case '/getsentimentovertime':
-      slackResponses = await getSentimentOverTime(statsList);
-      break;
-    case '/sentimenthelp':
-      slackResponses = await getSentimentHelp();
-    }
-  } catch (error) {
-    console.log(`Error handling command ${slackFields.command}: ${error}`);
-    throw error;
+  // Determine which command should be invoked
+  switch (slackFields.command) {
+  case '/getlatestreviews':
+    slackResponses = await report(statsList);
+    break;
+  case '/getreviews':
+    slackResponses = await report(statsList);
+    break;
+  case '/getsentimentovertime':
+    slackResponses = await getSentimentOverTime(statsList);
+    break;
+  case '/sentimenthelp':
+    slackResponses = await getSentimentHelp();
   }
 
-  try {
-    // Post messages to slack
-    for (let message in slackResponses) {
-      slackResponses[message].response_type = 'in_channel';
+  // Post messages to slack
+  for (let message in slackResponses) {
+    slackResponses[message].response_type = 'in_channel';
+
+    try {
       await axios.post(responseURL, slackResponses[message]);
+    } catch (error) {
+      console.log(`Error posting messages to Slack: ${error}`);
     }
-  } catch (error) {
-    console.log(`Error posting messages to Slack: ${error}`);
-    throw error;
   }
-
 
 }
 
@@ -174,36 +160,23 @@ async function extractSlackParameters(slackFields) {
  * and builds formatted messages to post to slack
  */
 async function handleScheduledReport() {
-  let statsList;
-  try {
-    statsList = await getStatistics();  // Get the statistics with default values
-  } catch (error) {
-    console.log(`Error getting statistics: ${error}`);
-    throw error;
-  }
-
-  let slackResponse;
-  try {
-    slackResponse = await report(statsList);  // Create the message to post to slack
-  } catch(error) {
-    console.log(`Error getting report: ${error}`);
-    throw error;
-  }
+  const statsList = await getStatistics();  // Get the statistics with default values
+  const slackResponse = await report(statsList);  // Create the message to post to slack
 
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${botToken}`
   };
 
-  try {
-    // Post all of the reports to slack
-    for (let message in slackResponse) {
+  // Post all of the reports to slack
+  for (let message in slackResponse) {
+    try {
       await axios.post(slackURL, slackResponse[message], { headers: headers });
+    } catch (error) {
+      console.log(`Error posting messages to Slack: ${error}`);
     }
-  } catch (error) {
-    console.log(`Error posting messages to Slack: ${error}`);
-    throw error;
   }
+
 
 }
 
@@ -222,17 +195,8 @@ async function getStatistics(parameters={}){
     store = parameters['store'].toLowerCase();
   }
 
-  let apps;
-  try {
-    // Get the apps for specified stores
-    apps = await getApps(store);
-  } catch (error) {
-    console.log(`Error getting Apps: ${error}`);
-    throw error;
-  }
-
+  const apps = await getApps(store);
   const statsRequests = await buildParameters(apps, parameters); // Get list of parameters to post a report for each app
-
 
   // Create a list of promises to await the statistics response
   let promises = [];
@@ -247,8 +211,7 @@ async function getStatistics(parameters={}){
   try {
     statistics = await allPromises;
   } catch(error) {
-    console.log(`Error awaiting statistics in function getStatistics(): ${error}`);
-    throw error;
+    console.log(`Error awaiting /stats requests in function getStatistics(): ${error}`);
   }
 
   // Add in app names to statistics
@@ -380,7 +343,6 @@ async function report(statistics){
     channel = '#' + await getSSMParam(`postingChannel-${stage}`);
   } catch (error) {
     console.log(`Error getting SSMParam: ${error}`);
-    throw error;
   }
 
   // report represents the index in statistics list
@@ -501,7 +463,13 @@ async function sentimentOverTimeText(data, labels, totals) {
     const total = totals[day];
 
     if (data[day] != null) {
-      text += `On ${date}, ${percent}% of reviews were negative: ${total} total reviews\n`;
+      text += `On ${date}, ${percent}% of reviews were negative: ${total} total `;
+
+      if (total == 1) {
+        text += 'review\n';
+      } else {
+        text += 'reviews\n';
+      }
     }
   }
 
