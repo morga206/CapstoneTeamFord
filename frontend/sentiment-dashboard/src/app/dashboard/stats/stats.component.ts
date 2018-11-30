@@ -89,7 +89,9 @@ export class StatsComponent implements OnInit {
     return (tooltipItem: Tooltip, data: ChartData) => {
       const allData = data.datasets[tooltipItem.datasetIndex].data;
       const tooltipData = allData[tooltipItem.index];
-      return  Math.round(tooltipData) + '%' + ' of ' + this.reviewTotals[tooltipItem.index] + ' reviews';
+
+      const suffix = this.reviewTotals[tooltipItem.index] === 1 ? ' review' : ' reviews';
+      return Math.round(tooltipData) + '%' + ' of ' + this.reviewTotals[tooltipItem.index] + suffix;
     };
   }
 
