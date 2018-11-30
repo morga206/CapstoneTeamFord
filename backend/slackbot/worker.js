@@ -94,27 +94,43 @@ async function getSSMParam(name) {
  */
 async function handleCommand(slackFields){
   const responseURL = slackFields['response_url'];
+  const parameters = await extractSlackParameters(slackFields);
 
-  let parameters;
+  // Get a list of statistics for given parameters
+  let statsList;
   try {
-    parameters = await extractSlackParameters(slackFields);
+    statsList = await getStatistics(parameters);
   } catch (error) {
-    console.log(`Error Extracting Slack Parameters: ${error}`);
+    console.log(`Error generating the statistics for a /command: ${error}`);
+    throw error
   }
 
-  const statsList = await getStatistics(parameters);
-
-  let slackResponses = []; // List of messages sending to slack
-  // Determine which command should be invoked
+  // Determine which command was triggered and get the report to send to slack
+  let slackResponses;
   switch (slackFields.command) {
   case '/getlatestreviews':
-    slackResponses = await report(statsList);
+    try {
+      slackResponses = await report(statsList);
+    } catch (error) {
+      console.log(`Error processing /command getLatestReviews: ${error}`);
+      throw error;
+    }
     break;
   case '/getreviews':
-    slackResponses = await report(statsList);
+    try {
+      slackResponses = await report(statsList);
+    } catch (error) {
+      console.log(`Error processing /command getReviews: ${error}`);
+      throw error;
+    }
     break;
   case '/getsentimentovertime':
-    slackResponses = await getSentimentOverTime(statsList);
+    try {
+      slackResponses = await getSentimentOverTime(statsList);
+    } catch (error) {
+      console.log(`Error processing /command getSentimentOverTime: ${error}`);
+      throw error;
+    }
     break;
   case '/sentimenthelp':
     slackResponses = await getSentimentHelp();
@@ -123,11 +139,12 @@ async function handleCommand(slackFields){
   // Post messages to slack
   for (let message in slackResponses) {
     slackResponses[message].response_type = 'in_channel';
+    let response = await axios.post(responseURL, slackResponses[message]);
 
-    try {
-      await axios.post(responseURL, slackResponses[message]);
-    } catch (error) {
-      console.log(`Error posting messages to Slack: ${error}`);
+    if (response.ok == false) {
+      const error = response.error;
+      console.log(`Error posting messages to slack: ${error}`);
+      throw error;
     }
   }
 
@@ -160,8 +177,21 @@ async function extractSlackParameters(slackFields) {
  * and builds formatted messages to post to slack
  */
 async function handleScheduledReport() {
-  const statsList = await getStatistics();  // Get the statistics with default values
-  const slackResponse = await report(statsList);  // Create the message to post to slack
+  let statsList;
+  try {
+    statsList = await getStatistics();  // Get the statistics with default values
+  } catch (error) {
+    console.log(`Error generating the statistics for the scheduled report: ${error}`);
+    throw error;
+  }
+
+  let slackResponse;
+  try {
+    slackResponse = await report(statsList);  // Create the message to post to slack
+  } catch (error) {
+    console.log(`Error generating the scheduled report for slack: ${error}`);
+    throw error;
+  }
 
   const headers = {
     'Content-Type': 'application/json',
@@ -170,10 +200,12 @@ async function handleScheduledReport() {
 
   // Post all of the reports to slack
   for (let message in slackResponse) {
-    try {
-      await axios.post(slackURL, slackResponse[message], { headers: headers });
-    } catch (error) {
-      console.log(`Error posting messages to Slack: ${error}`);
+    let response = await axios.post(slackURL, slackResponse[message], { headers: headers });
+
+    if (response.ok == false) {
+      const error = response.error;
+      console.log(`Error posting messages to slack: ${error}`);
+      throw error;
     }
   }
 
@@ -189,14 +221,22 @@ async function getStatistics(parameters={}){
   const endpoint = gatewayURL + '/stats';
   let statisticsList = [];
 
-  // Apple, Google or both app stores
+  // Specify Apple, Google or both app stores
   let store = 'both';
   if (parameters.hasOwnProperty('store')) {
     store = parameters['store'].toLowerCase();
   }
 
-  const apps = await getApps(store);
-  const statsRequests = await buildParameters(apps, parameters); // Get list of parameters to post a report for each app
+  // Get the apps for specified store(s)
+  let apps;
+  try {
+    apps = await getApps(store);
+  } catch (error) {
+    throw error;
+  }
+
+  // Build a list of parameters to request stats for
+  const statsRequests = await buildParameters(apps, parameters);
 
   // Create a list of promises to await the statistics response
   let promises = [];
@@ -208,10 +248,12 @@ async function getStatistics(parameters={}){
   const allPromises = Promise.all(promises);
   let statistics = [];
 
+  // Await all of the statistics responses
   try {
     statistics = await allPromises;
   } catch(error) {
-    console.log(`Error awaiting /stats requests in function getStatistics(): ${error}`);
+    console.log(`Error awaiting /stats requests: ${error}`);
+    throw error;
   }
 
   // Add in app names to statistics
@@ -233,33 +275,34 @@ async function getStatistics(parameters={}){
 async function getApps(store='both') {
   const endpoint = gatewayURL + '/apps';
 
+  // Request to /apps endpoint for all apps
   let appsRequest;
   try {
-    appsRequest = await axios.get(endpoint); // Get list of available apps
+    appsRequest = await axios.get(endpoint);
   } catch (error) {
     console.log(`Error getting apps from endpoint: ${error}`);
     throw error;
   }
-  const apps = appsRequest.data;
 
+  const apps = appsRequest.data;
   let filteredApps = {};
 
+  // Depending on specified store, filter the apps we want a report for
   if (store == 'both') {
     for (let appIdStore in apps.apps) {
-      // Filter apps that are configured to be in Slack reports
       if (apps.apps[appIdStore].slackReport) {
         filteredApps[appIdStore] = apps.apps[appIdStore];
       }
     }
+
   } else if (store.includes('google') || store.includes('android')) {
-    // Filter apps that are 1. configured to be in Slack reports and 2. are from Google Play
     for (let appIdStore in apps.apps) {
       if (apps.apps[appIdStore].slackReport && appIdStore.includes('Google Play')) {
         filteredApps[appIdStore] = apps.apps[appIdStore];
       }
     }
+
   } else if (store.includes('apple') || store.includes('ios')) {
-    // Filter apps that are 1. configured to be in Slack reports and 2. are from the App Store
     for (let appIdStore in apps.apps) {
       if (apps.apps[appIdStore].slackReport && appIdStore.includes('App Store')) {
         filteredApps[appIdStore] = apps.apps[appIdStore];
@@ -279,6 +322,7 @@ async function getApps(store='both') {
 function buildParameters(apps, slackInput) {
   let statsRequests = [];
 
+  // Determine the value to use for days
   for (let app in apps) {
     let days;
     if (slackInput.hasOwnProperty('days')) {
@@ -342,7 +386,7 @@ async function report(statistics){
   try {
     channel = '#' + await getSSMParam(`postingChannel-${stage}`);
   } catch (error) {
-    console.log(`Error getting SSMParam: ${error}`);
+    throw error;
   }
 
   // report represents the index in statistics list
