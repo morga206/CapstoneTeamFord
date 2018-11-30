@@ -185,7 +185,7 @@ describe('worker', function() {
         {
           name: 'mockApp*mockStore',
           version: '1.0.0',
-          numReviews: 16,
+          numReviews: {total: 16},
           overallSentiment: {
             POSITIVE: 57.69230769,
             NEGATIVE: 25.64102564,
