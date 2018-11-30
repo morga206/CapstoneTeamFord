@@ -141,7 +141,7 @@ async function handleCommand(slackFields){
     slackResponses[message].response_type = 'in_channel';
     let response = await axios.post(responseURL, slackResponses[message]);
 
-    if (response.ok == false) {
+    if (response.status != 200) {
       const error = response.error;
       console.log(`Error posting messages to slack: ${error}`);
       throw error;
@@ -202,7 +202,7 @@ async function handleScheduledReport() {
   for (let message in slackResponse) {
     let response = await axios.post(slackURL, slackResponse[message], { headers: headers });
 
-    if (response.ok == false) {
+    if (response.status != 200) {
       const error = response.error;
       console.log(`Error posting messages to slack: ${error}`);
       throw error;
