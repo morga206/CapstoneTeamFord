@@ -378,7 +378,13 @@ async function report(statistics){
 
     // Build the slack message to send back with attachments
     message += `Report for:\nApp: ${name}\nVersion: ${version}\n`;
-    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(rawReviews).length} reviews`;
+    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(rawReviews).length} `;
+
+    if (Object.keys(rawReviews).length == 1) {
+      message += 'review';
+    } else {
+      message += 'reviews';
+    }
 
     slackAttachments[0].text = await sentimentText(overallSentiment);
     slackAttachments[1].text = await keywordText(keywords.positive);
@@ -430,7 +436,13 @@ async function getSentimentOverTime(statistics){
 
     // Build the slack message to send back with attachments
     message += `Report for:\nApp: ${stats.name}\nVersion: ${stats.version}\n`;
-    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(stats.rawReviews).length} reviews`;
+    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(stats.rawReviews).length} `;
+
+    if (Object.keys(stats.rawReviews).length == 1) {
+      message += 'review';
+    } else {
+      message += 'reviews';
+    }
 
     attachments[0].text = await sentimentOverTimeText(data, labels, totals);
 
