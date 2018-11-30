@@ -360,11 +360,13 @@ function buildParameters(apps, slackInput) {
       'stats': [{
         'sentimentOverTime': null
       }, {
-        'keywords': null,
+        'keywords': null
       }, {
-        'overallSentiment': null,
+        'overallSentiment': null
       }, {
         'rawReviews': null
+      }, {
+        'numReviews': null
       }]
     };
 
@@ -415,6 +417,7 @@ async function report(statistics){
     const keywords = stats.keywords;
     const version = stats.version;
     const name = stats.name;
+    const numReviews = stats.numReviews;
     const startDate = stats.sentimentOverTime.labels[0];
     const endDate = stats.sentimentOverTime.labels[stats.sentimentOverTime.labels.length-1];
 
@@ -422,9 +425,9 @@ async function report(statistics){
 
     // Build the slack message to send back with attachments
     message += `Report for:\nApp: ${name}\nVersion: ${version}\n`;
-    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(rawReviews).length} `;
+    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${numReviews} `;
 
-    if (Object.keys(rawReviews).length == 1) {
+    if (numReviews == 1) {
       message += 'review';
     } else {
       message += 'reviews';
@@ -475,14 +478,15 @@ async function getSentimentOverTime(statistics){
     const totals = sentimentOverTime.totals;
     const startDate = stats.sentimentOverTime.labels[0];
     const endDate = stats.sentimentOverTime.labels[stats.sentimentOverTime.labels.length-1];
+    const numReviews = stats.numReviews;
 
     const attitude = await getAttitude(overallSentiment);
 
     // Build the slack message to send back with attachments
     message += `Report for:\nApp: ${stats.name}\nVersion: ${stats.version}\n`;
-    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${Object.keys(stats.rawReviews).length} `;
+    message += `Between ${startDate} and ${endDate}, sentiment has been mostly ${attitude} for ${numReviews} `;
 
-    if (Object.keys(stats.rawReviews).length == 1) {
+    if (numReviews == 1) {
       message += 'review';
     } else {
       message += 'reviews';
