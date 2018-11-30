@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
 import { ChangePasswordComponent } from '../../auth/change-password/change-password.component';
-import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { BsModalService } from 'ngx-bootstrap/modal';
+import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 
 @Component({
   selector: 'app-nav',
@@ -11,10 +12,16 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 export class NavComponent implements OnInit {
 
   public isCollapsed = true;
+  modalRef: BsModalRef;
 
   constructor(
-    public auth: AuthService
+    public auth: AuthService,
+    private modalService: BsModalService
   ) { }
+
+  openModal(template: TemplateRef<any>) {
+    this.modalRef = this.modalService.show(template);
+  }
 
   ngOnInit() {
   }
