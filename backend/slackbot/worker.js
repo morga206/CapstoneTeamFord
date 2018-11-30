@@ -139,12 +139,25 @@ async function handleCommand(slackFields){
   // Post messages to slack
   for (let message in slackResponses) {
     slackResponses[message].response_type = 'in_channel';
-    let response = await axios.post(responseURL, slackResponses[message]);
+    let response = await axios.post(responseURL, slackResponses[message])
+        .catch(function (error) {
+          if (error.response) {
+            console.log(`Slack responsed with a status code that falls out of range of 2xx: ${error}`);
+          } else if (error.request) {
+            console.log(`Error, request made to post message to slack, no response received: ${error}`);
+          } else {
+            console.log(`Unexpected error occured posting to slack: ${error}`);
+          }
 
-    if (response.status != 200) {
-      const error = response.error;
-      console.log(`Error posting messages to slack: ${error}`);
-      throw error;
+          throw error;
+        });
+
+    if (response.data.ok == false) {
+      const error = response.data.error;
+      const errorMessage = `Problem formatting text to send to slack: ${error}`;
+
+      console.log(errorMessage);
+      throw error
     }
   }
 
@@ -200,12 +213,25 @@ async function handleScheduledReport() {
 
   // Post all of the reports to slack
   for (let message in slackResponse) {
-    let response = await axios.post(slackURL, slackResponse[message], { headers: headers });
+    let response = await axios.post(slackURL, slackResponse[message], { headers: headers })
+        .catch(function (error) {
+        if (error.response) {
+          console.log(`Slack responsed with a status code that falls out of range of 2xx: ${error}`);
+        } else if (error.request) {
+          console.log(`Error, request made to post message to slack, no response received: ${error}`);
+        } else {
+          console.log(`Unexpected error occured posting to slack: ${error}`);
+        }
 
-    if (response.status != 200) {
-      const error = response.error;
-      console.log(`Error posting messages to slack: ${error}`);
-      throw error;
+        throw error;
+    });
+
+    if (response.data.ok == false) {
+      const error = response.data.error;
+      const errorMessage = `Problem formatting text to send to slack: ${error}`;
+
+      console.log(errorMessage);
+      throw error
     }
   }
 
