@@ -408,8 +408,7 @@ function buildParameters(apps, slackInput) {
 async function report(statistics){
   let slackMessages = []; // List of reports to send to slack as messages (One report per app)
 
-  let channel;
-  channel = '#' + await getSSMParam(`postingChannel-${stage}`);
+  const channel = '#' + await getSSMParam(`postingChannel-${stage}`);
 
   // report represents the index in statistics list
   for (let i = 0; i < statistics.length; i++) {
