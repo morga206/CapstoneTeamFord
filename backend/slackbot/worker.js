@@ -102,7 +102,7 @@ async function handleCommand(slackFields){
     statsList = await getStatistics(parameters);
   } catch (error) {
     console.log(`Error generating the statistics for a /command: ${error}`);
-    throw error
+    throw error;
   }
 
   // Determine which command was triggered and get the report to send to slack
@@ -413,7 +413,6 @@ async function report(statistics){
     const stats = statistics[i];
 
     const overallSentiment = stats.overallSentiment;
-    const rawReviews = stats.rawReviews;
     const keywords = stats.keywords;
     const version = stats.version;
     const name = stats.name;
