@@ -1,33 +1,43 @@
-<form class="form-inline flex-nowrap" [formGroup]="statsFilterForm" novalidate>
-  <div class="form-group">
-    <label [for]="'app-name' + idSuffix" class="mr-2">App name</label>
-    <select class="form-control mr-2" [id]="'app-name' + idSuffix" formControlName="appName" (change)="onAppSelect($event.target.value)" [class.is-invalid]="appIdStore.invalid">
-      <option *ngFor="let app of appList | keyvalue" [value]="app.key">{{ app.value.name }}</option>
-    </select>
-  </div>
+<form [formGroup]="statsFilterForm" novalidate>
+  <div class="form-row row">
+    <label [for]="'app-name' + idSuffix" class="col-lg-auto col-form-label label">App name</label>
+    <div class="mr-4 p-0 col-lg-2 form-group">
+      <select class="form-control" [id]="'app-name' + idSuffix" formControlName="appName" (change)="onAppSelect($event.target.value)" [class.is-invalid]="appIdStore.invalid">
+        <option *ngFor="let app of appList | keyvalue" [value]="app.key">{{ app.value.name }}</option>
+      </select>
+      <div class="invalid-feedback">
+        Please select an app.
+      </div>
+    </div>
 
-  <div class="form-group">
-    <label [for]="'version' + idSuffix" class="mr-2">Version</label>
-    <select class="form-control mr-2" [id]="'version' + idSuffix" formControlName="appVersion" (change)="onFilterChange()" [class.is-invalid]="version.invalid">
-      <option *ngFor="let version of selectedApp?.versions">{{ version }}</option>
-    </select>
-  </div>
+    <label [for]="'version' + idSuffix" class="col-lg-auto col-form-label">Version</label>
+    <div class="mr-4 p-0 col-lg-2 form-group">
+      <select class="form-control" [id]="'version' + idSuffix" formControlName="appVersion" (change)="onFilterChange()" [class.is-invalid]="version.invalid">
+        <option *ngFor="let version of selectedApp?.versions">{{ version }}</option>
+      </select>
+      <div class="invalid-feedback">
+        Please select a version.
+      </div>
+    </div>
 
-  <div class="form-group">
-    <label [for]="'date-range' + idSuffix" class="mr-2">Date Range</label>
-    <input type="text"
-           [id]="'date-range' + idSuffix"
-           class="form-control mr-2"
-           [class.is-invalid]="startDate === undefined || endDate === undefined"
-           [bsConfig]="{ containerClass: 'theme-default' }"
-           [minDate]="minDate"
-           [maxDate]="maxDate"
-           (bsValueChange)="onDateChange($event)"
-           bsDaterangepicker>
-  </div>
+    <label [for]="'date-range' + idSuffix" class="col-lg-auto col-form-label">Date Range</label>
+    <div class="mr-4 p-0 col-lg-2 form-group">
+      <input type="text"
+              [id]="'date-range' + idSuffix"
+              class="form-control"
+              [class.is-invalid]="startDate === undefined || endDate === undefined"
+              [bsConfig]="{ containerClass: 'theme-default' }"
+              [minDate]="minDate"
+              [maxDate]="maxDate"
+              (bsValueChange)="onDateChange($event)"
+              bsDaterangepicker>
+      <div class="invalid-feedback">
+        Please select a range.
+      </div>
+    </div>
 
-
-  <div class="form-group" *ngIf="showCompare">
-    <button type="button" class="btn btn-primary" (click)="toggleComparison()">{{ compareText }}</button>
+    <div class="mr-4 p-0 col-lg-1 form-group"  *ngIf="showCompare">
+      <button type="button" class="btn btn-primary" (click)="toggleComparison()">{{ compareText }}</button>
+    </div>
   </div>
 </form>

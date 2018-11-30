@@ -62,7 +62,7 @@ describe('RestService', () => {
       const stats = [
         { 'rawReviews': [] }
       ];
-      const testResponse: StatResponse = { 'rawReviews': [] };
+      const testResponse: StatResponse = { 'rawReviews': [], status: 'SUCCESS', message: undefined };
 
       const expectedBody = JSON.stringify({
         appIdStore: appIdStore,

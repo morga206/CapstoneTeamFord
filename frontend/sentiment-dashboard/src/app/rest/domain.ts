@@ -3,6 +3,8 @@ export interface StatRequest {
 }
 
 export interface StatResponse {
+  status: string;
+  message: string;
   numReviews?: { total: number };
   overallSentiment?: { [label: string]: number };
   keywords?: {

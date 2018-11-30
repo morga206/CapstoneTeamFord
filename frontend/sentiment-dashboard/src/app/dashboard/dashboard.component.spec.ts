@@ -67,6 +67,8 @@ describe('DashboardComponent', () => {
 
     // Check for properly formatted stat request when updateStats functions are called
     const statResponse: StatResponse = {
+      status: 'SUCCESS',
+      message: undefined,
       numReviews: { total: 13 },
       overallSentiment: {
         'positive': 10.2,
