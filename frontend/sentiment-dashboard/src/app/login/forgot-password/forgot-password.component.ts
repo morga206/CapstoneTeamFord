@@ -40,7 +40,6 @@ export class ForgotPasswordComponent implements OnInit {
     this.auth.forgotPassword(this.username)
     .then(data => {
       this.isValid = true;
-      this.forgotPasswordForm.controls['forgotUsername'].disable();
       this.resetErrorMessage = '';
     })
     .catch(err => {
@@ -57,6 +56,7 @@ export class ForgotPasswordComponent implements OnInit {
     .then(data => {
       this.verifyCodeErrorMessage = '';
       this.passwordChanged = true;
+      this.forgotPasswordForm.reset();
     })
     .catch(err => {
       console.log(err);
