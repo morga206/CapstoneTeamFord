@@ -139,26 +139,23 @@ async function handleCommand(slackFields){
   // Post messages to slack
   for (let message in slackResponses) {
     slackResponses[message].response_type = 'in_channel';
-    let response = await axios.post(responseURL, slackResponses[message])
-      .catch(function (error) {
-        if (error.response) {
-          console.log(`Slack responsed with a status code that falls out of range of 2xx: ${error}`);
-        } else if (error.request) {
-          console.log(`Error, request made to post message to slack, no response received: ${error}`);
-        } else {
-          console.log(`Unexpected error occured posting to slack: ${error}`);
-        }
 
-        throw error;
-      });
+    let response;
+    try {
+      response = await axios.post(responseURL, slackResponses[message]);
+    } catch (error) {
+      console.log(`Error sending request to slack: ${error}`);
+      throw error;
+    }
 
     if (response.data.ok == false) {
       const error = response.data.error;
-      const errorMessage = `Problem formatting text to send to slack: ${error}`;
+      const errorMessage = `Error received from slack: ${error}`;
 
       console.log(errorMessage);
       throw error;
     }
+
   }
 
 }
@@ -213,22 +210,17 @@ async function handleScheduledReport() {
 
   // Post all of the reports to slack
   for (let message in slackResponse) {
-    let response = await axios.post(slackURL, slackResponse[message], { headers: headers })
-      .catch(function (error) {
-        if (error.response) {
-          console.log(`Slack responsed with a status code that falls out of range of 2xx: ${error}`);
-        } else if (error.request) {
-          console.log(`Error, request made to post message to slack, no response received: ${error}`);
-        } else {
-          console.log(`Unexpected error occured posting to slack: ${error}`);
-        }
-
-        throw error;
-      });
+    let response;
+    try {
+      response = await axios.post(slackURL, slackResponse[message], { headers: headers });
+    } catch (error) {
+      console.log(`Error sending request to slack: ${error}`);
+      throw error;
+    }
 
     if (response.data.ok == false) {
       const error = response.data.error;
-      const errorMessage = `Problem formatting text to send to slack: ${error}`;
+      const errorMessage = `Error received from slack: ${error}`;
 
       console.log(errorMessage);
       throw error;
@@ -255,11 +247,7 @@ async function getStatistics(parameters={}){
 
   // Get the apps for specified store(s)
   let apps;
-  try {
-    apps = await getApps(store);
-  } catch (error) {
-    throw error;
-  }
+  apps = await getApps(store);
 
   // Build a list of parameters to request stats for
   const statsRequests = await buildParameters(apps, parameters);
@@ -284,6 +272,11 @@ async function getStatistics(parameters={}){
 
   // Add in app names to statistics
   for (let i = 0; i < statistics.length; i++) {
+    if (statistics[i].data.status === 'ERROR') {
+      console.log(`Error calculating statistic: ${statistics[i].data.message}`);
+      continue;
+    }
+
     const appName = apps[statistics[i].data.appIdStore].name;
     statistics[i].data.name = appName;
     statisticsList.push(statistics[i].data);
@@ -311,6 +304,11 @@ async function getApps(store='both') {
   }
 
   const apps = appsRequest.data;
+  if (apps.status === 'ERROR') {
+    console.log(`Error getting apps from endpoint: ${apps.message}`);
+    throw new Error(apps.message);
+  }
+
   let filteredApps = {};
 
   // Depending on specified store, filter the apps we want a report for
@@ -411,11 +409,7 @@ async function report(statistics){
   let slackMessages = []; // List of reports to send to slack as messages (One report per app)
 
   let channel;
-  try {
-    channel = '#' + await getSSMParam(`postingChannel-${stage}`);
-  } catch (error) {
-    throw error;
-  }
+  channel = '#' + await getSSMParam(`postingChannel-${stage}`);
 
   // report represents the index in statistics list
   for (let i = 0; i < statistics.length; i++) {
@@ -442,7 +436,7 @@ async function report(statistics){
     const keywords = stats.keywords;
     const version = stats.version;
     const name = stats.name;
-    const numReviews = stats.numReviews;
+    const numReviews = stats.numReviews.total;
     const startDate = stats.sentimentOverTime.labels[0];
     const endDate = stats.sentimentOverTime.labels[stats.sentimentOverTime.labels.length-1];
 
@@ -503,7 +497,7 @@ async function getSentimentOverTime(statistics){
     const totals = sentimentOverTime.totals;
     const startDate = stats.sentimentOverTime.labels[0];
     const endDate = stats.sentimentOverTime.labels[stats.sentimentOverTime.labels.length-1];
-    const numReviews = stats.numReviews;
+    const numReviews = stats.numReviews.total;
 
     const attitude = await getAttitude(overallSentiment);
 
