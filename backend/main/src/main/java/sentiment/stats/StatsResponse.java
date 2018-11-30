@@ -2,7 +2,6 @@ package sentiment.stats;
 
 import sentiment.Response;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**

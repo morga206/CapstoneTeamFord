@@ -11,11 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * Handles calculation of top N keywords from a list of DynamoDB reviews.
@@ -37,6 +34,16 @@ public class KeywordsCalculation extends StatCalculation {
    * The list of keywords present in at least one negative review.
    */
   private List<String> negativeKeywords = new ArrayList<String>();
+
+  /**
+   * The total number of positive reviews.
+   */
+  private int positiveReviews = 0;
+
+  /**
+   * The total number of negative reviews.
+   */
+  private int negativeReviews = 0;
 
   /**
    * The SSM client to use.
@@ -64,12 +71,13 @@ public class KeywordsCalculation extends StatCalculation {
     // Reducing step: Keyword Values -> Counts
     Map<String, Integer> positiveKeywordCounts = countKeywords(positiveKeywords, ignoreList);
     Map<String, Integer> negativeKeywordCounts = countKeywords(negativeKeywords, ignoreList);
+    System.out.println("Positive Keyword Counts: ");
 
     // Get top N keywords and map them to percentages
     Keyword[] positiveResults = 
-      calculateKeywordPercentages(positiveKeywordCounts, positiveKeywords.size());
+      calculateKeywordPercentages(positiveKeywordCounts, positiveReviews);
     Keyword[] negativeResults = 
-      calculateKeywordPercentages(negativeKeywordCounts, negativeKeywords.size());
+      calculateKeywordPercentages(negativeKeywordCounts, negativeReviews);
 
 
     // Wrap result in a Map for Jackson to serialize
@@ -105,11 +113,13 @@ public class KeywordsCalculation extends StatCalculation {
   private void separateKeywordsByReviewSentiment() {
     for (Map<String, AttributeValue> item : items) {
       if (item.get("sentiment").getS().equals("POSITIVE")) {
+        positiveReviews++;
         List<AttributeValue> keywordValues = item.get("keywords").getL();
         List<String> keywords = dynamoKeywordsToList(keywordValues);
         
         positiveKeywords.addAll(keywords);
       } else if (item.get("sentiment").getS().equals("NEGATIVE")) {
+        negativeReviews++;
         List<AttributeValue> keywordValues = item.get("keywords").getL();
         List<String> keywords = dynamoKeywordsToList(keywordValues);
         
