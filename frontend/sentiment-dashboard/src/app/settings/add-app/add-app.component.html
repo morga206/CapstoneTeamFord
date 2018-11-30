@@ -8,15 +8,24 @@
   <div class="modal-body">
     <label for="app-name">App Name</label>
     <input type="text" class="form-control" id="app-name" formControlName="appName" [class.is-invalid]="appName.invalid">
+    <div class="invalid-feedback">
+      Please enter an app name.
+    </div>
   
     <label for="app-store" class="mr-2">Store</label>
     <select class="form-control" id="app-store" formControlName="appStore" [class.is-invalid]="appStore.invalid" (change)="onStoreChange()">
       <option>App Store</option>
       <option>Google Play</option>
     </select>
+    <div class="invalid-feedback">
+      Please select an app store.
+    </div>
   
     <label for="app-id">App ID</label>
     <input type="text" class="form-control" id="app-id" formControlName="appId" [class.is-invalid]="appId.invalid">    
+    <div class="invalid-feedback">
+      Please enter an app ID. {{ idFormatMessage }}
+    </div>
 
     <label for="slack-report" class="mt-3">Include in Slack Report?</label>
     <input type="checkbox" id="slack-report" formControlName="slackReport" class="ml-2">
