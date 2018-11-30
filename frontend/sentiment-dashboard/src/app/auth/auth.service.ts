@@ -71,4 +71,12 @@ export class AuthService {
       })
     );
   }
+
+  public forgotPassword(username): Promise<any> {
+    return Auth.forgotPassword(username);
+  }
+
+  public forgotPasswordSubmit(username, code, new_password): Promise<any> {
+    return Auth.forgotPasswordSubmit(username, code, new_password);
+  }
 }
