@@ -43,6 +43,7 @@ export class LoginComponent implements OnInit {
     const username = value.username, password = value.password;
     this.auth.signIn(username, password).subscribe(
       result => {
+        this.auth.isAdmin().subscribe(val => this.auth.setAdmin(val));
         this.router.navigate(['/']);
       },
       error => {
