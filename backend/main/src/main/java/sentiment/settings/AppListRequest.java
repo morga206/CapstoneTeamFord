@@ -104,6 +104,51 @@ public class AppListRequest extends ListRequest<App> {
   }
 
   /**
+   * Update an existing item in the SSM list.
+   * @param client The SSM client to use.
+   * @param list The existing list.
+   * @param item The item to update.
+   * @return A Response with either an error message or the updated list.
+   */
+  protected AppListResponse update(AWSSimpleSystemsManagement client, 
+      App[] appList, 
+      App app) {
+    String message = app.checkValidity();
+
+    if (!message.isEmpty()) {
+      return new AppListResponse(message);
+    }
+
+    App[] newList = new App[appList.length];
+    int idx = 0;
+
+    boolean present = false;
+    for (App existingApp : appList) {
+      if (existingApp.getAppId().equals(app.getAppId())
+          && existingApp.getStore().equals(app.getStore())) {
+        present = true;
+        newList[idx] = app;
+        idx++;
+      } else if (idx < appList.length) {
+        newList[idx] = existingApp;
+        idx++;
+      }
+    }
+
+    if (!present) {
+      return new AppListResponse("Could not locate app with id " + app.getAppId() 
+        + " to update.");
+    }
+
+    message = writeList(client, newList);
+    if (!message.isEmpty()) {
+      return new AppListResponse(message);
+    }
+
+    return new AppListResponse(newList);
+  }
+
+  /**
    * Delete an app from the SSM list.
    * @param client The SSM client to use.
    * @param appList The existing app list.

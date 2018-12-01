@@ -182,6 +182,28 @@ export class SettingsComponent implements OnInit, AfterContentInit, OnDestroy {
       if (response.status === 'ERROR') {
         this.appListLoader.showErrorAlert(response.message);
       } else {
+        this.appList = response.appList;
+        this.appListLoader.showSuccessAlert();
+      }
+    });
+  }
+
+  onSlackCheckbox(app: App, event: any) {
+    // Update app with new slack report value
+    app.slackReport = event.target.checked;
+
+    if (this.appListSubscription !== undefined) {
+      this.appListSubscription.unsubscribe();
+    }
+
+    this.appListLoader.startLoading();
+    this.appListSubscription = this.rest.updateApp(app)
+    .subscribe((response) => {
+      if (response.status === 'ERROR') {
+        this.appListLoader.showErrorAlert(response.message);
+      } else {
+        console.log(response.appList);
+        this.appList = response.appList;
         this.appListLoader.showSuccessAlert();
       }
     });

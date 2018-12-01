@@ -62,7 +62,7 @@ describe('RestService', () => {
       const stats = [
         { 'rawReviews': [] }
       ];
-      const testResponse: StatResponse = { 'rawReviews': [] };
+      const testResponse: StatResponse = { 'rawReviews': [], status: 'SUCCESS', message: undefined };
 
       const expectedBody = JSON.stringify({
         appIdStore: appIdStore,
@@ -148,7 +148,8 @@ describe('RestService', () => {
         'appList': [{
           'name': 'test',
           'store': 'App Store',
-          'appId': 'com.ford.test'
+          'appId': 'com.ford.test',
+          'slackReport': true
           }],
         'message': null,
         'status': 'SUCCESS'
@@ -175,14 +176,16 @@ describe('RestService', () => {
     const app = {
       name: 'test',
       store: 'App Store',
-      appId: 'com.ford.test'
+      appId: 'com.ford.test',
+      slackReport: false
     };
 
     const testResponse = {
       'appList': [{
             'name': 'test',
             'store': 'App Store',
-            'appId': 'com.ford.test'
+            'appId': 'com.ford.test',
+            slackReport: false
       }],
       'message': null,
       'status': 'SUCCESS'
@@ -205,12 +208,45 @@ describe('RestService', () => {
     httpMock.verify();
   }));
 
+  it('should successfully update apps in the app list',
+  inject([HttpTestingController, RestService], async (httpMock: HttpTestingController, service: RestService) => {
+    const app = {
+      name: 'test',
+      store: 'App Store',
+      appId: 'com.ford.test',
+      slackReport: false
+    };
+
+    const testResponse = {
+      'appList': [app],
+      'message': null,
+      'status': 'SUCCESS'
+    };
+
+    const expectedBody = JSON.stringify({
+      command: 'UPDATE',
+      app: app
+    });
+
+    service.updateApp(app)
+      .subscribe((response) => {
+      expect(response).toEqual(testResponse);
+    });
+    const req = httpMock.expectOne(API_URL + 'settings/apps');
+    expect(req.request.method).toEqual('POST');
+    expect(req.request.body).toEqual(expectedBody);
+    req.flush(testResponse);
+
+    httpMock.verify();
+  }));
+
   it('should successfully delete from the app list',
   inject([HttpTestingController, RestService], async (httpMock: HttpTestingController, service: RestService) => {
     const app = {
       name: 'test',
       store: 'App Store',
-      appId: 'com.ford.test'
+      appId: 'com.ford.test',
+      slackReport: false
     };
 
     const testResponse = {

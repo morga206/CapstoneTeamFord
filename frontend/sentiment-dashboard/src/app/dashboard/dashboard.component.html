@@ -1,29 +1,32 @@
-<h1 class="sr-only">Home</h1>
+<div class="p-2 p-sm-0"> <!-- Fix padding on xs breakpoint -->
+  <h1 class="sr-only">Home</h1>
 
-<div [class.mb-2]="currentlyComparing">
-  <app-loader #form1Loader>
-    <app-form #form1 (compare)="setCurrentlyComparing($event)" (filterChange)="updateStatsSubscription($event)"></app-form>
-  </app-loader>
-</div>
+  <app-loader #autoUpdateLoader></app-loader>
 
-<div [hidden]="!currentlyComparing">
-  <app-loader #form2Loader>
-    <app-form #form2 [showCompare]="false" (filterChange)="updateCompareStatsSubscription($event)"></app-form>
-  </app-loader>
-</div>
-
-<div [class.row]="currentlyComparing">
-  <app-loader #stats1Loader>
-      <div [class.col-md-6]="currentlyComparing">
-        <h2 class="mt-4" *ngIf="currentlyComparing">{{ form.getCompareTitle() }}</h2>
+  <div [class.mb-2]="currentlyComparing">
+    <app-loader #form1Loader>
+      <app-form #form1 (compare)="setCurrentlyComparing($event)" (filterChange)="updateStatsSubscription($event)" idSuffix="form1"></app-form>
+    </app-loader>
+  </div>
+    
+  <div [hidden]="!currentlyComparing">
+    <app-loader #form2Loader>
+      <app-form #form2 [showCompare]="false" (filterChange)="updateCompareStatsSubscription($event)" idSuffix="form2"></app-form>
+    </app-loader>
+  </div>
+    
+  <div [class.row]="currentlyComparing">
+    <div [class.col-md-6]="currentlyComparing">
+      <app-loader #stats1Loader>
+        <h2 class="mt-4 text-truncate" *ngIf="currentlyComparing">{{ form.getCompareTitle() }}</h2>
         <app-stats #stats1></app-stats>
-      </div>
-  </app-loader>
-
-  <app-loader #stats2Loader>
-    <div *ngIf="currentlyComparing" class="col-md-6">
-      <h2 class="mt-4">{{ formCompare.getCompareTitle() }}</h2>
-      <app-stats #stats2></app-stats>
+      </app-loader>
     </div>
-  </app-loader>
+    <div *ngIf="currentlyComparing" class="col-md-6">
+      <app-loader #stats2Loader>
+        <h2 class="mt-4 text-truncate">{{ formCompare.getCompareTitle() }}</h2>
+        <app-stats #stats2></app-stats>
+      </app-loader>
+    </div>
+  </div>
 </div>

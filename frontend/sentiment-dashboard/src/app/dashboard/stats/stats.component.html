@@ -2,10 +2,10 @@
   <p>No data is available - please select new filter criteria above.</p>
 </ng-template>
 
-<h2 class="my-2 h4" *ngIf="totalReviews !== undefined">Sample Size: {{ totalReviews }} reviews</h2>
+<h2 class="my-2 h4" *ngIf="totalReviews !== undefined">Sample Size: {{ totalReviews }} {{ totalReviews === 1 ? 'review' : 'reviews' }}</h2>
 <div class="row mb-md-0 mt-2">
 <app-card title="Overall Sentiment">
-    <div class="m-auto" style="width: 500px;" *ngIf="!pieChartIsEmpty(); else noData">
+    <div class="top-row-card" *ngIf="!pieChartIsEmpty(); else noData">
         <canvas baseChart
                 [data]="pieChartData"
                 [labels]="pieChartLabels"
@@ -15,7 +15,7 @@
       </div>
 </app-card>
 <app-card title="Top Keywords">
-  <div class="row" style="width: 500px;" *ngIf="positiveKeywords.length !== 0 && negativeKeywords.length !== 0; else noData">
+  <div class="top-row-card row" *ngIf="positiveKeywords.length !== 0 && negativeKeywords.length !== 0; else noData">
     <div class="col">
       <p class="h4">Postive Reviews</p>
       <ol>

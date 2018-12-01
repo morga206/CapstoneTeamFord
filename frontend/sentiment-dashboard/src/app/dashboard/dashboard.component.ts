@@ -13,6 +13,8 @@ import { LoaderComponent } from '../shared/loader/loader.component';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
+  @ViewChild('autoUpdateLoader') autoUpdateLoader: LoaderComponent;
+
   @ViewChild('form1') form: FormComponent;
   @ViewChild('form1Loader') formLoader: LoaderComponent;
   @ViewChild('form2') formCompare: FormComponent;
@@ -23,8 +25,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('stats2') statsCompare: StatsComponent;
   @ViewChild('stats2Loader') statsCompareLoader: LoaderComponent;
   public currentlyComparing = false;
-
-  public errorMessage = '';
 
   private autoUpdateSettingSubscription: Subscription;
   private autoUpdateSubscription: Subscription;
@@ -37,7 +37,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.autoUpdateSettingSubscription = this.rest.getSettings(['refreshInterval'])
     .subscribe((response) => {
       if (response.status === 'ERROR') {
-        this.errorMessage = response.message;
+        this.autoUpdateLoader.showErrorAlert(response.message);
       } else {
         this.startAutoUpdate(response.settings[0].value);
       }
@@ -48,12 +48,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.formCompareLoader.startLoading();
     }
     this.appsSubscription = this.rest.getFilterList().subscribe((response: FilterListResponse) => {
-      this.form.setAppList(response.apps);
-      this.formCompare.setAppList(response.apps);
+      if (response.status === 'ERROR') {
+        this.formLoader.showErrorAlert(response.message);
+        if (this.currentlyComparing) {
+          this.formCompareLoader.showErrorAlert(response.message);
+        }
+      } else {
+        this.form.setAppList(response.apps);
+        this.formCompare.setAppList(response.apps);
 
-      this.formLoader.stopLoading();
-      if (this.currentlyComparing) {
-        this.formCompareLoader.stopLoading();
+        this.formLoader.stopLoading();
+        if (this.currentlyComparing) {
+          this.formCompareLoader.stopLoading();
+        }
       }
     });
   }
@@ -88,7 +95,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.updateStatsSubscription(values);
       }
 
-      if (this.formCompare === undefined || this.statsCompare === undefined) {
+      if (!this.currentlyComparing) {
         return;
       }
 
@@ -115,8 +122,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
             event.startDate,
             event.endDate,
             statsToGet).subscribe((response) => {
-              this.stats.setStats(response);
-              this.statsLoader.stopLoading();
+              if (response.status === 'ERROR') {
+                this.statsLoader.showErrorAlert(response.message);
+              } else {
+                this.stats.setStats(response);
+                this.statsLoader.stopLoading();
+              }
             });
   }
 
@@ -136,8 +147,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       event.endDate,
       statsToGet).subscribe((response) => {
       if (this.statsCompare !== undefined) {
-        this.statsCompare.setStats(response);
-        this.statsCompareLoader.stopLoading();
+        if (response.status === 'ERROR') {
+          this.statsCompareLoader.showErrorAlert(response.message);
+        } else {
+          this.statsCompare.setStats(response);
+          this.statsCompareLoader.stopLoading();
+        }
       }
     });
   }

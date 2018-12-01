@@ -67,6 +67,8 @@ describe('DashboardComponent', () => {
 
     // Check for properly formatted stat request when updateStats functions are called
     const statResponse: StatResponse = {
+      status: 'SUCCESS',
+      message: undefined,
       numReviews: { total: 13 },
       overallSentiment: {
         'positive': 10.2,
@@ -114,6 +116,8 @@ describe('DashboardComponent', () => {
     expect(statsReq.request.body).toEqual(JSON.stringify(expectedStatsRequest));
     statsReq.flush(statResponse);
 
+    component.setCurrentlyComparing(true);
+    fixture.detectChanges(); // Instantiate compareStats components
     component.updateCompareStatsSubscription({
       appIdStore: testAppIdStore,
       version: testVersion,
