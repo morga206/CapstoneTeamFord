@@ -16,6 +16,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   modalRef: BsModalRef;
+  error: string;
 
   constructor(
     private fb: FormBuilder,
@@ -41,13 +42,14 @@ export class LoginComponent implements OnInit {
 
   onSubmitLogin(value: any) {
     const username = value.username, password = value.password;
+    this.error = '';
     this.auth.signIn(username, password).subscribe(
       result => {
         this.auth.isAdmin().subscribe(val => this.auth.setAdmin(val));
         this.router.navigate(['/']);
       },
-      error => {
-        console.log(error);
+      err => {
+        this.error = 'Incorrect username or password.';
       });
   }
 }
