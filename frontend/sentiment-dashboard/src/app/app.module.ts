@@ -22,6 +22,8 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { LoaderComponent } from './shared/loader/loader.component';
 import { ForgotPasswordComponent } from './login/forgot-password/forgot-password.component';
+import { ChangePasswordComponent } from './auth/change-password/change-password.component';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
 @NgModule({
   declarations: [
@@ -35,7 +37,8 @@ import { ForgotPasswordComponent } from './login/forgot-password/forgot-password
     FormComponent,
     AddAppComponent,
     LoaderComponent,
-    ForgotPasswordComponent
+    ForgotPasswordComponent,
+    ChangePasswordComponent
   ],
   imports: [
     BrowserModule,
@@ -47,7 +50,8 @@ import { ForgotPasswordComponent } from './login/forgot-password/forgot-password
     HttpClientModule,
     ModalModule.forRoot(),
     CollapseModule.forRoot(),
-    BsDatepickerModule.forRoot()
+    BsDatepickerModule.forRoot(),
+    BsDropdownModule.forRoot()
   ],
   providers: [AmplifyService, AuthGuardService, AuthService],
   bootstrap: [AppComponent],

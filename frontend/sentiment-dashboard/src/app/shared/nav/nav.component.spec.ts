@@ -1,9 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
-
+import { ChangePasswordComponent } from '../../auth/change-password/change-password.component';
 import { NavComponent } from './nav.component';
 import { AuthService } from 'src/app/auth/auth.service';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
 describe('NavComponent', () => {
   let component: NavComponent;
@@ -11,9 +13,9 @@ describe('NavComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ NavComponent ],
+      declarations: [ NavComponent, ChangePasswordComponent ],
       providers: [ AuthService ],
-      imports: [ RouterTestingModule, CollapseModule ]
+      imports: [ RouterTestingModule, CollapseModule, ReactiveFormsModule, ModalModule.forRoot() ]
     })
     .compileComponents();
   }));
