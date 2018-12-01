@@ -60,6 +60,7 @@ describe('AddAppComponent', () => {
   it('should not submit if the appId format is invalid', () => {
     component.appName.setValue('Test Name');
     component.appStore.setValue('Google Play');
+    component.onStoreChange();
     component.appId.setValue('com.ford.test&');
     component.addAppForm.updateValueAndValidity();
 
@@ -69,5 +70,19 @@ describe('AddAppComponent', () => {
     component.addAppForm.updateValueAndValidity();
 
     expect(component.addAppForm.valid).toBeTruthy();
+
+    component.appStore.setValue('App Store');
+    component.onStoreChange();
+    component.appId.setValue('com.ford.test');
+    component.addAppForm.updateValueAndValidity();
+
+    expect(component.addAppForm.valid).toBeFalsy();
+
+    component.appId.setValue('12345678');
+    component.addAppForm.updateValueAndValidity();
+
+    expect(component.addAppForm.valid).toBeTruthy();
+
+
   });
 });

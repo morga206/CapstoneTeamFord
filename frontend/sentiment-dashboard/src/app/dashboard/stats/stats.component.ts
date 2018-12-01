@@ -9,6 +9,7 @@ import { Tooltip, ChartData } from './chartjs.types';
   styleUrls: ['./stats.component.scss']
 })
 export class StatsComponent implements OnInit {
+  public totalReviews: number;
 
   public pieChartLabels: string[] = [];
   public pieChartData: number[] = [];
@@ -39,7 +40,7 @@ export class StatsComponent implements OnInit {
     }
   };
   public lineChartColors: Array<any> = [
-    { // green
+    {
       backgroundColor: 'rgba(204,65,65,0.5)',
       borderColor: 'rgba(204,65,65,1)',
       pointBackgroundColor: 'rgba(204,65,65,1)',
@@ -57,6 +58,8 @@ export class StatsComponent implements OnInit {
   }
 
   public setStats(stats: StatResponse) {
+    this.totalReviews = stats['numReviews']['total'];
+
     // Cannot change reference to labels array or chart won't update
     this.pieChartLabels.length = 0;
     this.pieChartLabels.push(...Object.keys(stats['overallSentiment']));
@@ -86,7 +89,9 @@ export class StatsComponent implements OnInit {
     return (tooltipItem: Tooltip, data: ChartData) => {
       const allData = data.datasets[tooltipItem.datasetIndex].data;
       const tooltipData = allData[tooltipItem.index];
-      return  Math.round(tooltipData) + '%' + ' of ' + this.reviewTotals[tooltipItem.index] + ' reviews';
+
+      const suffix = this.reviewTotals[tooltipItem.index] === 1 ? ' review' : ' reviews';
+      return Math.round(tooltipData) + '%' + ' of ' + this.reviewTotals[tooltipItem.index] + suffix;
     };
   }
 

@@ -3,7 +3,6 @@ package sentiment.settings;
 import com.amazonaws.services.cloudwatchevents.AmazonCloudWatchEvents;
 import com.amazonaws.services.cloudwatchevents.AmazonCloudWatchEventsClient;
 import com.amazonaws.services.cloudwatchevents.model.PutRuleRequest;
-import com.amazonaws.services.cloudwatchevents.model.PutRuleResult;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
 import com.amazonaws.services.simplesystemsmanagement.model.ParameterType;
@@ -72,6 +71,7 @@ public class SetSettingsRequest extends Request {
    * Updates the Lambda invocation interval for the given setting, if necessary.
    * @param settingName The setting name
    * @param settingValue The setting value
+   * @return An error message if an error is encountered, else an empty string
    */
   private String updateLambdaInterval(String settingName, String settingValue) {
     // Query environment variables to check if this setting pertains to any Lambdas
@@ -83,12 +83,34 @@ public class SetSettingsRequest extends Request {
       return "";
     }
 
+    // Query environment variables to check if this setting has an associated time unit
+    String unitVarName = settingName.toUpperCase() + "_UNIT";
+    String unit = System.getenv(unitVarName);
+
+    if (unit == null) {
+      // Use "minutes" as default
+      unit = "minutes";
+    }
+
+    // AWS requires correct pluralization
+    int settingIntValue;
+    try {
+      settingIntValue = Integer.parseInt(settingValue);
+    } catch (Exception exp) {
+      return "Error updating CloudWatch rule for setting " + settingName 
+        + ": Could not parse " + settingValue + " to int.";
+    }
+    
+    if (settingIntValue == 1) {
+      unit = unit.substring(0, unit.length() - 1);
+    }
+
     // Update CloudWatch Event to set new Lambda interval, if necessary
     AmazonCloudWatchEvents cwe = AmazonCloudWatchEventsClient.builder().build();
 
     PutRuleRequest request = new PutRuleRequest()
         .withName(cloudWatchEventName)
-        .withScheduleExpression("rate(" + settingValue + " minutes)");
+        .withScheduleExpression("rate(" + settingValue + " " + unit + ")");
 
     try {
       cwe.putRule(request);

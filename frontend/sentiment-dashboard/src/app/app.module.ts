@@ -20,6 +20,10 @@ import { AddAppComponent } from './settings/add-app/add-app.component';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+import { LoaderComponent } from './shared/loader/loader.component';
+import { ForgotPasswordComponent } from './login/forgot-password/forgot-password.component';
+import { ChangePasswordComponent } from './auth/change-password/change-password.component';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
 @NgModule({
   declarations: [
@@ -31,7 +35,10 @@ import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
     CardComponent,
     StatsComponent,
     FormComponent,
-    AddAppComponent
+    AddAppComponent,
+    LoaderComponent,
+    ForgotPasswordComponent,
+    ChangePasswordComponent
   ],
   imports: [
     BrowserModule,
@@ -43,7 +50,8 @@ import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
     HttpClientModule,
     ModalModule.forRoot(),
     CollapseModule.forRoot(),
-    BsDatepickerModule.forRoot()
+    BsDatepickerModule.forRoot(),
+    BsDropdownModule.forRoot()
   ],
   providers: [AmplifyService, AuthGuardService, AuthService],
   bootstrap: [AppComponent],

@@ -13,6 +13,7 @@ import { StatResponse, FilterInfo } from '../rest/domain';
 import { BsDatepickerModule, BsDaterangepickerConfig, BsLocaleService } from 'ngx-bootstrap/datepicker';
 import { ComponentLoaderFactory } from 'ngx-bootstrap';
 import { PositioningService } from 'ngx-bootstrap/positioning';
+import { LoaderComponent } from '../shared/loader/loader.component';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -24,7 +25,7 @@ describe('DashboardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent ],
+      declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent, LoaderComponent ],
       providers: [ AuthService, BsDaterangepickerConfig, ComponentLoaderFactory, PositioningService, BsLocaleService ],
       imports: [
         ReactiveFormsModule,
@@ -66,6 +67,9 @@ describe('DashboardComponent', () => {
 
     // Check for properly formatted stat request when updateStats functions are called
     const statResponse: StatResponse = {
+      status: 'SUCCESS',
+      message: undefined,
+      numReviews: { total: 13 },
       overallSentiment: {
         'positive': 10.2,
         'negative': 50,
@@ -94,6 +98,7 @@ describe('DashboardComponent', () => {
       'startDate': testStartDate.toISOString(),
       'endDate': testEndDate.toISOString(),
       'stats': [
+        { numReviews: null },
         { overallSentiment: null },
         { keywords: null },
         { sentimentOverTime: null }
@@ -111,6 +116,8 @@ describe('DashboardComponent', () => {
     expect(statsReq.request.body).toEqual(JSON.stringify(expectedStatsRequest));
     statsReq.flush(statResponse);
 
+    component.setCurrentlyComparing(true);
+    fixture.detectChanges(); // Instantiate compareStats components
     component.updateCompareStatsSubscription({
       appIdStore: testAppIdStore,
       version: testVersion,

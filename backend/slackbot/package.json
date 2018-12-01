@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.18.0"
+    "aws-sdk": "^2.353.0",
+    "axios": "^0.18.0",
+    "query-string": "^6.2.0"
   },
   "devDependencies": {
     "mocha": "^5.2.0",

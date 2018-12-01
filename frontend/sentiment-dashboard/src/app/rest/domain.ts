@@ -3,6 +3,9 @@ export interface StatRequest {
 }
 
 export interface StatResponse {
+  status: string;
+  message: string;
+  numReviews?: { total: number };
   overallSentiment?: { [label: string]: number };
   keywords?: {
     positive: Keyword[],
@@ -37,6 +40,7 @@ export interface App {
   name: string;
   store: string;
   appId: string;
+  slackReport: boolean;
 }
 
 export interface IgnoreListResponse {

@@ -4,6 +4,7 @@ import { Subscription, timer } from 'rxjs';
 import { FormComponent, StatsFilterValues } from './form/form.component';
 import { StatsComponent } from './stats/stats.component';
 import { RestService } from '../rest/rest.service';
+import { LoaderComponent } from '../shared/loader/loader.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,49 +13,66 @@ import { RestService } from '../rest/rest.service';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
+  @ViewChild('autoUpdateLoader') autoUpdateLoader: LoaderComponent;
+
   @ViewChild('form1') form: FormComponent;
+  @ViewChild('form1Loader') formLoader: LoaderComponent;
   @ViewChild('form2') formCompare: FormComponent;
+  @ViewChild('form2Loader') formCompareLoader: LoaderComponent;
 
   @ViewChild('stats1') stats: StatsComponent;
+  @ViewChild('stats1Loader') statsLoader: LoaderComponent;
   @ViewChild('stats2') statsCompare: StatsComponent;
+  @ViewChild('stats2Loader') statsCompareLoader: LoaderComponent;
   public currentlyComparing = false;
 
-  private autoUpdate: Subscription;
+  private autoUpdateSettingSubscription: Subscription;
+  private autoUpdateSubscription: Subscription;
   private appsSubscription: Subscription;
   private statsSubscription?: Subscription;
 
   constructor(private rest: RestService) { }
 
   ngOnInit() {
+    this.autoUpdateSettingSubscription = this.rest.getSettings(['refreshInterval'])
+    .subscribe((response) => {
+      if (response.status === 'ERROR') {
+        this.autoUpdateLoader.showErrorAlert(response.message);
+      } else {
+        this.startAutoUpdate(response.settings[0].value);
+      }
+    });
+
+    this.formLoader.startLoading();
+    if (this.currentlyComparing) {
+      this.formCompareLoader.startLoading();
+    }
     this.appsSubscription = this.rest.getFilterList().subscribe((response: FilterListResponse) => {
-      this.form.setAppList(response.apps);
-      this.formCompare.setAppList(response.apps);
-    });
+      if (response.status === 'ERROR') {
+        this.formLoader.showErrorAlert(response.message);
+        if (this.currentlyComparing) {
+          this.formCompareLoader.showErrorAlert(response.message);
+        }
+      } else {
+        this.form.setAppList(response.apps);
+        this.formCompare.setAppList(response.apps);
 
-    this.autoUpdate = timer(0, 100000).subscribe(() => {
-      const values: StatsFilterValues | undefined = this.form.getCurrentValues();
-
-      if (values !== undefined) {
-        this.updateStatsSubscription(values);
-      }
-    });
-
-    this.autoUpdate = timer(0, 100000).subscribe(() => {
-      if (this.formCompare === undefined || this.statsCompare === undefined) {
-        return;
-      }
-      const values: StatsFilterValues | undefined = this.formCompare.getCurrentValues();
-
-      if (values !== undefined) {
-        this.updateCompareStatsSubscription(values);
+        this.formLoader.stopLoading();
+        if (this.currentlyComparing) {
+          this.formCompareLoader.stopLoading();
+        }
       }
     });
   }
 
   ngOnDestroy() {
 
-    if (this.autoUpdate !== undefined) {
-      this.autoUpdate.unsubscribe();
+    if (this.autoUpdateSettingSubscription !== undefined) {
+      this.autoUpdateSettingSubscription.unsubscribe();
+    }
+
+    if (this.autoUpdateSubscription !== undefined) {
+      this.autoUpdateSubscription.unsubscribe();
     }
 
     if (this.appsSubscription !== undefined) {
@@ -66,30 +84,62 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  public startAutoUpdate(interval: string) {
+    // Interval is in minutes - convert to milliseconds
+    const timerInterval = parseInt(interval, 10) * 60000;
+
+    this.autoUpdateSubscription = timer(0, timerInterval).subscribe(() => {
+      const values: StatsFilterValues | undefined = this.form.getCurrentValues();
+
+      if (values !== undefined) {
+        this.updateStatsSubscription(values);
+      }
+
+      if (!this.currentlyComparing) {
+        return;
+      }
+
+      const compareValues: StatsFilterValues | undefined = this.formCompare.getCurrentValues();
+
+      if (compareValues !== undefined) {
+        this.updateCompareStatsSubscription(compareValues);
+      }
+    });
+  }
+
   public updateStatsSubscription(event: StatsFilterValues) {
     const statsToGet: StatRequest[] = [
+      { numReviews: null },
       { overallSentiment: null },
       { keywords: null },
       { sentimentOverTime: null }
     ];
 
+    this.statsLoader.startLoading();
     this.statsSubscription = this.rest.getSentimentStats(
             event.appIdStore,
             event.version,
             event.startDate,
             event.endDate,
             statsToGet).subscribe((response) => {
-              this.stats.setStats(response);
+              if (response.status === 'ERROR') {
+                this.statsLoader.showErrorAlert(response.message);
+              } else {
+                this.stats.setStats(response);
+                this.statsLoader.stopLoading();
+              }
             });
   }
 
   public updateCompareStatsSubscription(event: StatsFilterValues) {
     const statsToGet: StatRequest[] = [
+      { numReviews: null },
       { overallSentiment: null },
       { keywords: null },
       { sentimentOverTime: null }
     ];
 
+    this.statsCompareLoader.startLoading();
     this.statsSubscription = this.rest.getSentimentStats(
       event.appIdStore,
       event.version,
@@ -97,7 +147,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       event.endDate,
       statsToGet).subscribe((response) => {
       if (this.statsCompare !== undefined) {
-        this.statsCompare.setStats(response);
+        if (response.status === 'ERROR') {
+          this.statsCompareLoader.showErrorAlert(response.message);
+        } else {
+          this.statsCompare.setStats(response);
+          this.statsCompareLoader.stopLoading();
+        }
       }
     });
   }

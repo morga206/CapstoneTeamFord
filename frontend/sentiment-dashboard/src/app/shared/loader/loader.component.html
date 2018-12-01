@@ -1,0 +1,19 @@
+<div class="alert alert-danger row" role="alert" *ngIf="error !== ''">
+  Error: {{ error }}
+</div>
+<div class="alert alert-success row" role="alert" *ngIf="success">
+Saved Successfully.
+</div>
+
+<div *ngIf="loading">
+    <div class="sr-only">Loading...</div>
+    <div class="spinner"></div>
+</div>
+
+<div *ngIf="timeout">
+  <!-- No content -->
+</div>
+
+<div *ngIf="!loading && !timeout">
+  <ng-content></ng-content>
+</div>

@@ -29,8 +29,10 @@ async function handler () {
     appList = await getAppList();
   } catch (error) {
     return {
-      statusCode: 500, // Internal Server Error
-      error: `Error getting app list: ${error}`
+      'statusCode': 500, // Internal server error
+      'headers': {},
+      'body': JSON.stringify({ error: `Error getting app list: ${error}` }),
+      'isBase64Encoded': false
     };
   }
 
@@ -39,8 +41,10 @@ async function handler () {
     reviews = await getReviews(appList);
   } catch (error) {
     return {
-      statusCode: 500, // Internal Server Error
-      error: `Error getting reviews: ${error}`
+      'statusCode': 500, // Internal server error
+      'headers': {},
+      'body': JSON.stringify({ error: `Error getting reviews: ${error}` }),
+      'isBase64Encoded': false
     };
   } 
 
@@ -50,27 +54,32 @@ async function handler () {
   } catch (error) {
     console.log(`Error during sentiment analysis: ${error}`);
     return {
-      statusCode: 500, // Internal Server Error
-      error: `Error during sentiment analysis: ${error}`
+      'statusCode': 500, // Internal server error
+      'headers': {},
+      'body': JSON.stringify({ error: `Error during sentiment analysis: ${error}` }),
+      'isBase64Encoded': false
     };
   }
-
 
   try {
     await writeReviewsToDB(processedReviews);
   } catch (error) {
     return {
-      statusCode: 500, // Internal Server Error
-      error: `Error writing to DynamoDB: ${error}`
+      'statusCode': 500, // Internal server error
+      'headers': {},
+      'body': JSON.stringify({ error: `Error writing to DynamoDB: ${error}` }),
+      'isBase64Encoded': false
     };
   }
 
   return {
-    statusCode: 200, // OK
-    body: JSON.stringify({
+    'statusCode': 200, // OK
+    'headers': {},
+    'body': JSON.stringify({ 
       length: processedReviews.length,
-      reviews: processedReviews
-    })
+      reviews: processedReviews 
+    }),
+    'isBase64Encoded': false
   };
 }
 
@@ -146,7 +155,7 @@ async function getReviews(appList) {
 
 /**
  * Pull all pages of an app's reviews from the given store
- * @param appId The app ID string to use (NOT a numerical App Store id)
+ * @param appId The app ID string to use (either a numerical App Store ID or a GPlay package ID)
  * @param scraper The scraping module to use 
  * @param store The app store name
  */
@@ -163,7 +172,7 @@ async function scrape(appId, scraper, store) {
       }));
     } else if (store === 'App Store') {
       promises.push(scraper.reviews({
-        appId: appId,
+        id: appId,
         page: i + 1
       }));
     }
@@ -179,9 +188,16 @@ async function scrape(appId, scraper, store) {
     throw error;
   }
 
-  let appInfo = await scraper.app({
-    appId: appId
-  });
+  let appInfo;
+  if (store === 'Google Play') {
+    appInfo = await scraper.app({
+      appId: appId
+    });
+  } else if (store === 'App Store') {
+    appInfo = await scraper.app({
+      id: appId
+    });
+  }
   let reviews = [].concat(...allPages).map(await convertReviewToDynamoRepresentation(appId, store, appInfo.version));
 
   return reviews;

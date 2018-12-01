@@ -1,5 +1,8 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-    <div class="navbar-brand">Sentiment Analysis Dashboard</div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="navbar-brand">
+      <img src="../../../assets/ford-logo.png" width="88" height="36" alt="Ford logo">
+      Sentiment Analysis Dashboard
+    </div>
     <button class="navbar-toggler" type="button" aria-controls="navbarText" [attr.aria-expanded]="!isCollapsed" aria-label="Toggle navigation" (click)="isCollapsed = !isCollapsed">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -8,9 +11,15 @@
         <li class="nav-item">
           <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">Home</a>
         </li>
-        <li *ngIf="this.auth.adminUser.value" class="nav-item">
-          <a class="nav-link" routerLink="/settings" routerLinkActive="active">Settings</a>
-        </li>
+        <span dropdown *ngIf="(auth.loggedIn | async)">
+          <li class="nav-item dropdown">
+            <a href id="basic-link" class="nav-link dropdown-toggle" dropdownToggle (click)="false" aria-controls="basic-link-dropdown">Settings</a>
+          <div id="basic-link-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="basic-link">
+              <a *ngIf="this.auth.adminUser.value" class="dropdown-item" routerLink="/settings">Administration</a>
+              <a class="dropdown-item" (click)="openModal(template)" href="javascript:;">Change password</a>
+          </div>
+          </li>
+        </span>
         <li *ngIf="!(auth.loggedIn | async)" class="nav-item">
           <a class="nav-link" routerLink="/login" routerLinkActive="active">Log In</a>
         </li>
@@ -20,3 +29,15 @@
       </ul>
     </div>
   </nav>
+
+<ng-template #template>
+  <div class="modal-header">
+    <h2 class="modal-title pull-left h4">Change password</h2>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+        <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <app-change-password></app-change-password>
+  </div>
+</ng-template>

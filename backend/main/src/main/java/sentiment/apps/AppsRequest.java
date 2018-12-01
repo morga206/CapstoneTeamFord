@@ -69,7 +69,8 @@ public class AppsRequest extends Request {
     for (int i = 0; i < appList.length; i++) {
       String appIdStore = appList[i].getAppId() + "*" + appList[i].getStore();
       String appName = appList[i].getName() + " (" + appList[i].getStore() + ")";
-      AppInfo info = getAppInfoFromDb(dynamoDbClient, appIdStore, appName);
+      AppInfo info = 
+          getAppInfoFromDb(dynamoDbClient, appIdStore, appName, appList[i].getSlackReport());
       if (info != null) {
         // We have reviews for this app
         apps.add(info);
@@ -79,7 +80,11 @@ public class AppsRequest extends Request {
     return new AppsResponse(apps.toArray(new AppInfo[0]));
   }
 
-  private AppInfo getAppInfoFromDb(AmazonDynamoDB db, String appIdStore, String name) {
+  private AppInfo getAppInfoFromDb(
+      AmazonDynamoDB db, 
+      String appIdStore, 
+      String name, 
+      boolean slackReport) {
     HashMap<String, AttributeValue> valueMap = new HashMap<String, AttributeValue>();
     valueMap.put(":id", new AttributeValue().withS(appIdStore));
 
@@ -157,6 +162,12 @@ public class AppsRequest extends Request {
     Arrays.sort(versions);
 
     // Create an AppInfo object
-    return new AppInfo(appIdStore, name, minDate.toString(), maxDate.toString(), versions);
+    return new AppInfo(
+        appIdStore, 
+        name, 
+        slackReport, 
+        minDate.toString(), 
+        maxDate.toString(), 
+        versions);
   }
 }

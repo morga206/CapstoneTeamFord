@@ -9,23 +9,15 @@ import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import sentiment.Request;
 import sentiment.Response;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 
 /**
@@ -165,6 +157,10 @@ public class StatsRequest extends Request {
       switch (stat.getName()) {
         case "rawReviews":
           results[nextIndex] = new RawReviewsCalculation(items).calculate();
+          nextIndex++;
+          break;
+        case "numReviews":
+          results[nextIndex] = new NumReviewsCalculation(items).calculate();
           nextIndex++;
           break;
         case "overallSentiment":

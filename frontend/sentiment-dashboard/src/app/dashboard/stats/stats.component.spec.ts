@@ -74,6 +74,9 @@ describe('StatsComponent', () => {
     const expectedReviewTotals: number[] = [23, 42];
 
     const statResponse: StatResponse = {
+      status: 'SUCCESS',
+      message: undefined,
+      numReviews: { total: 13 },
       overallSentiment: {
         'positive': 10.2,
         'negative': 50,
