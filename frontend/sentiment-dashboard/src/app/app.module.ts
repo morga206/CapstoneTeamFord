@@ -21,6 +21,7 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { LoaderComponent } from './shared/loader/loader.component';
+import { ForgotPasswordComponent } from './login/forgot-password/forgot-password.component';
 import { ChangePasswordComponent } from './auth/change-password/change-password.component';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
@@ -36,6 +37,7 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
     FormComponent,
     AddAppComponent,
     LoaderComponent,
+    ForgotPasswordComponent,
     ChangePasswordComponent
   ],
   imports: [
