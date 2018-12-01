@@ -11,9 +11,15 @@
         <li class="nav-item">
           <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">Home</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/settings" routerLinkActive="active">Settings</a>
-        </li>
+        <span dropdown *ngIf="(auth.loggedIn | async)">
+          <li class="nav-item dropdown">
+            <a href id="basic-link" class="nav-link dropdown-toggle" dropdownToggle (click)="false" aria-controls="basic-link-dropdown">Settings</a>
+          <div id="basic-link-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="basic-link">
+              <a class="dropdown-item" routerLink="/settings">Administration</a>
+              <a class="dropdown-item" (click)="openModal(template)" href="javascript:;">Change password</a>
+          </div>
+          </li>
+        </span>
         <li *ngIf="!(auth.loggedIn | async)" class="nav-item">
           <a class="nav-link" routerLink="/login" routerLinkActive="active">Log In</a>
         </li>
@@ -23,3 +29,15 @@
       </ul>
     </div>
   </nav>
+
+<ng-template #template>
+  <div class="modal-header">
+    <h2 class="modal-title pull-left h4">Change password</h2>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+        <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <app-change-password></app-change-password>
+  </div>
+</ng-template>
