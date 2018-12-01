@@ -21,8 +21,12 @@ export class AuthService {
   public signIn(username, password): Observable<boolean> {
     return from(Auth.signIn(username, password))
       .pipe(
-        tap(() => this.loggedIn.next(true))
-      );
+        tap(user => {
+          this.loggedIn.next(true);
+          if (user.challengeName === 'NEW_PASSWORD_REQUIRED') {
+            Auth.completeNewPassword(user, password, '');
+          }
+        }));
   }
 
   public signOut() {
