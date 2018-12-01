@@ -27,16 +27,16 @@ export class RestService {
   }
 
   getFilterList(): Observable<FilterListResponse> {
-    const options = {
-      headers: new HttpHeaders({'Content-Type' : 'application/json'})
-    };
-    return this.http.get<FilterListResponse>(this.API_URL + 'apps', options);
+    return this.apiKey$.pipe(
+      map((key) => new HttpHeaders({
+          'Content-Type' : 'application/json',
+          'Authorization': key
+        })),
+      switchMap((headers) => this.http.get<FilterListResponse>(this.API_URL + 'apps', { headers: headers }))
+    );
   }
 
   getSentimentStats(appIdStore: string, version: string, startDate: Date, endDate: Date, stats: StatRequest[]) {
-    const options = {
-      headers: new HttpHeaders({'Content-Type' : 'application/json'})
-    };
     const body = JSON.stringify({
       appIdStore: appIdStore,
       version: version,
@@ -44,7 +44,13 @@ export class RestService {
       endDate: endDate.toISOString(),
       stats: stats
     });
-    return this.http.post<StatResponse>(this.API_URL + 'stats', body, options);
+    return this.apiKey$.pipe(
+      map((key) => new HttpHeaders({
+          'Content-Type' : 'application/json',
+          'Authorization': key
+        })),
+      switchMap((headers) => this.http.post<StatResponse>(this.API_URL + 'stats', body, { headers: headers }))
+    );
   }
 
   getSettings(names: string[]): Observable<SettingResponse> {
