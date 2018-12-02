@@ -49,7 +49,7 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/']);
       },
       err => {
-        this.error = 'Incorrect username or password.';
+        this.error = err.message;
       });
   }
 }
