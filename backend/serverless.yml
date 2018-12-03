@@ -80,10 +80,12 @@ functions:
           method: post
           path: stats
           cors: true
+          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
       - http:
           method: get
           path: apps
           cors: true
+          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
       - http:
           method: post
           path: settings/apps
