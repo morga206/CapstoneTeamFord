@@ -9,11 +9,18 @@ import { StatsComponent } from './stats/stats.component';
 import { AuthService } from '../auth/auth.service';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { environment } from 'src/environments/environment';
-import { StatResponse, FilterInfo } from '../rest/domain';
+import { StatResponse, FilterInfo, SettingResponse } from '../rest/domain';
 import { BsDatepickerModule, BsDaterangepickerConfig, BsLocaleService } from 'ngx-bootstrap/datepicker';
 import { ComponentLoaderFactory } from 'ngx-bootstrap';
 import { PositioningService } from 'ngx-bootstrap/positioning';
 import { LoaderComponent } from '../shared/loader/loader.component';
+import { of } from 'rxjs';
+
+class MockAuthService {
+  getIdToken() {
+    return of('12345');
+  }
+}
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -26,7 +33,7 @@ describe('DashboardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent, LoaderComponent ],
-      providers: [ AuthService, BsDaterangepickerConfig, ComponentLoaderFactory, PositioningService, BsLocaleService ],
+      providers: [ { provide: AuthService, useClass: MockAuthService }, BsDaterangepickerConfig, ComponentLoaderFactory, PositioningService, BsLocaleService ],
       imports: [
         ReactiveFormsModule,
         FormsModule,
@@ -51,6 +58,20 @@ describe('DashboardComponent', () => {
   });
 
   it('successfully queries for updated stats', () => {
+    // Send mock auto update interval to initialize component
+    const expectedAutoUpdateRequest = {
+      names: [ 'refreshInterval']
+    };
+
+    const autoUpdateResponse: SettingResponse = {
+      settings: [ { name: 'refreshInterval', value: '20' }],
+      status: 'SUCCESS',
+      message: ''
+    };
+    const autoUpdateReq = httpMock.expectOne(API_URL + 'settings/get');
+    expect(autoUpdateReq.request.body).toEqual(JSON.stringify(expectedAutoUpdateRequest));
+    autoUpdateReq.flush(autoUpdateResponse);
+    
     // Send mock app list to initialize component
     const testApp: FilterInfo = {
       name: '',
