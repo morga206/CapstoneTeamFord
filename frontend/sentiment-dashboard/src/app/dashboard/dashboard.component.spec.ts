@@ -33,7 +33,12 @@ describe('DashboardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ DashboardComponent, CardComponent, FormComponent, StatsComponent, LoaderComponent ],
-      providers: [ { provide: AuthService, useClass: MockAuthService }, BsDaterangepickerConfig, ComponentLoaderFactory, PositioningService, BsLocaleService ],
+      providers: [
+        { provide: AuthService, useClass: MockAuthService },
+        BsDaterangepickerConfig,
+        ComponentLoaderFactory,
+        PositioningService,
+        BsLocaleService ],
       imports: [
         ReactiveFormsModule,
         FormsModule,
@@ -71,7 +76,7 @@ describe('DashboardComponent', () => {
     const autoUpdateReq = httpMock.expectOne(API_URL + 'settings/get');
     expect(autoUpdateReq.request.body).toEqual(JSON.stringify(expectedAutoUpdateRequest));
     autoUpdateReq.flush(autoUpdateResponse);
-    
+
     // Send mock app list to initialize component
     const testApp: FilterInfo = {
       name: '',
