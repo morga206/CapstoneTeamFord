@@ -43,6 +43,7 @@ plugins:
 
 custom:
   tableName: 'appReviewsTable-${self:provider.stage}'
+  userPoolName: '${self:service}-${self:provider.stage}-user-pool'
 
   reviewsEventName: reviews-interval-${self:provider.stage}
   slackbotEventName: slackbot-interval-${self:provider.stage}
@@ -80,32 +81,50 @@ functions:
           method: post
           path: stats
           cors: true
-          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
+          authorizer: 
+             type: COGNITO_USER_POOLS
+             authorizerId: 
+               Ref: ApiGatewayAuthorizer
       - http:
           method: get
           path: apps
           cors: true
-          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
+          authorizer: 
+             type: COGNITO_USER_POOLS
+             authorizerId: 
+               Ref: ApiGatewayAuthorizer
       - http:
           method: post
           path: settings/apps
           cors: true
-          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
+          authorizer: 
+             type: COGNITO_USER_POOLS
+             authorizerId: 
+               Ref: ApiGatewayAuthorizer
       - http:
           method: post
           path: settings/keywords
           cors: true
-          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
+          authorizer: 
+             type: COGNITO_USER_POOLS
+             authorizerId: 
+               Ref: ApiGatewayAuthorizer
       - http:
           method: post
           path: settings/get
           cors: true
-          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
+          authorizer: 
+             type: COGNITO_USER_POOLS
+             authorizerId: 
+               Ref: ApiGatewayAuthorizer
       - http:
           method: post
           path: settings/set
           cors: true
-          authorizer: arn:aws:cognito-idp:us-east-2:948594532470:userpool/us-east-2_R99catdY3
+          authorizer: 
+             type: COGNITO_USER_POOLS
+             authorizerId: 
+               Ref: ApiGatewayAuthorizer
   reviews:
     runtime: nodejs8.10
     timeout: 60
@@ -167,6 +186,34 @@ functions:
 
 resources:
   Resources:
+    ApiGatewayAuthorizer: 
+      Type: AWS::ApiGateway::Authorizer
+      Properties: 
+        Name: CognitoUserPool
+        Type: COGNITO_USER_POOLS
+        IdentitySource: method.request.header.Authorization
+        RestApiId: 
+          Ref: ApiGatewayRestApi
+        ProviderARNs: 
+          - Fn::GetAtt:
+              - userPool
+              - Arn
+    userPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:custom.userPoolName}
+
+    userPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        # Generate an app client name based on the stage
+        ClientName: ${self:custom.userPoolName}-client
+        UserPoolId:
+          Ref: userPool
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
+    
+        GenerateSecret: false
     appReviewsTable:
       Type: AWS::DynamoDB::Table
       Properties:
