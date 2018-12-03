@@ -1,5 +1,5 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from './../auth/auth.service';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
@@ -15,6 +15,9 @@ import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
+  username: AbstractControl;
+  password: AbstractControl;
+
   modalRef: BsModalRef;
   error: string;
 
@@ -38,6 +41,8 @@ export class LoginComponent implements OnInit {
       'username': ['', Validators.required],
       'password': ['', Validators.required]
     });
+    this.username = this.loginForm.get('username');
+    this.password = this.loginForm.get('password');
   }
 
   onSubmitLogin(value: any) {
