@@ -15,7 +15,7 @@ From the repository root...
 
 3. Enter the Main module folder: `cd main`
 
-4. Build the Main module using Maven: `mvn install`
+4. Build the Main module using [Maven](https://maven.apache.org/download.cgi): `mvn install`
 
 5. Enter the backend project folder: `cd ..`
 
