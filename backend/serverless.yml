@@ -172,17 +172,7 @@ functions:
     environment:
       DEPLOY_REGION: ${self:provider.region}
       STAGE: ${self:provider.stage}
-      GW_URL:
-        Fn::Join:
-          - ""
-          -
-            - "https://"
-            - Ref: "ApiGatewayRestApi"
-            - ".execute-api."
-            - ${self:provider.region}
-            - ".amazonaws.com/"
-            - ${self:provider.stage}
-
+      MAIN_API_LAMBDA: ${self:service}-${self:provider.stage}-main
 
 resources:
   Resources:
@@ -210,8 +200,6 @@ resources:
         ClientName: ${self:custom.userPoolName}-client
         UserPoolId:
           Ref: userPool
-        ExplicitAuthFlows:
-          - ADMIN_NO_SRP_AUTH
     
         GenerateSecret: false
     appReviewsTable:
