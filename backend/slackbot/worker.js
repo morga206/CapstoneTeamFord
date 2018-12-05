@@ -1,8 +1,9 @@
 'use strict';
 let botToken;
 const slackURL = 'https://slack.com/api/chat.postMessage';
-const gatewayURL = process.env.GW_URL;
 const stage = process.env.STAGE;
+const region = process.env.DEPLOY_REGION;
+const mainApi = process.env.MAIN_API_LAMBDA;
 
 const aws = require('aws-sdk');
 const axios = require('axios');
@@ -64,6 +65,26 @@ async function handler (event) {
   };
 
 }
+
+/**
+ * Invokes the main API by mimicking an incoming GET or POST request to API Gateway
+ * @param path The API Gateway path
+ * @param body The request body (undefined if endpoint expects a GET request)
+ * @return A promise with the Lambda results
+ */
+function invokeMainApi(path, body) {
+  let lambda = new aws.Lambda({ region: region });
+  let params = {
+    FunctionName : mainApi,
+    InvocationType: 'RequestResponse', // synchronous
+    Payload: JSON.stringify({ path: path, body: JSON.stringify(body) })
+  };
+  return lambda.invoke(params)
+    .promise()
+    .then((response) => JSON.parse(response.Payload))
+    .then((payload) => JSON.parse(payload.body));
+}
+
 
 /**
  * Get a value from the SSM parameter store
@@ -236,7 +257,6 @@ async function handleScheduledReport() {
  * @returns statsList The list of statistics for each specified version of an app
  */
 async function getStatistics(parameters={}){
-  const endpoint = gatewayURL + '/stats';
   let statisticsList = [];
 
   // Specify Apple, Google or both app stores
@@ -255,7 +275,7 @@ async function getStatistics(parameters={}){
   // Create a list of promises to await the statistics response
   let promises = [];
   for (let request in statsRequests) {
-    const promise = axios.post(endpoint, statsRequests[request]);
+    const promise = invokeMainApi('/stats', statsRequests[request]);
     promises.push(promise);
   }
 
@@ -272,14 +292,14 @@ async function getStatistics(parameters={}){
 
   // Add in app names to statistics
   for (let i = 0; i < statistics.length; i++) {
-    if (statistics[i].data.status === 'ERROR') {
-      console.log(`Error calculating statistic: ${statistics[i].data.message}`);
+    if (statistics[i].status === 'ERROR') {
+      console.log(`Error calculating statistic: ${statistics[i].message}`);
       continue;
     }
 
-    const appName = apps[statistics[i].data.appIdStore].name;
-    statistics[i].data.name = appName;
-    statisticsList.push(statistics[i].data);
+    const appName = apps[statistics[i].appIdStore].name;
+    statistics[i].name = appName;
+    statisticsList.push(statistics[i]);
   }
 
   return statisticsList;
@@ -292,18 +312,15 @@ async function getStatistics(parameters={}){
  * @returns filteredApps The JSON object with appIdStore as the key and name, dates and versions as values
  */
 async function getApps(store='both') {
-  const endpoint = gatewayURL + '/apps';
-
   // Request to /apps endpoint for all apps
-  let appsRequest;
+  let apps;
   try {
-    appsRequest = await axios.get(endpoint);
+    apps = await invokeMainApi('/apps', undefined);
   } catch (error) {
     console.log(`Error getting apps from endpoint: ${error}`);
     throw error;
   }
 
-  const apps = appsRequest.data;
   if (apps.status === 'ERROR') {
     console.log(`Error getting apps from endpoint: ${apps.message}`);
     throw new Error(apps.message);
