@@ -1,6 +1,7 @@
 package sentiment;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Map;
 /**
  * Response format for sentiment API.
  */
+@JsonIgnoreProperties({"status", "message"})
 public class Response {
   protected enum Status {
     SUCCESS,

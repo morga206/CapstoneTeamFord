@@ -4,7 +4,7 @@ export interface StatRequest {
 
 export interface StatResponse {
   status: string;
-  message: string;
+  message?: string;
   numReviews?: { total: number };
   overallSentiment?: { [label: string]: number };
   keywords?: {
@@ -22,7 +22,7 @@ export interface StatResponse {
 export interface SettingResponse {
   settings: Setting[];
   status: string;
-  message: string;
+  message?: string;
 }
 
 export interface Setting {
@@ -33,7 +33,7 @@ export interface Setting {
 export interface AppListResponse {
   appList: App[];
   status: string;
-  message: string;
+  message?: string;
 }
 
 export interface App {
@@ -46,7 +46,7 @@ export interface App {
 export interface IgnoreListResponse {
   ignoreList: string[];
   status: string;
-  message: string;
+  message?: string;
 }
 
 export interface FilterInfo {

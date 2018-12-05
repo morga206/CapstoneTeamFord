@@ -101,15 +101,14 @@ From the repository root...
 4. Select **Install App** from the left side of the screen and install the app to your workspace.
 
 5. Configure your app’s bot token in AWS:
-
     1.  Select **OAuth and Permissions** from the left side of the screen and make a note of your app’s Bot User OAuth Access Token. 
 
-    2. In the AWS Console, create a new SSM Parameter for the token:
+    3. In the AWS Console, create a new SSM Parameter for the token:
 
-        - In the Console, visit **Systems Manager > Parameter Store > Create Parameter** to create a new parameter with the following information:  
-          - **Name:** slackBotToken  
-          - **Type:** SecureString  
-          - **Value:** Bot token from step 6a.
+        - Visit **Systems Manager > Parameter Store > Create Parameter** to create new parameters with the following information:  
+            - **Name:** slackBotToken  
+            - **Type:** SecureString  
+            - **Value:** Bot token from step 5-1. 
 
 
 # API Reference
@@ -163,7 +162,7 @@ The body of the response contains a JSON object with the statistics requested fo
 
 - status - Status of the request
 
-- message - Empty string unless value for status is "ERROR"
+- message - Error message if status is ERROR, else undefined
 
 If included in request, the following fields will also be included:
 
@@ -180,7 +179,6 @@ Ex:
 ```
 {
     status: “SUCCESS”,
-    message: “”
     overallSentiment: {
         POSITIVE: 25.00,
         MIXED: 25.00,
@@ -218,7 +216,7 @@ The body of the response contains a JSON object with the apps requested. The fie
 
 - status - Status of the request
 
-- message - Empty string, else error message if status is ERROR
+- message - Error message if status is ERROR, else undefined
 
 - apps - Nested JSON object containing app data, where keys are the appStoreId’s.
 
@@ -234,7 +232,6 @@ Ex.
 ```
 {
     status: “SUCCESS”,
-    message: “”,
     apps: {
         com.ford.fordpass*Google Play: {
             name: "FordPass (Google Play)",
@@ -271,7 +268,7 @@ The response includes:
 
 - status - Status of the request
 
-- message - Empty string, else error message if status is ERROR
+- message - Error message if status is ERROR, else undefined
 
 - settings - A list of settings with the setting name and value
 
@@ -279,7 +276,6 @@ Ex.
 ```
 {
     status: “SUCCESS”,
-    message: “”,
     settings: [{name: “settingName”, value: “settingValue”} ]
 }
 ```
@@ -306,13 +302,12 @@ The response includes:
 
 - status - Status of the request
 
-- message - Empty string, else error message if status is ERROR
+- message - Error message if status is ERROR, else undefined
 
 Ex.
 ```
 {
-    status: “SUCCESS”,
-    message: “”
+    status: “SUCCESS”
 }
 ```
 
